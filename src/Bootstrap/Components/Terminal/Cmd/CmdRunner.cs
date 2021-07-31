@@ -6,6 +6,7 @@ using Bootstrap.Extensions;
 
 namespace Bootstrap.Components.Terminal.Cmd
 {
+    [Obsolete("Use CliWrap instead")]
     public class CmdRunner
     {
         private const string PathEnvKey = "PATH";

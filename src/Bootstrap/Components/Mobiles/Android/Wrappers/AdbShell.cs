@@ -1,16 +1,17 @@
 ﻿using System.Threading.Tasks;
+using Bootstrap.Components.Mobiles.Android.Infrastructures;
 
 namespace Bootstrap.Components.Mobiles.Android.Wrappers
 {
     public class AdbShell : AdbWrapper
     {
-        internal AdbShell(AdbWrapper prev, params string[] appendArguments) : base(prev, appendArguments)
+        internal AdbShell(AdbWrapper prev) : base(prev, "shell")
         {
         }
 
         public async Task AdbScreenshot(string pathInDevice)
         {
-            await Run($"screencap {pathInDevice}");
+            await Execute($"screencap {pathInDevice}");
         }
     }
 }

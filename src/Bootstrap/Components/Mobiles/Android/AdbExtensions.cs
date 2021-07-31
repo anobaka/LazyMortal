@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Bootstrap.Components.Mobiles.Android.Models.Constants;
 using Bootstrap.Components.Terminal.Cmd;
+using CliWrap;
 
 namespace Bootstrap.Components.Mobiles.Android
 {
@@ -12,7 +13,7 @@ namespace Bootstrap.Components.Mobiles.Android
             { "device", AdbDeviceState.Device },
             { "nodevice", AdbDeviceState.NoDevice },
         };
-        public static void ThrowAdbExceptionIfInvalid(this CmdResult r)
+        public static void ThrowAdbExceptionIfInvalid(this CommandResult r)
         {
             if (r.ExitCode != 0)
             {

@@ -1,6 +1,9 @@
-﻿using System.Threading;
+﻿using System.IO;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Bootstrap.Components.Terminal.Cmd;
+using CliWrap;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -17,13 +20,17 @@ namespace Bootstrap.Components.Mobiles.Android
             _logger = logger;
         }
 
-        public async Task<string> Run(string command)
+        public async Task<CommandResult> Run(string command, Stream stream)
         {
             _logger.LogInformation($"Before executing adb command: {command}");
-            var result = await new CmdRunner().Run(out _, _options.Value.ExecutablePath, command, new CancellationToken());
-            _logger.LogInformation($"Adb command executed with exit code: {result.ExitCode}, output: {result.Output}");
+            var result = await Cli.Wrap(_options.Value.ExecutablePath)
+                .WithArguments(command)
+                .WithStandardOutputPipe(PipeTarget.ToStream(stream))
+                .ExecuteAsync();
+            _logger.LogInformation(
+                $"Adb command executed with exit code: {result.ExitCode}, elapsed: {result.RunTime:g}");
             result.ThrowAdbExceptionIfInvalid();
-            return result.Output;
+            return result;
         }
     }
 }
