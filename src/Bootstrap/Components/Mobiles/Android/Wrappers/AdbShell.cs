@@ -5,13 +5,10 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers
 {
     public class AdbShell : AdbWrapper
     {
+        public AdbInput AdbInput { get; }
         internal AdbShell(AdbWrapper prev) : base(prev, "shell")
         {
-        }
-
-        public async Task AdbScreenshot(string pathInDevice)
-        {
-            await Execute($"screencap {pathInDevice}");
+            AdbInput = new AdbInput(this);
         }
     }
 }

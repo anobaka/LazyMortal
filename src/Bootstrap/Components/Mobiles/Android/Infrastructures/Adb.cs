@@ -8,70 +8,21 @@ using Bootstrap.Components.Mobiles.Android.Wrappers;
 
 namespace Bootstrap.Components.Mobiles.Android.Infrastructures
 {
-    public class Adb
+    public class Adb : AdbCommon
     {
-        private List<AdbDevice> _devices;
-        private readonly AdbCommon _adbCommon;
-
-        public Adb(AdbInvoker adb)
+        public Adb(AdbInvoker adb) : base(new AdbWrapper(adb))
         {
-            _adbCommon = new AdbCommon(new AdbWrapper(adb));
         }
 
-        public async Task<List<AdbDevice>> GetDevices(bool forceRefresh = false)
+        public async Task<List<AdbDevice>> Devices(bool showLongOutput = false)
         {
-            if (_devices == null || forceRefresh)
+            var cmd = "devices";
+            if (showLongOutput)
             {
-                await RefreshDevices();
+                cmd += " -l";
             }
 
-            return _devices;
-        }
-
-        public async Task<AdbDevice> GetDevice(int index)
-        {
-            if (_devices == null || _devices.Count <= index)
-            {
-                await RefreshDevices();
-            }
-
-            if (_devices.Count <= index)
-            {
-                throw new AdbException(AdbExceptionCode.InvalidDevice, $"{nameof(index)}:{index} is out of range.");
-            }
-
-            return _devices[index];
-        }
-
-        public async Task<AdbDevice> GetDevice(string serialNumber)
-        {
-            var device = _devices?.FirstOrDefault(t => t.SerialNumber == serialNumber);
-            if (device == null)
-            {
-                await RefreshDevices();
-                device = _devices.FirstOrDefault(a => a.SerialNumber == serialNumber);
-                if (device == null)
-                {
-                    throw new AdbException(AdbExceptionCode.InvalidDevice, $"Device:{serialNumber} is not found.");
-                }
-            }
-
-            return device;
-        }
-
-        public async Task AdbStartServer()
-        {
-            await _adbCommon.Execute("start-server");
-        }
-
-        public async Task AdbKillServer()
-        {
-            await _adbCommon.Execute("kill-server");
-        }
-
-        public async Task RefreshDevices()
-        {
-            var output = await _adbCommon.Execute("devices -l");
+            var output = await Execute(cmd);
             const string keyword = "List of devices attached";
             var startIndex = output.IndexOf(keyword, StringComparison.OrdinalIgnoreCase);
             if (startIndex > -1)
@@ -81,7 +32,7 @@ namespace Bootstrap.Components.Mobiles.Android.Infrastructures
 
             var keyLines = output.Substring(startIndex)
                 .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
-            _devices = keyLines
+            var devices = keyLines
                 .Select(adbOutput =>
                 {
                     var segments = adbOutput.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -115,8 +66,39 @@ namespace Bootstrap.Components.Mobiles.Android.Infrastructures
                         .Select(a => a.Split(':', StringSplitOptions.RemoveEmptyEntries))
                         .ToDictionary(a => a[0], a => a[1]);
                     var description = new AdbDeviceDescription(properties);
-                    return new AdbDevice(_adbCommon, serialNumber, s, description);
+                    return new AdbDevice(this, serialNumber, s, description);
                 }).ToList();
+            return devices;
+        }
+
+        public async Task<AdbDevice> UseDevice(int transportId)
+        {
+
+        }
+
+        public async Task<AdbDevice> UseDevice(string serialNumber)
+        {
+
+        }
+
+        public async Task<AdbDevice> UseUsbDevice()
+        {
+
+        }
+
+        public async Task<AdbDevice> UseTcpIpDevice()
+        {
+
+        }
+
+        public async Task AdbStartServer()
+        {
+            await Execute("start-server");
+        }
+
+        public async Task KillServer()
+        {
+            await Execute("kill-server");
         }
     }
 }

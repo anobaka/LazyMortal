@@ -20,12 +20,18 @@ namespace Bootstrap.Components.Mobiles.Android
             _logger = logger;
         }
 
-        public async Task<CommandResult> Run(string command, Stream stream)
+        /// <summary>
+        /// TBD: Use custom classes instead of <see cref="CliWrap"/>'s <see cref="CommandResult"/> and <see cref="PipeTarget"/>
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="outputStream"></param>
+        /// <returns></returns>
+        public async Task<CommandResult> Run(string command, PipeTarget outputStream)
         {
             _logger.LogInformation($"Before executing adb command: {command}");
             var result = await Cli.Wrap(_options.Value.ExecutablePath)
                 .WithArguments(command)
-                .WithStandardOutputPipe(PipeTarget.ToStream(stream))
+                .WithStandardOutputPipe(outputStream)
                 .ExecuteAsync();
             _logger.LogInformation(
                 $"Adb command executed with exit code: {result.ExitCode}, elapsed: {result.RunTime:g}");

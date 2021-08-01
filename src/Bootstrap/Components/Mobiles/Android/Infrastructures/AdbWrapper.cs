@@ -31,29 +31,24 @@ namespace Bootstrap.Components.Mobiles.Android.Infrastructures
         {
         }
 
-        public async Task<string> ExecuteAndGetOutputString(string arguments)
+        public async Task<string> Execute(string arguments)
         {
             var sb = new StringBuilder();
-            var result = await Execute(arguments, );
+            var result = await Execute(arguments, PipeTarget.ToStringBuilder(sb));
             return sb.ToString();
         }
 
-        public async Task ExecuteAndSaveToStream(string arguments, Stream output)
+        public async Task Execute(string arguments, Stream output)
         {
             await Execute(arguments, PipeTarget.ToStream(output));
         }
 
-        public async Task ExecuteAndSaveToFile(string arguments, string filePath)
+        public async Task Execute(string arguments, string filePath)
         {
             await Execute(arguments, PipeTarget.ToFile(filePath));
         }
 
-        public async Task<CommandResult> Execute(string arguments, Stream stream)
-        {
-            return await Execute(new[] {arguments}, stream);
-        }
-
-        public async Task<CommandResult> Execute(string[] arguments, Stream stream)
+        public async Task<CommandResult> Execute(string arguments, PipeTarget pipeTarget)
         {
             var cmd = _baseCommand;
             if (arguments?.Any() == true)
@@ -61,7 +56,7 @@ namespace Bootstrap.Components.Mobiles.Android.Infrastructures
                 cmd += " " + string.Join(" ", arguments);
             }
 
-            return await _adb.Run(cmd, stream);
+            return await _adb.Run(cmd, pipeTarget);
         }
     }
 }

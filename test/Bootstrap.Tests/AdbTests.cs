@@ -31,18 +31,9 @@ namespace Bootstrap.Tests
         [Fact]
         public async Task Test1()
         {
-            // var fs = File.Create("./1.png");
-            // var sb = new StringBuilder();
-            // var result = await Cli.Wrap(_options.Value.ExecutablePath).WithArguments("exec-out screencap -p")
-            //     .WithStandardOutputPipe(PipeTarget.ToStream(fs))
-            //     // .WithWorkingDirectory(Directory.GetCurrentDirectory())
-            //     .ExecuteAsync();
             var devices = await _adb.GetDevices();
             var device = devices[0];
-            var r = await device.AdbExecOut.ExecuteAndSaveToFile("screencap -p");
-            // var bytes = Encoding.Default.GetBytes(r);
-            // await FileUtils.Save("1.png", bytes);
-            await fs.DisposeAsync();
+            var r = await device.ExecOut.ScreenCap();
         }
     }
 }

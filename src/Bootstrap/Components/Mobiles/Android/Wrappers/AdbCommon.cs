@@ -8,8 +8,8 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers
 {
     public class AdbCommon : AdbWrapper
     {
-        public AdbShell AdbShell { get; }
-        public AdbExecOut AdbExecOut { get; }
+        public AdbShell Shell { get; }
+        public AdbExecOut ExecOut { get; }
 
         /// <summary>
         /// For extending.
@@ -19,37 +19,23 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers
         public AdbCommon(AdbWrapper prev, params string[] appendArguments) : base(prev,
             appendArguments)
         {
-            AdbShell = new AdbShell(this);
-            AdbExecOut = new AdbExecOut(this);
+            Shell = new AdbShell(this);
+            ExecOut = new AdbExecOut(this);
         }
 
-        public async Task TakeScreenshot(string destPath)
-        {
-            const string pathInDevice = "/sdcard/screen.png";
-            await AdbShell.AdbScreenshot(pathInDevice);
-            await AdbPull(pathInDevice, destPath);
-        }
-
-        public async Task AdbPull(string pathInDevice, string destPath)
+        public async Task Pull(string pathInDevice, string destPath)
         {
             await Execute("pull");
         }
 
-        // public async Task<Stream> TakeScreenshot()
-        // {
-        //     var tmpPath = Path.Combine(_env.ContentRootPath, "adb");
-        //     var tmpFilename = Guid.NewGuid().ToString();
-        //     var tmpFullname = Path.Combine(tmpPath, tmpFilename);
-        //     await TakeScreenshot(tmpFullname);
-        //     var ms = new MemoryStream();
-        //     using (var fs = System.IO.File.OpenRead(tmpFullname))
-        //     {
-        //         await fs.CopyToAsync(ms);
-        //     }
-        //
-        //     System.IO.File.Delete(tmpFullname);
-        //     ms.Seek(0, SeekOrigin.Begin);
-        //     return ms;
-        // }
+        public async Task Install(string apkPath)
+        {
+            await Execute($"install {apkPath}");
+        }
+
+        public async Task Uninstall(string package)
+        {
+            await Execute($"uninstall {package}");
+        }
     }
 }
