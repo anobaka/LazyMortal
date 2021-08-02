@@ -13,22 +13,22 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers
         {
         }
 
-        public async Task AdbTap(int x, int y)
+        public async Task Tap(int x, int y)
         {
             await Execute($"tap {x} {y}");
         }
 
-        public async Task AdbText(string text)
+        public async Task Text(string text)
         {
             await Execute($"text {text}");
         }
 
-        public async Task AdbKeyEvent(int eventId)
+        public async Task KeyEvent(int eventId)
         {
             await Execute($"keyevent {eventId}");
         }
 
-        public async Task AdbSwipe(int x1, int y1, int x2, int y2)
+        public async Task Swipe(int x1, int y1, int x2, int y2)
         {
             await Execute($"swipe {x1} {y1} {x2} {y2}");
         }

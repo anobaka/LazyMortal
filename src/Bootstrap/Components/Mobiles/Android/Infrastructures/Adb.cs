@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Bootstrap.Components.Mobiles.Android.Models;
 using Bootstrap.Components.Mobiles.Android.Models.Constants;
+using Bootstrap.Components.Mobiles.Android.Models.Exceptions;
 using Bootstrap.Components.Mobiles.Android.Wrappers;
 
 namespace Bootstrap.Components.Mobiles.Android.Infrastructures
@@ -14,14 +15,11 @@ namespace Bootstrap.Components.Mobiles.Android.Infrastructures
         {
         }
 
-        public async Task<List<AdbDevice>> Devices(bool showLongOutput = false)
-        {
-            var cmd = "devices";
-            if (showLongOutput)
-            {
-                cmd += " -l";
-            }
+        #region Adb
 
+        public async Task<List<AdbDevice>> Devices(string arguments = null)
+        {
+            var cmd = $"devices {arguments}";
             var output = await Execute(cmd);
             const string keyword = "List of devices attached";
             var startIndex = output.IndexOf(keyword, StringComparison.OrdinalIgnoreCase);
@@ -30,15 +28,14 @@ namespace Bootstrap.Components.Mobiles.Android.Infrastructures
                 startIndex += keyword.Length;
             }
 
-            var keyLines = output.Substring(startIndex)
-                .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
+            var keyLines = output[startIndex..].Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
             var devices = keyLines
                 .Select(adbOutput =>
                 {
-                    var segments = adbOutput.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    var segments = adbOutput.Split(new[] {' ', '\t'}, StringSplitOptions.RemoveEmptyEntries).ToList();
                     if (!(segments.Count > 1))
                     {
-                        throw new AdbException(AdbExceptionCode.InvalidDevice, $"Adb device output: {adbOutput}");
+                        throw new AdbException(AdbExceptionCode.Error, $"Adb device output: {adbOutput}");
                     }
 
                     var serialNumber = segments[0];
@@ -50,48 +47,33 @@ namespace Bootstrap.Components.Mobiles.Android.Infrastructures
                     {
                         if (segments.Count < 2)
                         {
-                            throw new AdbException(AdbExceptionCode.InvalidDevice, $"Adb device output: {adbOutput}");
+                            throw new AdbException(AdbExceptionCode.Error, $"Adb device output: {adbOutput}");
                         }
 
                         stateString += segments[1];
                         segments.RemoveAt(0);
                     }
 
-                    if (!AdbExtensions.TryParseDeviceState(stateString, out var s))
+                    if (!AdbExtensions.TryParseDeviceState(stateString, out var state))
                     {
-                        throw new AdbException(AdbExceptionCode.InvalidDevice);
+                        throw new AdbException(AdbExceptionCode.Error);
                     }
 
                     var properties = segments
                         .Select(a => a.Split(':', StringSplitOptions.RemoveEmptyEntries))
                         .ToDictionary(a => a[0], a => a[1]);
                     var description = new AdbDeviceDescription(properties);
-                    return new AdbDevice(this, serialNumber, s, description);
+                    return new AdbDevice(serialNumber, state, description);
                 }).ToList();
             return devices;
         }
 
-        public async Task<AdbDevice> UseDevice(int transportId)
+        public async Task<string> Version()
         {
-
+            return await Execute("version");
         }
 
-        public async Task<AdbDevice> UseDevice(string serialNumber)
-        {
-
-        }
-
-        public async Task<AdbDevice> UseUsbDevice()
-        {
-
-        }
-
-        public async Task<AdbDevice> UseTcpIpDevice()
-        {
-
-        }
-
-        public async Task AdbStartServer()
+        public async Task StartServer()
         {
             await Execute("start-server");
         }
@@ -100,5 +82,36 @@ namespace Bootstrap.Components.Mobiles.Android.Infrastructures
         {
             await Execute("kill-server");
         }
+
+        #endregion
+
+        #region Bridges
+
+        public AdbCommon UseDevice(int transportId)
+        {
+            return new(this, $"-t {transportId}");
+        }
+
+        public AdbCommon UseDevice(string serialNumber)
+        {
+            return new(this, $"-s {serialNumber}");
+        }
+
+        public AdbCommon UseUsbDevice()
+        {
+            return new(this, $"-d");
+        }
+
+        public AdbCommon UseTcpIpDevice()
+        {
+            return new(this, $"-e");
+        }
+
+        public AdbCommon WithArguments(string arguments)
+        {
+            return new(this, arguments);
+        }
+
+        #endregion
     }
 }

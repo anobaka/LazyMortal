@@ -1,7 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Bootstrap.Components.Mobiles.Android.Infrastructures;
+using Bootstrap.Components.Mobiles.Android.Models.Constants;
 using Microsoft.Extensions.Hosting;
 
 namespace Bootstrap.Components.Mobiles.Android.Wrappers
@@ -28,14 +31,26 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers
             await Execute("pull");
         }
 
-        public async Task Install(string apkPath)
+        public async Task Install(string apkPath, string arguments = null)
         {
-            await Execute($"install {apkPath}");
+            var output = await Execute($"install {arguments} {apkPath}");
+            AdbExtensions.ThrowIfError(output);
         }
 
-        public async Task Uninstall(string package)
+        public async Task InstallMultiple(string[] apkPaths, string arguments = null)
         {
-            await Execute($"uninstall {package}");
+            throw new NotImplementedException();
+        }
+
+        public async Task InstallMultiPackage(string[] apkPaths, string arguments = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task Uninstall(string package, string arguments = null)
+        {
+            var output = await Execute($"uninstall {arguments} {package}");
+            AdbExtensions.ThrowIfError(output);
         }
     }
 }

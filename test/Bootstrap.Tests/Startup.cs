@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 namespace Bootstrap.Tests
 {
@@ -23,7 +24,10 @@ namespace Bootstrap.Tests
 
         public void ConfigureServices(IServiceCollection services, HostBuilderContext hostBuilderContext)
         {
-            services.AddLogging(t => t.AddConsole());
+            services.AddLogging(t =>
+            {
+                t.AddConsole();
+            });
 
             services.Configure<AdbOptions>(hostBuilderContext.Configuration.GetSection(nameof(AdbOptions)));
             services.AddSingleton<AdbInvoker>();

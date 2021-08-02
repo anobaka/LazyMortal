@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Bootstrap.Components.Mobiles.Android.Models;
 using Bootstrap.Extensions;
 using CliWrap;
 
@@ -56,7 +57,7 @@ namespace Bootstrap.Components.Mobiles.Android.Infrastructures
                 cmd += " " + string.Join(" ", arguments);
             }
 
-            return await _adb.Run(cmd, pipeTarget);
+            return await _adb.Run(cmd?.Trim(), pipeTarget);
         }
     }
 }

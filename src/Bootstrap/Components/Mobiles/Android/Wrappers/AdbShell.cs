@@ -5,10 +5,10 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers
 {
     public class AdbShell : AdbWrapper
     {
-        public AdbInput AdbInput { get; }
+        public AdbInput Input { get; }
         internal AdbShell(AdbWrapper prev) : base(prev, "shell")
         {
-            AdbInput = new AdbInput(this);
+            Input = new AdbInput(this);
         }
     }
 }

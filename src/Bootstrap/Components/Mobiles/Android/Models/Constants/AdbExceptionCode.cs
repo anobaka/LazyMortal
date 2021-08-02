@@ -2,7 +2,10 @@
 {
     public enum AdbExceptionCode
     {
-        AdbError = 1,
-        InvalidDevice = 2
+        /// <summary>
+        /// Uncategorized error
+        /// </summary>
+        Error = 1,
+        InvalidExitCode = 2
     }
 }
