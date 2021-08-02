@@ -1,14 +1,15 @@
 ﻿using System.Threading.Tasks;
 using Bootstrap.Components.Mobiles.Android.Infrastructures;
+using Bootstrap.Components.Mobiles.Android.Wrappers.Shell;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Bootstrap.Components.Mobiles.Android.Wrappers
 {
-    public class AdbShell : AdbWrapper
+    public class AdbShell : AdbShellWrapper
     {
-        public AdbInput Input { get; }
         internal AdbShell(AdbWrapper prev) : base(prev, "shell")
         {
-            Input = new AdbInput(this);
         }
     }
 }

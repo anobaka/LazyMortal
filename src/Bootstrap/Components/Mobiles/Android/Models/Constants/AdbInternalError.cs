@@ -12,7 +12,10 @@ namespace Bootstrap.Components.Mobiles.Android.Models.Constants
         /// Uncategorized
         /// </summary>
         Error = 1,
+
         INSTALL_FAILED_ALREADY_EXISTS = 100,
-        DELETE_FAILED_INTERNAL_ERROR = 101
+        DELETE_FAILED_INTERNAL_ERROR = 101,
+
+        FailedToConnectDevice = 200
     }
 }

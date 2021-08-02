@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Bootstrap.Components.Mobiles.Android.Infrastructures;
+using Bootstrap.Components.Mobiles.Android.Wrappers.Shell;
 
 namespace Bootstrap.Components.Mobiles.Android.Wrappers
 {
-    public class AdbExecOut : AdbWrapper
+    public class AdbExecOut : AdbShellWrapper
     {
-        public AdbExecOut(AdbWrapper prev) : base(prev, "exec-out")
+        internal AdbExecOut(AdbWrapper prev) : base(prev, "exec-out")
         {
         }
 

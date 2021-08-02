@@ -83,6 +83,15 @@ namespace Bootstrap.Components.Mobiles.Android.Infrastructures
             await Execute("kill-server");
         }
 
+        public async Task Connect(string ip, int port = 5555)
+        {
+            var output = await Execute($"connect {ip}:{port}");
+            if (!output.Contains("connected"))
+            {
+                throw new AdbInternalException(AdbInternalError.FailedToConnectDevice, output);
+            }
+        }
+
         #endregion
 
         #region Bridges

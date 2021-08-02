@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Bootstrap.Components.Mobiles.Android.Infrastructures;
 
-namespace Bootstrap.Components.Mobiles.Android.Wrappers
+namespace Bootstrap.Components.Mobiles.Android.Wrappers.Shell
 {
-    public class AdbInput: AdbWrapper
+    public class AdbInput : AdbWrapper
     {
-        public AdbInput(AdbWrapper prev) : base(prev, "input")
+        public AdbInput(AdbShellWrapper prev) : base(prev, "input")
         {
         }
 
