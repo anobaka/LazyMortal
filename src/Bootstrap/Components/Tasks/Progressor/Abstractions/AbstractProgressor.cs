@@ -35,7 +35,7 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
             await SendStateToClient();
         }
 
-        protected async Task UpdateProgress(Action<TProgress> update)
+        public async Task UpdateProgress(Action<TProgress> update)
         {
             update(Progress as TProgress);
             await SendProgressToClient();

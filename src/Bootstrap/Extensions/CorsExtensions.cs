@@ -16,7 +16,8 @@ namespace Bootstrap.Extensions
             // umi 1
             "http://localhost:8000",
             // umi 2
-            "http://localhost:8001"
+            "http://localhost:8001",
+            "http://localhost:1970",
         };
 
         public static CorsPolicyBuilder WithDevOrigins(this CorsPolicyBuilder builder) =>
