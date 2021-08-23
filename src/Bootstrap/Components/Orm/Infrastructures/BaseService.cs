@@ -226,7 +226,8 @@ namespace Bootstrap.Components.Orm.Infrastructures
         public virtual async Task<BaseResponse> RemoveAll<TResource>(Expression<Func<TResource, bool>> selector)
             where TResource : class
         {
-            DbContext.RemoveRange(DbContext.Set<TResource>().Where(selector));
+            var ctx = DbContext;
+            ctx.RemoveRange(ctx.Set<TResource>().Where(selector));
             return BaseResponseBuilder.Build(await DbContext.SaveChangesAsync() > 0
                 ? ResponseCode.Success
                 : ResponseCode.NotModified);
@@ -241,8 +242,9 @@ namespace Bootstrap.Components.Orm.Infrastructures
         public virtual async Task<SingletonResponse<TResource>> Add<TResource>(TResource resource)
             where TResource : class
         {
-            DbContext.Add(resource);
-            await DbContext.SaveChangesAsync();
+            var ctx = DbContext;
+            ctx.Add(resource);
+            await ctx.SaveChangesAsync();
             return new SingletonResponse<TResource>(resource);
         }
 
@@ -255,8 +257,9 @@ namespace Bootstrap.Components.Orm.Infrastructures
         public virtual async Task<ListResponse<TResource>> AddRange<TResource>(List<TResource> resources)
             where TResource : class
         {
-            await DbContext.AddRangeAsync(resources);
-            await DbContext.SaveChangesAsync();
+            var ctx = DbContext;
+            await ctx.AddRangeAsync(resources);
+            await ctx.SaveChangesAsync();
             return new ListResponse<TResource>(resources);
         }
 
@@ -268,8 +271,9 @@ namespace Bootstrap.Components.Orm.Infrastructures
 
         public virtual async Task<BaseResponse> Update<TResource>(TResource resource)
         {
-            DbContext.Entry(resource).State = EntityState.Modified;
-            await DbContext.SaveChangesAsync();
+            var ctx = DbContext;
+            ctx.Entry(resource).State = EntityState.Modified;
+            await ctx.SaveChangesAsync();
             return BaseResponseBuilder.Ok;
         }
 
@@ -279,14 +283,15 @@ namespace Bootstrap.Components.Orm.Infrastructures
             var rs = resources.ToList();
             var ks = FuncExtensions.BuildKeySelector<TResource>();
             var keys = rs.Select(r => ks(r)).ToList();
-            var locals = DbContext.Set<TResource>().Local.Where(t => keys.Contains(ks(t))).ToList();
-            locals.ForEach(t => { DbContext.Entry(t).State = EntityState.Detached; });
+            var ctx = DbContext;
+            var locals = ctx.Set<TResource>().Local.Where(t => keys.Contains(ks(t))).ToList();
+            locals.ForEach(t => { ctx.Entry(t).State = EntityState.Detached; });
             foreach (var r in rs)
             {
-                DbContext.Entry(r).State = EntityState.Modified;
+                ctx.Entry(r).State = EntityState.Modified;
             }
 
-            await DbContext.SaveChangesAsync();
+            await ctx.SaveChangesAsync();
             return BaseResponseBuilder.Ok;
         }
 
@@ -295,9 +300,14 @@ namespace Bootstrap.Components.Orm.Infrastructures
             Action<TResource> modify)
             where TResource : class
         {
+            var ctx = DbContext;
             var r = (await GetAll(selector)).FirstOrDefault();
+            if (ctx.Entry(r).State == EntityState.Detached)
+            {
+                ctx.Attach(r);
+            }
             modify(r);
-            await DbContext.SaveChangesAsync();
+            await ctx.SaveChangesAsync();
             return new SingletonResponse<TResource>(r);
         }
 
@@ -306,13 +316,19 @@ namespace Bootstrap.Components.Orm.Infrastructures
             Action<TResource> modify)
             where TResource : class
         {
+            var ctx = DbContext;
             var rs = await GetAll(selector);
             foreach (var r in rs)
             {
+                if (ctx.Entry(r).State == EntityState.Detached)
+                {
+                    ctx.Attach(r);
+                }
                 modify(r);
+
             }
 
-            await DbContext.SaveChangesAsync();
+            await ctx.SaveChangesAsync();
             return new ListResponse<TResource>(rs);
         }
 

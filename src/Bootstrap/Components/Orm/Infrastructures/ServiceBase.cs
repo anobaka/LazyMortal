@@ -33,7 +33,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError(e, e.Message);
+                    Logger.LogWarning(e, e.Message);
                     return NewScopeDbContext;
                 }
             }
