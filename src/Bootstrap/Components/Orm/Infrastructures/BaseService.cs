@@ -50,20 +50,22 @@ namespace Bootstrap.Components.Orm.Infrastructures
         // todo: test
         public virtual async Task<BaseResponse> Remove<TResource>(TResource resource)
         {
-            DbContext.Entry(resource).State = EntityState.Deleted;
-            await DbContext.SaveChangesAsync();
+            var ctx = DbContext;
+            ctx.Entry(resource).State = EntityState.Deleted;
+            await ctx.SaveChangesAsync();
             return BaseResponseBuilder.Ok;
         }
 
         // todo: test
         public virtual async Task<BaseResponse> RemoveRange<TResource>(IEnumerable<TResource> resources)
         {
+            var ctx = DbContext;
             foreach (var r in resources)
             {
-                DbContext.Entry(r).State = EntityState.Deleted;
+                ctx.Entry(r).State = EntityState.Deleted;
             }
 
-            await DbContext.SaveChangesAsync();
+            await ctx.SaveChangesAsync();
             return BaseResponseBuilder.Ok;
         }
 
@@ -102,8 +104,13 @@ namespace Bootstrap.Components.Orm.Infrastructures
             var r = await GetByKey<TResource>(key);
             if (r != null)
             {
+                var ctx = DbContext;
+                if (ctx.Entry(r).State == EntityState.Detached)
+                {
+                    ctx.Attach(r);
+                }
                 modify(r);
-                await DbContext.SaveChangesAsync();
+                await ctx.SaveChangesAsync();
                 return new SingletonResponse<TResource>(r);
             }
 
@@ -115,12 +122,17 @@ namespace Bootstrap.Components.Orm.Infrastructures
             where TResource : class
         {
             var rs = await GetByKeys<TResource>(keys);
+            var ctx = DbContext;
             foreach (var r in rs)
             {
+                if (ctx.Entry(r).State == EntityState.Detached)
+                {
+                    ctx.Attach(r);
+                }
                 modify(r);
             }
 
-            await DbContext.SaveChangesAsync();
+            await ctx.SaveChangesAsync();
             return new ListResponse<TResource>(rs);
         }
 
@@ -228,7 +240,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
         {
             var ctx = DbContext;
             ctx.RemoveRange(ctx.Set<TResource>().Where(selector));
-            return BaseResponseBuilder.Build(await DbContext.SaveChangesAsync() > 0
+            return BaseResponseBuilder.Build(await ctx.SaveChangesAsync() > 0
                 ? ResponseCode.Success
                 : ResponseCode.NotModified);
         }
