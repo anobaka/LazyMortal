@@ -37,7 +37,8 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <param name="asNoTracking"></param>
         /// <returns></returns>
         public virtual Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null,
-            bool useNewDbContext = false, bool asNoTracking = false) => BaseService.GetAll(selector, useNewDbContext, asNoTracking);
+            bool useNewDbContext = false, bool asNoTracking = false) =>
+            BaseService.GetAll(selector, useNewDbContext, asNoTracking);
 
         /// <summary>
         /// 搜索默认资源
@@ -56,7 +57,9 @@ namespace Bootstrap.Components.Orm.Infrastructures
             BaseService.Search(selector, pageIndex, pageSize, orderBy, asc, include);
 
         public virtual Task<BaseResponse> Remove(TResource resource) => BaseService.Remove(resource);
-        public virtual Task<BaseResponse> RemoveRange(IEnumerable<TResource> resources) => BaseService.RemoveRange(resources);
+
+        public virtual Task<BaseResponse> RemoveRange(IEnumerable<TResource> resources) =>
+            BaseService.RemoveRange(resources);
 
         /// <summary>
         /// 删除默认资源
@@ -82,9 +85,12 @@ namespace Bootstrap.Components.Orm.Infrastructures
             BaseService.AddRange(resources);
 
         public virtual Task<int> Count(Expression<Func<TResource, bool>> selector) => BaseService.Count(selector);
+        public virtual Task<bool> Any(Expression<Func<TResource, bool>> selector) => BaseService.Any(selector);
 
         public virtual Task<BaseResponse> Update(TResource resource) => BaseService.Update(resource);
-        public virtual Task<BaseResponse> UpdateRange(IEnumerable<TResource> resources) => BaseService.UpdateRange(resources);
+
+        public virtual Task<BaseResponse> UpdateRange(IEnumerable<TResource> resources) =>
+            BaseService.UpdateRange(resources);
 
         public virtual Task<SingletonResponse<TResource>> UpdateFirst(Expression<Func<TResource, bool>> selector,
             Action<TResource> modify) => BaseService.UpdateFirst(selector, modify);

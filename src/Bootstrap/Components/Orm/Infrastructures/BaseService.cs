@@ -109,6 +109,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
                 {
                     ctx.Attach(r);
                 }
+
                 modify(r);
                 await ctx.SaveChangesAsync();
                 return new SingletonResponse<TResource>(r);
@@ -129,6 +130,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
                 {
                     ctx.Attach(r);
                 }
+
                 modify(r);
             }
 
@@ -281,6 +283,12 @@ namespace Bootstrap.Components.Orm.Infrastructures
             return await DbContext.Set<TResource>().CountAsync(selector);
         }
 
+        public virtual async Task<bool> Any<TResource>(Expression<Func<TResource, bool>> selector)
+            where TResource : class
+        {
+            return await DbContext.Set<TResource>().AnyAsync(selector);
+        }
+
         public virtual async Task<BaseResponse> Update<TResource>(TResource resource)
         {
             var ctx = DbContext;
@@ -318,6 +326,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
             {
                 ctx.Attach(r);
             }
+
             modify(r);
             await ctx.SaveChangesAsync();
             return new SingletonResponse<TResource>(r);
@@ -336,6 +345,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
                 {
                     ctx.Attach(r);
                 }
+
                 modify(r);
 
             }
