@@ -28,7 +28,13 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers
 
         public async Task Pull(string pathInDevice, string destPath)
         {
+            throw new NotImplementedException();
             await Execute("pull");
+        }
+
+        public async Task Push(string localFilename, string devicePath)
+        {
+            await Execute($"push \"{localFilename}\" \"{devicePath}\"");
         }
 
         public async Task Install(string apkPath, string arguments = null)

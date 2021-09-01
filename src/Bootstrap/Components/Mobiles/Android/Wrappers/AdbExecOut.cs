@@ -19,6 +19,7 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers
         {
             var ms = new MemoryStream();
             await Execute("screencap -p", ms);
+            ms.Seek(0, SeekOrigin.Begin);
             return ms;
         }
     }
