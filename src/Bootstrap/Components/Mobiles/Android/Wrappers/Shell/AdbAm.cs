@@ -13,5 +13,10 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers.Shell
         {
             await Execute($"broadcast -a {action} {arguments}");
         }
+
+        public async Task ForceStop(string packageName)
+        {
+            await Execute($"force-stop {packageName}");
+        }
     }
 }
