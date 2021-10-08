@@ -112,7 +112,7 @@ namespace Bootstrap.Components.Orm
             return BaseResponseBuilder.Ok;
         }
 
-        public override async Task<ListResponse<TActiveMultilevelResource>> AddRange(List<TActiveMultilevelResource> resources)
+        public override async Task<ListResponse<TActiveMultilevelResource>> AddRange(IEnumerable<TActiveMultilevelResource> resources)
         {
             var rsp = await base.AddRange(resources);
             await BuildTree();

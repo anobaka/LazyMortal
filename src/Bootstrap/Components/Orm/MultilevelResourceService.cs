@@ -65,7 +65,7 @@ namespace Bootstrap.Components.Orm
             return rsp;
         }
 
-        public override async Task<ListResponse<TMultilevelResource>> AddRange(List<TMultilevelResource> resources)
+        public override async Task<ListResponse<TMultilevelResource>> AddRange(IEnumerable<TMultilevelResource> resources)
         {
             var rsp = await base.AddRange(resources);
             await BuildTree();

@@ -81,7 +81,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// </summary>
         /// <param name="resources"></param>
         /// <returns></returns>
-        public virtual Task<ListResponse<TResource>> AddRange(List<TResource> resources) =>
+        public virtual Task<ListResponse<TResource>> AddRange(IEnumerable<TResource> resources) =>
             BaseService.AddRange(resources);
 
         public virtual Task<int> Count(Expression<Func<TResource, bool>> selector) => BaseService.Count(selector);

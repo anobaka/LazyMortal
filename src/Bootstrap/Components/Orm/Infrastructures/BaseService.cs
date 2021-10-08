@@ -268,7 +268,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <typeparam name="TResource"></typeparam>
         /// <param name="resources"></param>
         /// <returns></returns>
-        public virtual async Task<ListResponse<TResource>> AddRange<TResource>(List<TResource> resources)
+        public virtual async Task<ListResponse<TResource>> AddRange<TResource>(IEnumerable<TResource> resources)
             where TResource : class
         {
             var ctx = DbContext;
