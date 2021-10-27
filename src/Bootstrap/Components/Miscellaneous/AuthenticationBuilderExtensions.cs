@@ -16,7 +16,7 @@ namespace Bootstrap.Components.Miscellaneous
             return builder.AddCookie(scheme, t =>
             {
                 t.Cookie.Name = scheme;
-                t.Cookie.SameSite = SameSiteMode.None;
+                // t.Cookie.SameSite = SameSiteMode.None;
                 t.Events.OnValidatePrincipal = context => Task.CompletedTask;
                 t.Events.OnRedirectToLogout = async context => { };
                 t.Events.OnRedirectToReturnUrl = async context => { };
