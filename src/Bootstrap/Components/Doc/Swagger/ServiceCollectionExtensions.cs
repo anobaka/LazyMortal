@@ -35,6 +35,8 @@ namespace Bootstrap.Components.Doc.Swagger
             t.OperationFilter<EnumSchemaFilter>();
 
             t.EnableAnnotations();
+
+            t.CustomSchemaIds(type => type.ToString());
         }
 
         public static IServiceCollection
