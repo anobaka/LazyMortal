@@ -253,10 +253,10 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <typeparam name="TResource"></typeparam>
         /// <param name="resource"></param>
         /// <returns></returns>
-        public virtual async Task<SingletonResponse<TResource>> Add<TResource>(TResource resource)
+        public virtual async Task<SingletonResponse<TResource>> Add<TResource>(TResource resource, bool useNewDbContext = false)
             where TResource : class
         {
-            var ctx = DbContext;
+            var ctx = useNewDbContext ? NewScopeDbContext : DbContext;
             ctx.Add(resource);
             await ctx.SaveChangesAsync();
             return new SingletonResponse<TResource>(resource);
@@ -271,10 +271,11 @@ namespace Bootstrap.Components.Orm.Infrastructures
         public virtual async Task<ListResponse<TResource>> AddRange<TResource>(IEnumerable<TResource> resources)
             where TResource : class
         {
+            var data = resources.ToList();
             var ctx = DbContext;
-            await ctx.AddRangeAsync(resources);
+            await ctx.AddRangeAsync(data);
             await ctx.SaveChangesAsync();
-            return new ListResponse<TResource>(resources);
+            return new ListResponse<TResource>(data);
         }
 
         public virtual async Task<int> Count<TResource>(Expression<Func<TResource, bool>> selector)

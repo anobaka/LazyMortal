@@ -86,9 +86,9 @@ namespace Bootstrap.Components.Orm
             return BaseResponseBuilder.Ok;
         }
 
-        public override async Task<SingletonResponse<TActiveMultilevelResource>> Add(TActiveMultilevelResource resource)
+        public override async Task<SingletonResponse<TActiveMultilevelResource>> Add(TActiveMultilevelResource resource, bool useNewDbContext = false)
         {
-            var rsp = await base.Add(resource);
+            var rsp = await base.Add(resource, useNewDbContext);
             await BuildTree();
             return rsp;
         }

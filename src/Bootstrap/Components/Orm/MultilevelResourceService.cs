@@ -58,9 +58,9 @@ namespace Bootstrap.Components.Orm
             await DbContext.SaveChangesAsync();
         }
 
-        public override async Task<SingletonResponse<TMultilevelResource>> Add(TMultilevelResource resource)
+        public override async Task<SingletonResponse<TMultilevelResource>> Add(TMultilevelResource resource, bool useNewDbContext = false)
         {
-            var rsp = await base.Add(resource);
+            var rsp = await base.Add(resource, useNewDbContext);
             await BuildTree();
             return rsp;
         }
