@@ -10,7 +10,7 @@ namespace Bootstrap.Components.Storage
         public static async Task Save(string fullname, Stream stream, FileMode mode = FileMode.Create,
             Encoding encoding = null)
         {
-            
+
             if (string.IsNullOrEmpty(fullname))
             {
                 throw new ArgumentNullException(nameof(fullname));
@@ -72,6 +72,13 @@ namespace Bootstrap.Components.Storage
             await using var fs = new FileStream(fullname, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using var sr = new StreamReader(fs);
             return await sr.ReadToEndAsync();
+        }
+
+        public static async Task CopyAsync(string sourcePath, string destinationPath)
+        {
+            await using Stream source = File.OpenRead(sourcePath);
+            await using Stream destination = File.Create(destinationPath);
+            await source.CopyToAsync(destination);
         }
     }
 }

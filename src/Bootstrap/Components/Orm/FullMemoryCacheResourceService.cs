@@ -49,6 +49,41 @@ namespace Bootstrap.Components.Orm
         public virtual int Count(Func<TResource, bool> selector = null) =>
             selector == null ? CacheVault.Values.Count : CacheVault.Values.Count(selector);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="selector"></param>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="orders">Key Selector - Asc</param>
+        /// <returns></returns>
+        public virtual SearchResponse<TResource> Search(Func<TResource, bool> selector,
+            int pageIndex, int pageSize, List<(Func<TResource, object> SelectKey, bool Asc)> orders)
+        {
+            var resources = CacheVault.Values.ToList();
+            if (selector != null)
+            {
+                resources = resources.Where(selector).ToList();
+            }
+
+            if (orders?.Any() == true)
+            {
+                var (fk, fa) = orders[0];
+                var temp = fa ? resources.OrderBy(fk) : resources.OrderByDescending(fk);
+                foreach (var (k, asc) in orders.Skip(1))
+                {
+                    temp = asc ? temp.ThenBy(k) : temp.ThenByDescending(k);
+                }
+
+                resources = temp.ToList();
+            }
+
+            var count = resources.Count;
+            var data = resources.Skip(Math.Max(pageIndex - 1, 0) * pageSize).Take(pageSize).ToList();
+            var result = new SearchResponse<TResource>(data, count, pageIndex, pageSize);
+            return result.JsonCopy();
+        }
+
         public virtual SearchResponse<TResource> Search(Func<TResource, bool> selector,
             int pageIndex, int pageSize, Func<TResource, object> orderBy = null, bool asc = false)
         {
