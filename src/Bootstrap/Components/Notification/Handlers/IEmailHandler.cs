@@ -7,6 +7,6 @@ namespace Bootstrap.Components.Notification.Handlers
 {
     public interface IEmailHandler : IMessageHandler<EmailMessage>
     {
-        Task<SearchResponse<EmailMessage>> Search(EmailMessageSearchRequestModel model);
+        Task<SearchResponse<EmailMessage>> Search(MessageSearchRequestModel model);
     }
 }

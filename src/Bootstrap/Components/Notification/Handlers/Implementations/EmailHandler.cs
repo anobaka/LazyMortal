@@ -14,7 +14,7 @@ namespace Bootstrap.Components.Notification.Handlers.Implementations
         {
         }
 
-        public virtual async Task<SearchResponse<EmailMessage>> Search(EmailMessageSearchRequestModel model)
+        public virtual async Task<SearchResponse<EmailMessage>> Search(MessageSearchRequestModel model)
         {
             var query = Db.EmailMessages.Where(t => t.Email.Equals(model.Email)).OrderByDescending(a => a.Id);
             return new SearchResponse<EmailMessage>

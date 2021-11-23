@@ -5,9 +5,8 @@ using Newtonsoft.Json;
 
 namespace Bootstrap.Components.Notification.Messages
 {
-    public class WeChatTemplateMessage : Message
+    public class WeChatTemplateMessageContent
     {
-        public string OpenId { get; set; }
         public string TemplateId { get; set; }
         public string Url { get; set; }
 

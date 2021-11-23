@@ -5,8 +5,8 @@ using Bootstrap.Models.ResponseModels;
 
 namespace Bootstrap.Components.Notification.Handlers
 {
-    public interface IWeChatTemplateMessageHandler : IMessageHandler<WeChatTemplateMessage>
+    public interface IWeChatTemplateMessageHandler : IMessageHandler<WeChatTemplateMessageContent>
     {
-        Task<SearchResponse<WeChatTemplateMessage>> Search(WeChatTemplateMessageSearchRequestModel model);
+        Task<SearchResponse<WeChatTemplateMessageContent>> Search(WeChatTemplateMessageSearchRequestModel model);
     }
 }

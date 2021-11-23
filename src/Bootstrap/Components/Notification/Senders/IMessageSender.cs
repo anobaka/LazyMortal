@@ -4,8 +4,8 @@ using Bootstrap.Models.ResponseModels;
 
 namespace Bootstrap.Components.Notification.Senders
 {
-    public interface IMessageSender<in TMessage> where TMessage : Message
+    public interface IMessageSender
     {
-        Task<BaseResponse> Send(TMessage message);
+        Task<BaseResponse> Send(Message message);
     }
 }

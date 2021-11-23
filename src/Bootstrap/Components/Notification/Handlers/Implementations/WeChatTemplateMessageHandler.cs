@@ -8,16 +8,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bootstrap.Components.Notification.Handlers.Implementations
 {
-    public abstract class WeChatTemplateMessageHandler : MessageHandler<WeChatTemplateMessage>, IWeChatTemplateMessageHandler
+    public abstract class WeChatTemplateMessageHandler : MessageHandler<WeChatTemplateMessageContent>, IWeChatTemplateMessageHandler
     {
         protected WeChatTemplateMessageHandler(NotificationDbContext db, IWeChatTemplateMessageSender sender) : base(db, sender)
         {
         }
 
-        public virtual async Task<SearchResponse<WeChatTemplateMessage>> Search(WeChatTemplateMessageSearchRequestModel model)
+        public virtual async Task<SearchResponse<WeChatTemplateMessageContent>> Search(WeChatTemplateMessageSearchRequestModel model)
         {
             var query = Db.WeChatTemplateMessages.Where(t => t.OpenId.Equals(model.OpenId)).OrderByDescending(a => a.Id);
-            return new SearchResponse<WeChatTemplateMessage>
+            return new SearchResponse<WeChatTemplateMessageContent>
             {
                 Data = await query.Skip(model.PageIndex * model.PageSize).Take(model.PageSize).ToListAsync(),
                 TotalCount = await query.CountAsync(),
