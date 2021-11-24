@@ -16,5 +16,10 @@ namespace Bootstrap.Extensions
             t == null ? default : JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(t));
 
         public static bool IsNull(this object t) => t == null;
+
+        public static string ToJson(this object obj)
+        {
+            return JsonConvert.SerializeObject(obj);
+        }
     }
 }
