@@ -17,6 +17,7 @@ namespace Bootstrap.Components.Orm
     {
         protected ResourceService<TDbContext, TResource, TKey> ResourceService;
         protected ConcurrentDictionary<TKey, TResource> CacheVault;
+
         public FullMemoryCacheResourceService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
             ResourceService = new ResourceService<TDbContext, TResource, TKey>(serviceProvider);
@@ -25,12 +26,13 @@ namespace Bootstrap.Components.Orm
             CacheVault = new ConcurrentDictionary<TKey, TResource>(data);
         }
 
-        public virtual TResource GetByKey(TKey key) => (CacheVault.TryGetValue(key, out var v) ? v : null).JsonCopy();
+        public virtual Task<TResource> GetByKey(TKey key) => Task.FromResult((CacheVault.TryGetValue(key, out var v) ? v : null).JsonCopy());
 
-        public virtual List<TResource> GetByKeys(IEnumerable<TKey> keys) =>
-            keys.Select(GetByKey).Where(v => v != null).ToList();
+        public virtual Task<List<TResource>> GetByKeys(IEnumerable<TKey> keys) =>
+            Task.FromResult(keys.Select(k => CacheVault.TryGetValue(k, out var v) ? v : null).Where(v => v != null)
+                .ToList());
 
-        public virtual TResource GetFirst(Expression<Func<TResource, bool>> selector,
+        public virtual Task<TResource> GetFirst(Expression<Func<TResource, bool>> selector,
             Expression<Func<TResource, object>> orderBy = null, bool asc = false)
         {
             var data = CacheVault.Values.Where(selector.Compile());
@@ -40,14 +42,15 @@ namespace Bootstrap.Components.Orm
                 data = asc ? data.OrderBy(ob) : data.OrderByDescending(ob);
             }
 
-            return data.FirstOrDefault().JsonCopy();
+            return Task.FromResult(data.FirstOrDefault().JsonCopy());
         }
 
-        public virtual List<TResource> GetAll(Expression<Func<TResource, bool>> selector = null) =>
-            (selector == null ? CacheVault.Values : CacheVault.Values.Where(selector.Compile())).ToList().JsonCopy();
+        public virtual Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null) =>
+            Task.FromResult((selector == null ? CacheVault.Values : CacheVault.Values.Where(selector.Compile()))
+                .ToList().JsonCopy());
 
-        public virtual int Count(Func<TResource, bool> selector = null) =>
-            selector == null ? CacheVault.Values.Count : CacheVault.Values.Count(selector);
+        public virtual Task<int> Count(Func<TResource, bool> selector = null) =>
+            Task.FromResult(selector == null ? CacheVault.Values.Count : CacheVault.Values.Count(selector));
 
         /// <summary>
         /// 
@@ -84,7 +87,7 @@ namespace Bootstrap.Components.Orm
             return result.JsonCopy();
         }
 
-        public virtual SearchResponse<TResource> Search(Func<TResource, bool> selector,
+        public virtual Task<SearchResponse<TResource>> Search(Func<TResource, bool> selector,
             int pageIndex, int pageSize, Func<TResource, object> orderBy = null, bool asc = false)
         {
             var resources = CacheVault.Values.ToList();
@@ -101,7 +104,7 @@ namespace Bootstrap.Components.Orm
             var count = resources.Count;
             var data = resources.Skip(Math.Max(pageIndex - 1, 0) * pageSize).Take(pageSize).ToList();
             var result = new SearchResponse<TResource>(data, count, pageIndex, pageSize);
-            return result.JsonCopy();
+            return Task.FromResult(result.JsonCopy());
         }
 
         public virtual async Task<BaseResponse> Remove(TResource resource)
@@ -199,7 +202,7 @@ namespace Bootstrap.Components.Orm
         public virtual async Task<BaseResponse> Update(TResource resource)
         {
             var rsp = await ResourceService.Update(resource);
-            if (rsp.Code == (int)ResponseCode.Success)
+            if (rsp.Code == (int) ResponseCode.Success)
             {
                 CacheVault[resource.GetKeyPropertyValue<TKey>()] = resource;
             }
@@ -210,7 +213,7 @@ namespace Bootstrap.Components.Orm
         public virtual async Task<BaseResponse> UpdateRange(IReadOnlyCollection<TResource> resources)
         {
             var rsp = await ResourceService.UpdateRange(resources);
-            if (rsp.Code == (int)ResponseCode.Success)
+            if (rsp.Code == (int) ResponseCode.Success)
             {
                 foreach (var resource in resources)
                 {

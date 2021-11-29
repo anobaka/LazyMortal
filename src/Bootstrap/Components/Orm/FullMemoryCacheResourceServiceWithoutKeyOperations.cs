@@ -29,7 +29,7 @@ namespace Bootstrap.Components.Orm
             CacheVault = new ConcurrentBag<TResource>(data);
         }
 
-        public virtual TResource GetFirst(Expression<Func<TResource, bool>> selector,
+        public virtual Task<TResource> GetFirst(Expression<Func<TResource, bool>> selector,
             Expression<Func<TResource, object>> orderBy = null, bool asc = false)
         {
             var data = CacheVault.Where(selector.Compile());
@@ -39,16 +39,16 @@ namespace Bootstrap.Components.Orm
                 data = asc ? data.OrderBy(ob) : data.OrderByDescending(ob);
             }
 
-            return data.FirstOrDefault().JsonCopy();
+            return Task.FromResult(data.FirstOrDefault().JsonCopy());
         }
 
-        public virtual List<TResource> GetAll(Expression<Func<TResource, bool>> selector = null) =>
-            (selector == null ? CacheVault : CacheVault.Where(selector.Compile())).ToList().JsonCopy();
+        public virtual Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null) =>
+            Task.FromResult((selector == null ? CacheVault : CacheVault.Where(selector.Compile())).ToList().JsonCopy());
 
-        public virtual int Count(Func<TResource, bool> selector = null) =>
-            selector == null ? CacheVault.Count : CacheVault.Count(selector);
+        public virtual Task<int> Count(Func<TResource, bool> selector = null) =>
+            Task.FromResult(selector == null ? CacheVault.Count : CacheVault.Count(selector));
 
-        public virtual SearchResponse<TResource> Search(Func<TResource, bool> selector,
+        public virtual Task<SearchResponse<TResource>> Search(Func<TResource, bool> selector,
             int pageIndex, int pageSize, Func<TResource, object> orderBy = null, bool asc = false)
         {
             var resources = CacheVault.ToList();
@@ -65,7 +65,7 @@ namespace Bootstrap.Components.Orm
             var count = resources.Count;
             var data = resources.Skip(Math.Max(pageIndex - 1, 0) * pageSize).Take(pageSize).ToList();
             var result = new SearchResponse<TResource>(data, count, pageIndex, pageSize);
-            return result.JsonCopy();
+            return Task.FromResult(result.JsonCopy());
         }
 
         public virtual async Task<BaseResponse> Remove(TResource resource)
