@@ -12,7 +12,7 @@ namespace Bootstrap.Components.Notification.Abstractions.Models.Entities
         public int TryTimes { get; set; }
 
         public string Sender { get; set; }
-        [Required] public string Receiver { get; set; }
+        public string Receiver { get; set; }
         public string Content { get; set; }
         public string Subject { get; set; }
         public string RawDataString { get; set; }
@@ -23,10 +23,16 @@ namespace Bootstrap.Components.Notification.Abstractions.Models.Entities
         public DateTime? ScheduleDt { get; set; }
         public DateTime? SendDt { get; set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        /// <summary>
+        /// todo: db generation
+        /// </summary>
+        // [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreateDt { get; set; } = DateTime.Now;
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        /// <summary>
+        /// todo: db generation
+        /// </summary>
+        // [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime UpdateDt { get; set; } = DateTime.Now;
         public string ResultMessage { get; set; }
     }

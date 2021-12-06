@@ -15,11 +15,10 @@ namespace Bootstrap.Components.Notification.Abstractions
 {
     public class MessageService: ResourceService<NotificationDbContext, Message, int>
     {
-        private readonly INotifier[] _notifiers;
+        private IEnumerable<INotifier> Notifiers => GetRequiredService<IEnumerable<INotifier>>();
 
         public MessageService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
-            _notifiers = serviceProvider.GetRequiredService<IEnumerable<INotifier>>().ToArray();
         }
 
         public Task<SearchResponse<Message>> Search(MessageSearchRequestModel model)
@@ -32,7 +31,7 @@ namespace Bootstrap.Components.Notification.Abstractions
 
         public async Task Send(CommonMessageSendRequestModel model)
         {
-            var notifiers = _notifiers.Where(a => model.Types.HasFlag(a.Type)).ToArray();
+            var notifiers = Notifiers.Where(a => model.Types.HasFlag(a.Type)).ToArray();
             var messages = notifiers.Select(n =>
             {
                 var m = new Message
