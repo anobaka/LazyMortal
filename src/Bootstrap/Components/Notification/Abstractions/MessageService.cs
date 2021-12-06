@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Bootstrap.Components.Notification.Abstractions
 {
-    public class MessageService : ResourceService<NotificationDbContext, Message, int>
+    public class MessageService: ResourceService<NotificationDbContext, Message, int>
     {
         private readonly INotifier[] _notifiers;
 
