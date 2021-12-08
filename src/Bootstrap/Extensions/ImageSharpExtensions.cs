@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace Bootstrap.Extensions
@@ -237,6 +240,28 @@ namespace Bootstrap.Extensions
             }
 
             return new Rectangle(left, top, right - left + 1, bottom - top + 1);
+        }
+
+        public static byte[] Compress(this Image image, int quality) =>
+            image.Save(new JpegEncoder
+            {
+                Quality = quality
+            });
+
+        public static byte[] Save(this Image image, IImageFormat format)
+        {
+            using var ms = new MemoryStream();
+            image.Save(ms, format);
+            ms.Seek(0, SeekOrigin.Begin);
+            return ms.ToArray();
+        }
+
+        public static byte[] Save(this Image image, IImageEncoder encoder)
+        {
+            using var ms = new MemoryStream();
+            image.Save(ms, encoder);
+            ms.Seek(0, SeekOrigin.Begin);
+            return ms.ToArray();
         }
     }
 }

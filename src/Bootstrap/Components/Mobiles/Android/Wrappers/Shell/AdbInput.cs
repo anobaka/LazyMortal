@@ -24,9 +24,15 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers.Shell
             await Execute($"keyevent {eventId}");
         }
 
-        public async Task Swipe(int x1, int y1, int x2, int y2)
+        public async Task Swipe(int x1, int y1, int x2, int y2, int? duration = null)
         {
-            await Execute($"swipe {x1} {y1} {x2} {y2}");
+            var cmd = $"swipe {x1} {y1} {x2} {y2}";
+            if (duration.HasValue)
+            {
+                cmd += $" {duration.Value}";
+            }
+
+            await Execute(cmd);
         }
     }
 }

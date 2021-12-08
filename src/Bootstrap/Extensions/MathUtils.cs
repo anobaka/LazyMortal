@@ -20,8 +20,8 @@ namespace Bootstrap.Extensions
 
         public static int GetRandom() => Random.Next();
 
-        public static int GetRandom(int max, bool compareAbsoluteValue = false) =>
-            compareAbsoluteValue ? Random.Next(-max, max) : Random.Next(max);
+        public static int GetRandom(int threshold, bool includeNegativeRange = false) =>
+            includeNegativeRange ? Random.Next(-threshold, threshold) : Random.Next(threshold);
 
         public static int GetRandom(int min, int max) => Random.Next(min, max);
     }

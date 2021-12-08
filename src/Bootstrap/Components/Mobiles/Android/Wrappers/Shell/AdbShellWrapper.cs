@@ -8,6 +8,7 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers.Shell
         public AdbPm Pm { get; init; }
         public AdbAm Am { get; init; }
         public AdbMonkey Monkey { get; init; }
+        public AdbWm Wm { get; init; }
 
         protected AdbShellWrapper(AdbWrapper prev, params string[] appendArguments) : base(prev, appendArguments)
         {
@@ -15,6 +16,7 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers.Shell
             Pm = new AdbPm(this);
             Am = new AdbAm(this);
             Monkey = new AdbMonkey(this);
+            Wm = new AdbWm(this);
         }
     }
 }

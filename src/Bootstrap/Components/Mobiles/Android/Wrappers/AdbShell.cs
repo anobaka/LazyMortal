@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 using Bootstrap.Components.Mobiles.Android.Infrastructures;
 using Bootstrap.Components.Mobiles.Android.Wrappers.Shell;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,11 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers
     {
         internal AdbShell(AdbWrapper prev) : base(prev, "shell")
         {
+        }
+
+        public async Task ScreenCap(params string[] args)
+        {
+            await Execute($"screencap {string.Join(' ', args)}");
         }
     }
 }

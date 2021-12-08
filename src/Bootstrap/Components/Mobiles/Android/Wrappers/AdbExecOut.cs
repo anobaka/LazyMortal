@@ -15,7 +15,7 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers
         {
         }
 
-        public async Task<Stream> ScreenCap()
+        public async Task<MemoryStream> ScreenCap()
         {
             var ms = new MemoryStream();
             await Execute("screencap -p", ms);
