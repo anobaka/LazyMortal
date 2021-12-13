@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Bootstrap.Components.Storage
 {
-    public class DirectoryUtils
+    public static class DirectoryUtils
     {
         // public static Dictionary<string, int> CountExtensions(string directory, bool recursively)
         // {
@@ -15,5 +15,47 @@ namespace Bootstrap.Components.Storage
         //
         //     var files = dir.GetFileSystemInfos();
         // }
+
+        public static void Merge(DirectoryInfo source, DirectoryInfo target)
+        {
+            if (string.Equals(source.FullName, target.FullName, StringComparison.CurrentCultureIgnoreCase))
+            {
+                return;
+            }
+
+            // Check if the target directory exists, if not, create it.
+            if (Directory.Exists(target.FullName) == false)
+            {
+                Directory.CreateDirectory(target.FullName);
+            }
+
+            // Copy each file into it's new directory.
+            foreach (var fi in source.GetFiles())
+            {
+                var path = Path.Combine(target.ToString(), fi.Name);
+                if (File.Exists(path))
+                {
+                    fi.Delete();
+                }
+                else
+                {
+                    fi.MoveTo(path);
+                }
+            }
+
+            // Copy each sub directory using recursion.
+            foreach (var diSourceSubDir in source.GetDirectories())
+            {
+                var nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
+                Merge(diSourceSubDir, nextTargetSubDir);
+            }
+
+            source.Delete();
+        }
+
+        public static void Merge(string source, string target)
+        {
+            Merge(new DirectoryInfo(source), new DirectoryInfo(target));
+        }
     }
 }
