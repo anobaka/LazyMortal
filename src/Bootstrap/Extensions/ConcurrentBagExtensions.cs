@@ -20,7 +20,19 @@ namespace Bootstrap.Extensions
         public static ConcurrentBag<T> Remove<T>(this ConcurrentBag<T> t, T data) =>
             new ConcurrentBag<T>(t.Except(new[] {data}));
 
-        public static ConcurrentBag<T> RemoveRange<T>(this ConcurrentBag<T> t, IEnumerable<T> data) =>
-            new ConcurrentBag<T>(data);
+        public static ConcurrentBag<T> RemoveRange<T>(this ConcurrentBag<T> t, IEnumerable<T> data)
+        {
+            var n = new ConcurrentBag<T>();
+            var enumerable = data as T[] ?? data.ToArray();
+            foreach (var o in t)
+            {
+                if (!enumerable.Contains(o))
+                {
+                    n.Add(o);
+                }
+            }
+
+            return n;
+        }
     }
 }

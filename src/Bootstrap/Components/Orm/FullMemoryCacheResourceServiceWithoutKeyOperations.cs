@@ -85,7 +85,8 @@ namespace Bootstrap.Components.Orm
             var rsp = await ResourceService.RemoveRange(rs);
             if (rsp.Code == (int) ResponseCode.Success)
             {
-                CacheVault = CacheVault.RemoveRange(rs.Select(AttachCacheEntry));
+                var associateCache = rs.Select(AttachCacheEntry).ToArray();
+                CacheVault = CacheVault.RemoveRange(associateCache);
             }
 
             return rsp;
