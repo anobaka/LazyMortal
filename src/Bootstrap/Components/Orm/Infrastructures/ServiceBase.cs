@@ -63,6 +63,20 @@ namespace Bootstrap.Components.Orm.Infrastructures
                     ServiceProvider).GetRequiredService<T>();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>Resolved service from current request scope. Or from global scope if it doesn't exist.</returns>
+        protected virtual T GetRequiredService<T>(Type implementationType, bool fromNewScope = false) where T : class
+        {
+            var instance = fromNewScope
+                ? ServiceProvider.CreateScope().ServiceProvider.GetRequiredService(implementationType)
+                : (ServiceProvider.GetRequiredService<IHttpContextAccessor>()?.HttpContext?.RequestServices ??
+                   ServiceProvider).GetRequiredService(implementationType);
+            return instance as T;
+        }
+
         #endregion
     }
 }
