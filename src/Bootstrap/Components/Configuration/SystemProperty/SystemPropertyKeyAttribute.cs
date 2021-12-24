@@ -6,9 +6,9 @@ namespace Bootstrap.Components.Configuration.SystemProperty
     public class SystemPropertyKeyAttribute : Attribute
     {
         public virtual string Key { get; set; }
-        public string Description { get; set; }
-        public bool RestartRequired { get; set; }
-        public string Example { get; set; }
-        public bool Required { get; set; }
+        public virtual string Description { get; set; }
+        public virtual bool RestartRequired { get; set; }
+        public virtual string Example { get; set; }
+        public virtual bool Required { get; set; }
     }
 }

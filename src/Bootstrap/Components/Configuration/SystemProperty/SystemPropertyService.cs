@@ -13,17 +13,14 @@ using Microsoft.OpenApi.Extensions;
 
 namespace Bootstrap.Components.Configuration.SystemProperty
 {
-    public abstract class SystemPropertyService<TDbContext, TKey> : ResourceService<TDbContext, SystemProperty, string>
-        where TDbContext : DbContext where TKey : Enum
+    public abstract class SystemPropertyService : ResourceService<SystemPropertyDbContext, SystemProperty, string>
     {
-        protected readonly Dictionary<TKey, SystemPropertyKeyAttribute> PropertiesCache;
-        protected readonly HashSet<TKey> PendingRestartKeys = new();
+        protected readonly Dictionary<string, SystemPropertyKeyAttribute> PropertiesCache = new();
+        protected readonly HashSet<string> PendingRestartKeys = new();
 
-        public SystemPropertyService(IServiceProvider serviceProvider) : base(
+        protected SystemPropertyService(IServiceProvider serviceProvider) : base(
             serviceProvider)
         {
-            PropertiesCache = SpecificEnumUtils<TKey>.Values.ToDictionary(t => t,
-                t => t.GetAttributeOfType<SystemPropertyKeyAttribute>());
         }
 
         public async Task<List<SystemPropertyDto>> GetAll(Expression<Func<SystemProperty, bool>> selector = null)
@@ -48,30 +45,24 @@ namespace Bootstrap.Components.Configuration.SystemProperty
                 return null;
             }
 
-            var k = _parse(sp.Key);
-            return sp.ToDto(PropertiesCache.TryGetValue(k, out var v) ? v : null, PendingRestartKeys.Contains(k));
+            return sp.ToDto(PropertiesCache.TryGetValue(sp.Key, out var v) ? v : null,
+                PendingRestartKeys.Contains(sp.Key));
         }
 
-        public async Task<SystemPropertyDto> GetByKey(TKey key, bool throwIfNotSet = false)
+        public async Task<SystemPropertyDto> GetByKey(string key, bool throwIfNotSet)
         {
-            var p = await GetByKey(PropertiesCache[key].Key);
+            var p = await base.GetByKey(PropertiesCache[key].Key);
             return p?.Value == null && throwIfNotSet
                 ? throw new NotInitializedException(nameof(SystemProperty),
                     $"{key} not {(p == null ? "found" : "set")}")
                 : _toDto(p);
         }
 
-        private TKey _parse(string key)
-        {
-            return PropertiesCache.FirstOrDefault(a => a.Value.Key == key).Key;
-        }
-
         private void _tryAddToPendingChanges(string key)
         {
-            var k = _parse(key);
-            if (PropertiesCache.TryGetValue(k, out var a) && a.RestartRequired)
+            if (PropertiesCache.TryGetValue(key, out var a) && a.RestartRequired)
             {
-                PendingRestartKeys.Add(k);
+                PendingRestartKeys.Add(key);
             }
         }
 
@@ -88,8 +79,8 @@ namespace Bootstrap.Components.Configuration.SystemProperty
             var p = await GetByKey(key);
             if (p == null)
             {
-                p = new SystemProperty {Key = key, Value = value};
-                await Add(p);
+                var np = new SystemProperty {Key = key, Value = value};
+                await Add(np);
                 _tryAddToPendingChanges(key);
             }
             else
