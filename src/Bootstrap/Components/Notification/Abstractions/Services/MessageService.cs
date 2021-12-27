@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Bootstrap.Components.Notification.Abstractions.Infrastructures;
-using Bootstrap.Components.Notification.Abstractions.Models.Constants;
 using Bootstrap.Components.Notification.Abstractions.Models.Entities;
 using Bootstrap.Components.Notification.Abstractions.Models.RequestModels;
 using Bootstrap.Components.Orm.Infrastructures;
 using Bootstrap.Models.ResponseModels;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace Bootstrap.Components.Notification.Abstractions
+namespace Bootstrap.Components.Notification.Abstractions.Services
 {
     public class MessageService: ResourceService<NotificationDbContext, Message, int>
     {

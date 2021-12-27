@@ -5,7 +5,7 @@ using Bootstrap.Components.Orm.Infrastructures;
 using Bootstrap.Models.ResponseModels;
 using Microsoft.Extensions.Logging;
 
-namespace Bootstrap.Components.Logging.LogService
+namespace Bootstrap.Components.Logging.LogService.Services
 {
     public class LogService : ResourceService<LogDbContext, Log, int>
     {

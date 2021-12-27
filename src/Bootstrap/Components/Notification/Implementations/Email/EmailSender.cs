@@ -6,6 +6,7 @@ using Bootstrap.Components.Notification.Abstractions;
 using Bootstrap.Components.Notification.Abstractions.Infrastructures.Email;
 using Bootstrap.Components.Notification.Abstractions.Models.Constants;
 using Bootstrap.Components.Notification.Abstractions.Models.Entities;
+using Bootstrap.Components.Notification.Abstractions.Services;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Options;
 using MimeKit;

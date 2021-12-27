@@ -1,10 +1,13 @@
 ﻿using System.Threading.Tasks;
+using Bootstrap.Components.Configuration.SystemProperty.Models.Dtos;
+using Bootstrap.Components.Configuration.SystemProperty.Models.RequestModels;
+using Bootstrap.Components.Configuration.SystemProperty.Services;
 using Bootstrap.Components.Miscellaneous.ResponseBuilders;
 using Bootstrap.Models.ResponseModels;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace Bootstrap.Components.Configuration.SystemProperty
+namespace Bootstrap.Components.Configuration.SystemProperty.Controllers
 {
     [Route("~/system-property")]
     public abstract class SystemPropertyController : Controller

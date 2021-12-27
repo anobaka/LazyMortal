@@ -5,7 +5,7 @@ namespace Bootstrap.Components.Configuration.SystemProperty
 {
     public class SystemPropertyDbContext : DbContext
     {
-        public DbSet<SystemProperty> SystemProperties { get; set; }
+        public DbSet<Models.Entities.SystemProperty> SystemProperties { get; set; }
 
         public SystemPropertyDbContext([NotNull] DbContextOptions options) : base(options)
         {

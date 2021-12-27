@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Bootstrap.Components.Miscellaneous.ResponseBuilders;
-using Bootstrap.Components.Orm.Infrastructures;
+using Bootstrap.Components.Configuration.SystemProperty.Attributes;
+using Bootstrap.Components.Configuration.SystemProperty.Models.Dtos;
 using Bootstrap.Extensions;
-using Bootstrap.Models.Exceptions;
 using Bootstrap.Models.ResponseModels;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Extensions;
 
-namespace Bootstrap.Components.Configuration.SystemProperty
+namespace Bootstrap.Components.Configuration.SystemProperty.Services
 {
     public abstract class EnumKeyBasedSystemPropertyService<TKey> : SystemPropertyService where TKey : Enum
     {

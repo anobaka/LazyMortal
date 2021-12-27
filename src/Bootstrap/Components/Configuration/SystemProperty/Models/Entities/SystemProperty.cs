@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Bootstrap.Components.Configuration.SystemProperty
+namespace Bootstrap.Components.Configuration.SystemProperty.Models.Entities
 {
     public class SystemProperty
     {

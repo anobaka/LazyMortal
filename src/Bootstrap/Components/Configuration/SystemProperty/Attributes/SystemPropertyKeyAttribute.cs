@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Bootstrap.Components.Configuration.SystemProperty
+namespace Bootstrap.Components.Configuration.SystemProperty.Attributes
 {
     [AttributeUsage(AttributeTargets.Field)]
     public class SystemPropertyKeyAttribute : Attribute

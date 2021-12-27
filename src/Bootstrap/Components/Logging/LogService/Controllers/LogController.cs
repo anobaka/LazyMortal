@@ -6,14 +6,14 @@ using Bootstrap.Models.ResponseModels;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace Bootstrap.Components.Logging.LogService
+namespace Bootstrap.Components.Logging.LogService.Controllers
 {
     [Route("~/log")]
     public abstract class LogController : Controller
     {
-        private readonly LogService _service;
+        private readonly Services.LogService _service;
 
-        protected LogController(LogService service)
+        protected LogController(Services.LogService service)
         {
             _service = service;
         }

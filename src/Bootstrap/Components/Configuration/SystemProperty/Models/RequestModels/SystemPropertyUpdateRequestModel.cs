@@ -1,4 +1,4 @@
-﻿namespace Bootstrap.Components.Configuration.SystemProperty
+﻿namespace Bootstrap.Components.Configuration.SystemProperty.Models.RequestModels
 {
     public class SystemPropertyUpdateRequestModel
     {

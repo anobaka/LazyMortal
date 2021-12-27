@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Bootstrap.Components.Configuration.SystemProperty.Attributes;
+using Bootstrap.Components.Configuration.SystemProperty.Extensions;
+using Bootstrap.Components.Configuration.SystemProperty.Models.Dtos;
 using Bootstrap.Components.Miscellaneous.ResponseBuilders;
 using Bootstrap.Components.Orm.Infrastructures;
-using Bootstrap.Extensions;
 using Bootstrap.Models.Exceptions;
 using Bootstrap.Models.ResponseModels;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Extensions;
 
-namespace Bootstrap.Components.Configuration.SystemProperty
+namespace Bootstrap.Components.Configuration.SystemProperty.Services
 {
-    public abstract class SystemPropertyService : ResourceService<SystemPropertyDbContext, SystemProperty, string>
+    public class SystemPropertyService : ResourceService<SystemPropertyDbContext, Models.Entities.SystemProperty, string>
     {
         protected readonly Dictionary<string, SystemPropertyKeyAttribute> PropertiesCache = new();
         protected readonly HashSet<string> PendingRestartKeys = new();
@@ -23,7 +23,7 @@ namespace Bootstrap.Components.Configuration.SystemProperty
         {
         }
 
-        public async Task<List<SystemPropertyDto>> GetAll(Expression<Func<SystemProperty, bool>> selector = null)
+        public async Task<List<SystemPropertyDto>> GetAll(Expression<Func<Models.Entities.SystemProperty, bool>> selector = null)
         {
             var ps = await base.GetAll(selector);
             var results = PropertiesCache.Select(t => new SystemPropertyDto
@@ -38,7 +38,7 @@ namespace Bootstrap.Components.Configuration.SystemProperty
             return results;
         }
 
-        private SystemPropertyDto _toDto(SystemProperty sp)
+        private SystemPropertyDto _toDto(Models.Entities.SystemProperty sp)
         {
             if (sp == null)
             {
@@ -53,7 +53,7 @@ namespace Bootstrap.Components.Configuration.SystemProperty
         {
             var p = await base.GetByKey(PropertiesCache[key].Key);
             return p?.Value == null && throwIfNotSet
-                ? throw new NotInitializedException(nameof(SystemProperty),
+                ? throw new NotInitializedException(nameof(Models.Entities.SystemProperty),
                     $"{key} not {(p == null ? "found" : "set")}")
                 : _toDto(p);
         }
@@ -79,7 +79,7 @@ namespace Bootstrap.Components.Configuration.SystemProperty
             var p = await GetByKey(key);
             if (p == null)
             {
-                var np = new SystemProperty {Key = key, Value = value};
+                var np = new Models.Entities.SystemProperty {Key = key, Value = value};
                 await Add(np);
                 _tryAddToPendingChanges(key);
             }
@@ -96,6 +96,7 @@ namespace Bootstrap.Components.Configuration.SystemProperty
             return BaseResponseBuilder.Ok;
         }
 
-        protected abstract Task<SingletonResponse<string>> ValidateValue(string key, string value);
+        protected virtual Task<SingletonResponse<string>> ValidateValue(string key, string value) =>
+            Task.FromResult(SingletonResponseBuilder<string>.Ok);
     }
 }

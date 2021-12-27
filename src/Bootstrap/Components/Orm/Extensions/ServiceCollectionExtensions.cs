@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using Bootstrap.Components.Configuration.SystemProperty;
+using Bootstrap.Components.Configuration.SystemProperty.Services;
 using Bootstrap.Components.Orm.Infrastructures;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +23,39 @@ namespace Bootstrap.Components.Orm.Extensions
             services.TryAddSingleton<BaseService<TDbContext>>();
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddDbContext<TDbContext, TDbContextImplementation>(configure);
+            return services;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TDbContext"></typeparam>
+        /// <param name="services"></param>
+        /// <param name="serviceType"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddSingleServiceBootstrapServices<TDbContext>(
+            this IServiceCollection services, Type serviceType, Action<DbContextOptionsBuilder> configure = null)
+            where TDbContext : DbContext
+        {
+            return services.AddSingleServiceBootstrapServices<TDbContext, TDbContext>(serviceType, configure);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TDbContext"></typeparam>
+        /// <typeparam name="TDbContextImplementation"></typeparam>
+        /// <param name="services"></param>
+        /// <param name="serviceType"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddSingleServiceBootstrapServices<TDbContext, TDbContextImplementation>(
+            this IServiceCollection services, Type serviceType, Action<DbContextOptionsBuilder> configure = null)
+            where TDbContextImplementation : TDbContext where TDbContext : DbContext
+        {
+            services.TryAddSingleton(serviceType);
+            services.AddBootstrapServices<TDbContext, TDbContextImplementation>(configure);
             return services;
         }
     }
