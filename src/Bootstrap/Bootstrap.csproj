@@ -21,17 +21,17 @@
 
   <ItemGroup>
     <PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.13.0" />
-    <PackageReference Include="Humanizer" Version="2.11.10" />
+    <PackageReference Include="Humanizer" Version="2.13.14" />
     <PackageReference Include="Aliyun.Api.LogService" Version="1.1.0" />
-    <PackageReference Include="MailKit" Version="2.15.0" />
-    <PackageReference Include="NPOI" Version="2.5.3" />
-    <PackageReference Include="Quartz" Version="3.3.2" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.3" />
-    <PackageReference Include="StackExchange.Redis" Version="2.2.50" />
-    <PackageReference Include="System.CodeDom" Version="5.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.1.4" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.1.4" />
-    <PackageReference Include="CliWrap" Version="3.3.2" />
+    <PackageReference Include="MailKit" Version="3.0.0" />
+    <PackageReference Include="NPOI" Version="2.5.5" />
+    <PackageReference Include="Quartz" Version="3.3.3" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+    <PackageReference Include="StackExchange.Redis" Version="2.2.88" />
+    <PackageReference Include="System.CodeDom" Version="6.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.2.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.2.3" />
+    <PackageReference Include="CliWrap" Version="3.3.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.7" />
   </ItemGroup>
 
