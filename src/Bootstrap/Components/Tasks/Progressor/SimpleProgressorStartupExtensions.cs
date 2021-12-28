@@ -12,7 +12,7 @@ namespace Bootstrap.Components.Tasks.Progressor
             where TProgressor : class, IProgressor
         {
             services.TryAddSingleton<IProgressor, TProgressor>();
-            services.TryAddSingleton<IProgressNotifier, SimpleProgressorHubNotifier>();
+            services.TryAddSingleton<IProgressDispatcher, SimpleProgressorHubDispatcher>();
             return services;
         }
 

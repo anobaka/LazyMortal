@@ -32,7 +32,7 @@ namespace Bootstrap.Components.Tasks.Progressor
             var p = GetProgressor(key);
             if (p == null)
             {
-                await Clients.Caller.SendAsync(ProcessorClientMethod.NotRegistered.ToString(), key, $"Progressor with key {key} is not registered.");
+                await Clients.Caller.SendAsync(ProgressorEvent.NotRegistered.ToString(), key, $"Progressor with key {key} is not registered.");
                 return;
             }
             switch (action)
@@ -44,10 +44,10 @@ namespace Bootstrap.Components.Tasks.Progressor
                     await p.Stop();
                     break;
                 case ProgressorClientAction.Initialize:
-                    await Clients.Caller.SendAsync(ProcessorClientMethod.State.ToString(), p.Key, p.State);
+                    await Clients.Caller.SendAsync(ProgressorEvent.StateChanged.ToString(), p.Key, p.State);
                     if (p.State.Status == ProgressorStatus.Running)
                     {
-                        await Clients.Caller.SendAsync(ProcessorClientMethod.Progress.ToString(), p.Key, p.Progress);
+                        await Clients.Caller.SendAsync(ProgressorEvent.ProgressChanged.ToString(), p.Key, p.Progress);
                     }
 
                     break;

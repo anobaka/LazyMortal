@@ -397,7 +397,7 @@ namespace Bootstrap.Components.Texts.Google
                 string text2_a = hm[2];
                 string text2_b = hm[3];
                 string mid_common = hm[4];
-                // Send both pairs off for separate processing.
+                // Dispatch both pairs off for separate processing.
                 List<Diff> diffs_a = diff_main(text1_a, text2_a, checklines, deadline);
                 List<Diff> diffs_b = diff_main(text1_b, text2_b, checklines, deadline);
                 // Merge the results.

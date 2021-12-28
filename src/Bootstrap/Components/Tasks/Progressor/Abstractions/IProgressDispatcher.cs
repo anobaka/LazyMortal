@@ -3,8 +3,8 @@ using Bootstrap.Components.Tasks.Progressor.Abstractions.Models.Constants;
 
 namespace Bootstrap.Components.Tasks.Progressor.Abstractions
 {
-    public interface IProgressNotifier
+    public interface IProgressDispatcher
     {
-        Task Send(ProcessorClientMethod topic, string key, object data);
+        Task Dispatch(ProgressorEvent topic, string progressorKey, object data);
     }
 }

@@ -5,18 +5,18 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Bootstrap.Components.Tasks.Progressor
 {
-    public class SimpleProgressorHubNotifier : IProgressNotifier
+    public class SimpleProgressorHubDispatcher : IProgressDispatcher
     {
         private readonly IHubContext<SimpleProgressorHub> _hub;
 
-        public SimpleProgressorHubNotifier(IHubContext<SimpleProgressorHub> hub)
+        public SimpleProgressorHubDispatcher(IHubContext<SimpleProgressorHub> hub)
         {
             _hub = hub;
         }
 
-        public Task Send(ProcessorClientMethod topic, string key, object data)
+        public Task Dispatch(ProgressorEvent topic, string progressorKey, object data)
         {
-            return _hub.Clients.All.SendAsync(topic.ToString(), key, data);
+            return _hub.Clients.All.SendAsync(topic.ToString(), progressorKey, data);
         }
     }
 }

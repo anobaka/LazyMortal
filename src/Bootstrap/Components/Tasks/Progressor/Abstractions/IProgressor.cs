@@ -14,7 +14,7 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
         /// </summary>
         ProgressorState State { get; }
         object Progress { get; }
-        Task Start(string jsonParams, CancellationToken ct);
+        Task Start(object @params, CancellationToken ct);
         Task Stop();
     }
 }

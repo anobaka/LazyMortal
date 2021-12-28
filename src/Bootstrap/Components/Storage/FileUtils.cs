@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -79,6 +80,16 @@ namespace Bootstrap.Components.Storage
             await using Stream source = File.OpenRead(sourcePath);
             await using Stream destination = File.Create(destinationPath);
             await source.CopyToAsync(destination);
+        }
+
+        public static string GetFullname(string filename)
+        {
+            if (File.Exists(filename))
+                return Path.GetFullPath(filename);
+
+            var values = Environment.GetEnvironmentVariable("PATH");
+            return values?.Split(Path.PathSeparator).Select(path => Path.Combine(path, filename))
+                .FirstOrDefault(File.Exists);
         }
     }
 }

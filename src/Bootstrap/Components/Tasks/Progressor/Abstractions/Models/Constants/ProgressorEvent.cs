@@ -1,9 +1,9 @@
 ﻿namespace Bootstrap.Components.Tasks.Progressor.Abstractions.Models.Constants
 {
-    public enum ProcessorClientMethod
+    public enum ProgressorEvent
     {
-        State = 1,
-        Progress = 2,
+        StateChanged = 1,
+        ProgressChanged = 2,
         NotRegistered = 3
     }
 }

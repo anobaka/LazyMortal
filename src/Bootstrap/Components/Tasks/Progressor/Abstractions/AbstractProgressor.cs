@@ -8,11 +8,12 @@ using Bootstrap.Extensions;
 
 namespace Bootstrap.Components.Tasks.Progressor.Abstractions
 {
-    public abstract class AbstractProgressor<TProgress> : IProgressor where TProgress : ProgressorProgress, new()
+    public abstract class AbstractProgressor<TProgressModel, TStartParamModel> : IProgressor
+        where TProgressModel : ProgressorProgress, new() where TStartParamModel : class
     {
         public virtual string Key => GetType().Name;
 
-        private readonly IProgressNotifier _progressNotifier;
+        private readonly IProgressDispatcher _progressDispatcher;
 
         private CancellationTokenSource _internalCts;
         private readonly Stopwatch _sw = new();
@@ -22,23 +23,23 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
         /// </summary>
         public ProgressorState State { get; } = new();
 
-        public object Progress { get; } = new TProgress();
+        public object Progress { get; } = new TProgressModel();
 
-        protected AbstractProgressor(IProgressNotifier progressNotifier)
+        protected AbstractProgressor(IProgressDispatcher progressDispatcher = null)
         {
-            _progressNotifier = progressNotifier;
+            _progressDispatcher = progressDispatcher;
         }
 
         private async Task UpdateState(Action<ProgressorState> update)
         {
             update(State);
-            await SendStateToClient();
+            await DispatchState();
         }
 
-        public async Task UpdateProgress(Action<TProgress> update)
+        public async Task UpdateProgress(Action<TProgressModel> update)
         {
-            update(Progress as TProgress);
-            await SendProgressToClient();
+            update(Progress as TProgressModel);
+            await DispatchProgress();
         }
 
         private void StartCountingInBackground(CancellationToken ct)
@@ -53,7 +54,7 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
             }, ct);
         }
 
-        public async Task Start(string jsonParams, CancellationToken ct)
+        public async Task Start(TStartParamModel @params, CancellationToken ct)
         {
             if (State.Status.CanStart())
             {
@@ -70,7 +71,7 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
                 try
                 {
                     StartCountingInBackground(mixedCt);
-                    await StartInternal(jsonParams, mixedCt);
+                    await StartCore(@params, mixedCt);
                     _sw.Stop();
                     cts.Cancel();
                     await UpdateState(a => { a.Status = ProgressorStatus.Complete; });
@@ -95,7 +96,12 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
             }
         }
 
-        protected abstract Task StartInternal(string jsonParams, CancellationToken ct);
+        protected abstract Task StartCore(TStartParamModel @params, CancellationToken ct);
+
+        public Task Start(object @params, CancellationToken ct)
+        {
+            return Start(@params as TStartParamModel, ct);
+        }
 
         public async Task Stop()
         {
@@ -106,7 +112,7 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
                 await StopInternal();
                 State.Status = ProgressorStatus.Idle;
                 State.Message = default;
-                await SendStateToClient();
+                await DispatchState();
             }
         }
 
@@ -115,14 +121,20 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
             return Task.CompletedTask;
         }
 
-        private async Task SendStateToClient()
+        private async Task DispatchState()
         {
-            await _progressNotifier.Send(ProcessorClientMethod.State, Key, State);
+            if (_progressDispatcher != null)
+            {
+                await _progressDispatcher.Dispatch(ProgressorEvent.StateChanged, Key, State);
+            }
         }
 
-        private async Task SendProgressToClient()
+        private async Task DispatchProgress()
         {
-            await _progressNotifier.Send(ProcessorClientMethod.Progress, Key, Progress);
+            if (_progressDispatcher != null)
+            {
+                await _progressDispatcher.Dispatch(ProgressorEvent.ProgressChanged, Key, Progress);
+            }
         }
     }
 }
