@@ -84,7 +84,8 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
                     if (!mixedCt.IsCancellationRequested)
                     {
                         cts.Cancel();
-                        message = e.BuildFullInformationText();
+                        // message = e.BuildFullInformationText();
+                        message = e.Message;
                     }
                     else
                     {
