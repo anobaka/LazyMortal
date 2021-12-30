@@ -14,7 +14,7 @@ namespace Bootstrap.Components.Tasks.Progressor
             _hub = hub;
         }
 
-        public Task Dispatch(ProgressorEvent topic, string progressorKey, object data)
+        public Task Dispatch(string progressorKey, ProgressorEvent topic, object data)
         {
             return _hub.Clients.All.SendAsync(topic.ToString(), progressorKey, data);
         }

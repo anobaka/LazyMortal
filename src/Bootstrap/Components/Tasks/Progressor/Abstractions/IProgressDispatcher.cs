@@ -5,6 +5,6 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
 {
     public interface IProgressDispatcher
     {
-        Task Dispatch(ProgressorEvent topic, string progressorKey, object data);
+        Task Dispatch(string progressorKey, ProgressorEvent topic, object data);
     }
 }

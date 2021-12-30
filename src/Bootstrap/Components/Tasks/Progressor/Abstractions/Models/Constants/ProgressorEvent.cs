@@ -4,6 +4,6 @@
     {
         StateChanged = 1,
         ProgressChanged = 2,
-        NotRegistered = 3
+        ErrorOccurred = 3
     }
 }

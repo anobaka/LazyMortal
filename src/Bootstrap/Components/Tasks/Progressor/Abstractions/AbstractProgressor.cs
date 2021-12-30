@@ -80,11 +80,15 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
                 catch (Exception e)
                 {
                     _sw.Stop();
-                    string message = null;
+                    string message;
                     if (!mixedCt.IsCancellationRequested)
                     {
                         cts.Cancel();
                         message = e.BuildFullInformationText();
+                    }
+                    else
+                    {
+                        message = e.Message;
                     }
 
                     await UpdateState(a =>
@@ -109,14 +113,11 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
             {
                 _sw.Stop();
                 _internalCts.Cancel();
-                await StopInternal();
-                State.Status = ProgressorStatus.Idle;
-                State.Message = default;
-                await DispatchState();
+                await StopCore();
             }
         }
 
-        protected virtual Task StopInternal()
+        protected virtual Task StopCore()
         {
             return Task.CompletedTask;
         }
@@ -125,7 +126,7 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
         {
             if (_progressDispatcher != null)
             {
-                await _progressDispatcher.Dispatch(ProgressorEvent.StateChanged, Key, State);
+                await _progressDispatcher.Dispatch(Key, ProgressorEvent.StateChanged, State);
             }
         }
 
@@ -133,7 +134,7 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
         {
             if (_progressDispatcher != null)
             {
-                await _progressDispatcher.Dispatch(ProgressorEvent.ProgressChanged, Key, Progress);
+                await _progressDispatcher.Dispatch(Key, ProgressorEvent.ProgressChanged, Progress);
             }
         }
     }
