@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic.FileIO;
 
 namespace Bootstrap.Components.Storage
 {
@@ -90,6 +91,30 @@ namespace Bootstrap.Components.Storage
             var values = Environment.GetEnvironmentVariable("PATH");
             return values?.Split(Path.PathSeparator).Select(path => Path.Combine(path, filename))
                 .FirstOrDefault(File.Exists);
+        }
+
+        public static void Delete(string fullname, bool ignoreError, bool sendToRecycleBin)
+        {
+            try
+            {
+                if (sendToRecycleBin)
+                {
+                    FileSystem.DeleteFile(fullname, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                }
+                else
+                {
+                    File.Delete(fullname);
+                }
+            }
+            catch (Exception)
+            {
+                if (ignoreError)
+                {
+                    return;
+                }
+
+                throw;
+            }
         }
     }
 }

@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic.FileIO;
+using SearchOption = System.IO.SearchOption;
 
 namespace Bootstrap.Components.Storage
 {
@@ -70,6 +72,30 @@ namespace Bootstrap.Components.Storage
             foreach (var newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
             {
                 File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+            }
+        }
+
+        public static void Delete(string fullname, bool ignoreError, bool sendToRecycleBin)
+        {
+            try
+            {
+                if (sendToRecycleBin)
+                {
+                    FileSystem.DeleteDirectory(fullname, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                }
+                else
+                {
+                    Directory.Delete(fullname, true);
+                }
+            }
+            catch (Exception)
+            {
+                if (ignoreError)
+                {
+                    return;
+                }
+
+                throw;
             }
         }
     }
