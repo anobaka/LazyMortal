@@ -155,7 +155,7 @@ namespace Bootstrap.Components.Orm
         public virtual Task<BaseResponse> RemoveByKeys(IEnumerable<TKey> keys)
         {
             var ks = keys.ToList();
-            ks.ForEach(k => RemoveByKey(k));
+            ks.ForEach(k => CacheVault.Remove(k, out _));
             return ResourceService.RemoveByKeys(ks);
         }
 
