@@ -3,7 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.FileIO;
+using FileSystem = Microsoft.VisualBasic.FileIO.FileSystem;
 
 namespace Bootstrap.Components.Storage
 {
@@ -93,6 +95,14 @@ namespace Bootstrap.Components.Storage
                 .FirstOrDefault(File.Exists);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fullname"></param>
+        /// <param name="ignoreError"></param>
+        /// <param name="sendToRecycleBin">
+        /// True for using <see cref="Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(string, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin)"/> and false for <see cref="File.Delete"/>
+        /// </param>
         public static void Delete(string fullname, bool ignoreError, bool sendToRecycleBin)
         {
             try
@@ -114,6 +124,18 @@ namespace Bootstrap.Components.Storage
                 }
 
                 throw;
+            }
+        }
+
+        public static bool IsFile(string path)
+        {
+            try
+            {
+                return !File.GetAttributes(path).HasFlag(FileAttributes.Directory);
+            }
+            catch
+            {
+                return false;
             }
         }
     }
