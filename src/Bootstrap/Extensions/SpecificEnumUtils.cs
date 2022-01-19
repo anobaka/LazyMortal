@@ -7,8 +7,8 @@ namespace Bootstrap.Extensions
 {
     public static class SpecificEnumUtils<TEnum> where TEnum : Enum
     {
-        public static readonly List<TEnum>
-            Values = Enum.GetValues(SpecificTypeUtils<TEnum>.Type).Cast<TEnum>().ToList();
+        public static readonly IReadOnlySet<TEnum> Values = Enum.GetValues(SpecificTypeUtils<TEnum>.Type).Cast<TEnum>()
+            .ToHashSet();
 
         private static Dictionary<TEnum, string> _displayNames;
 

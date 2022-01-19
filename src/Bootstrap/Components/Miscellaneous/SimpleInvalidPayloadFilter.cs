@@ -30,7 +30,7 @@ namespace Bootstrap.Components.Miscellaneous
             ModelStateDictionary modelState)
         {
             var message = string.Join("; ",
-                context.ModelState.Select(
+                context.ModelState.Where(a => a.Value.ValidationState == ModelValidationState.Invalid).Select(
                     t =>
                         $"{t.Key.Substring(0, 1)?.ToLower()}{t.Key.Substring(1)} {string.Join(", ", t.Value.Errors.Select(e => e.ErrorMessage))}"
                             .Trim()));

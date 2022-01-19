@@ -82,7 +82,7 @@ namespace Bootstrap.Components.Doc.Swagger
                         .Where(r => !string.IsNullOrEmpty(r.Value)).ToDictionary(r => r.Key, r => r.Value);
                     foreach (var r in apiVisibility.Realms)
                     {
-                        SpecificEnumUtils<TApiVisibleRealm>.Values.ForEach(sr =>
+                        foreach (var sr in SpecificEnumUtils<TApiVisibleRealm>.Values)
                         {
                             if (r.HasFlag(sr))
                             {
@@ -91,7 +91,9 @@ namespace Bootstrap.Components.Doc.Swagger
                                     docNames.Add(d);
                                 }
                             }
-                        });
+                        }
+
+                        ;
                     }
 
                     return docNames.Contains(docName);
