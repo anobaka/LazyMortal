@@ -26,28 +26,59 @@ namespace Bootstrap.Components.Orm
             CacheVault = new ConcurrentDictionary<TKey, TResource>(data);
         }
 
-        public virtual Task<TResource> GetByKey(TKey key) => Task.FromResult((CacheVault.TryGetValue(key, out var v) ? v : null).JsonCopy());
+        public virtual Task<TResource> GetByKey(TKey key, bool returnCopy = true)
+        {
+            var data = CacheVault.TryGetValue(key, out var v) ? v : null;
+            if (returnCopy)
+            {
+                data = data.JsonCopy();
+            }
 
-        public virtual Task<List<TResource>> GetByKeys(IEnumerable<TKey> keys) =>
-            Task.FromResult(keys.Select(k => CacheVault.TryGetValue(k, out var v) ? v : null).Where(v => v != null)
-                .ToList());
+            return Task.FromResult(data);
+        }
+
+        public virtual Task<TResource[]> GetByKeys(IEnumerable<TKey> keys, bool returnCopy = true)
+        {
+            var data = keys.Select(k => CacheVault.TryGetValue(k, out var v) ? v : null).Where(v => v != null)
+                .ToArray();
+            if (returnCopy)
+            {
+                data = data.JsonCopy();
+            }
+
+            return Task.FromResult(data);
+        }
 
         public virtual Task<TResource> GetFirst(Expression<Func<TResource, bool>> selector,
-            Expression<Func<TResource, object>> orderBy = null, bool asc = false)
+            Expression<Func<TResource, object>> orderBy = null, bool asc = false, bool returnCopy = true)
         {
-            var data = CacheVault.Values.Where(selector.Compile());
+            var list = CacheVault.Values.Where(selector.Compile());
             if (orderBy != null)
             {
                 var ob = orderBy.Compile();
-                data = asc ? data.OrderBy(ob) : data.OrderByDescending(ob);
+                list = asc ? list.OrderBy(ob) : list.OrderByDescending(ob);
             }
 
-            return Task.FromResult(data.FirstOrDefault().JsonCopy());
+            var data = list.FirstOrDefault();
+            if (returnCopy)
+            {
+                data = data.JsonCopy();
+            }
+
+            return Task.FromResult(data);
         }
 
-        public virtual Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null) =>
-            Task.FromResult((selector == null ? CacheVault.Values : CacheVault.Values.Where(selector.Compile()))
-                .ToList().JsonCopy());
+        public virtual Task<TResource[]> GetAll(Expression<Func<TResource, bool>> selector = null, bool returnCopy = true)
+        {
+            var data = (selector == null ? CacheVault.Values : CacheVault.Values.Where(selector.Compile()))
+                .ToArray();
+            if (returnCopy)
+            {
+                data = data.JsonCopy();
+            }
+
+            return Task.FromResult(data);
+        }
 
         public virtual Task<int> Count(Func<TResource, bool> selector = null) =>
             Task.FromResult(selector == null ? CacheVault.Values.Count : CacheVault.Values.Count(selector));
@@ -59,9 +90,11 @@ namespace Bootstrap.Components.Orm
         /// <param name="pageIndex"></param>
         /// <param name="pageSize"></param>
         /// <param name="orders">Key Selector - Asc</param>
+        /// <param name="returnCopy"></param>
         /// <returns></returns>
-        public virtual SearchResponse<TResource> Search(Func<TResource, bool> selector,
-            int pageIndex, int pageSize, List<(Func<TResource, object> SelectKey, bool Asc)> orders)
+        public virtual Task<SearchResponse<TResource>> Search(Func<TResource, bool> selector,
+            int pageIndex, int pageSize, (Func<TResource, object> SelectKey, bool Asc)[] orders,
+            bool returnCopy = true)
         {
             var resources = CacheVault.Values.ToList();
             if (selector != null)
@@ -83,28 +116,21 @@ namespace Bootstrap.Components.Orm
 
             var count = resources.Count;
             var data = resources.Skip(Math.Max(pageIndex - 1, 0) * pageSize).Take(pageSize).ToList();
+            if (returnCopy)
+            {
+                data = data.JsonCopy();
+            }
+
             var result = new SearchResponse<TResource>(data, count, pageIndex, pageSize);
-            return result.JsonCopy();
+            return Task.FromResult(result);
         }
 
         public virtual Task<SearchResponse<TResource>> Search(Func<TResource, bool> selector,
-            int pageIndex, int pageSize, Func<TResource, object> orderBy = null, bool asc = false)
+            int pageIndex, int pageSize, Func<TResource, object> orderBy = null, bool asc = false, bool returnCopy = true)
         {
-            var resources = CacheVault.Values.ToList();
-            if (selector != null)
-            {
-                resources = resources.Where(selector).ToList();
-            }
-
-            if (orderBy != null)
-            {
-                resources = (asc ? resources.OrderBy(orderBy) : resources.OrderByDescending(orderBy)).ToList();
-            }
-
-            var count = resources.Count;
-            var data = resources.Skip(Math.Max(pageIndex - 1, 0) * pageSize).Take(pageSize).ToList();
-            var result = new SearchResponse<TResource>(data, count, pageIndex, pageSize);
-            return Task.FromResult(result.JsonCopy());
+            var orders = orderBy == null ? null : new[] {(orderBy, asc)};
+            var r = Search(selector, pageIndex, pageSize, orders, returnCopy);
+            return r;
         }
 
         public virtual async Task<BaseResponse> Remove(TResource resource)

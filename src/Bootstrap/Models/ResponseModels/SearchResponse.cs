@@ -12,7 +12,7 @@ namespace Bootstrap.Models.ResponseModels
         {
         }
 
-        public SearchResponse(List<T> data, int totalCount, int pageIndex, int pageSize) : base(data)
+        public SearchResponse(IEnumerable<T> data, int totalCount, int pageIndex, int pageSize) : base(data)
         {
             TotalCount = totalCount;
             PageIndex = pageIndex;
