@@ -25,4 +25,14 @@ namespace Bootstrap.Components.Tasks.Progressor.SignalR
             return await ConvertToStartModel(typedJsonParam as TJsonParam);
         }
     }
+
+    public interface ISignalRGenericProgressor<TStartModel> : ISignalRGenericProgressor<TStartModel, TStartModel>
+        where TStartModel : class
+    {
+        Task<TStartModel> ISignalRGenericProgressor<TStartModel, TStartModel>.ConvertToStartModel(
+            TStartModel typedJsonParam)
+        {
+            return Task.FromResult(typedJsonParam);
+        }
+    }
 }
