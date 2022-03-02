@@ -18,7 +18,7 @@ namespace Bootstrap.Components.Configuration.SystemProperty.Services
         protected readonly Dictionary<string, SystemPropertyKeyAttribute> PropertiesCache = new();
         protected readonly HashSet<string> PendingRestartKeys = new();
 
-        protected SystemPropertyService(IServiceProvider serviceProvider) : base(
+        public SystemPropertyService(IServiceProvider serviceProvider) : base(
             serviceProvider)
         {
         }
