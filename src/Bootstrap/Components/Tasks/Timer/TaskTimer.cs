@@ -10,76 +10,68 @@ namespace Bootstrap.Components.Tasks.Timer
 {
     public class TaskTimer
     {
-        internal class TaskTimerStopwatch : IDisposable
+        internal class DisposableSw : IDisposable
         {
             public readonly Stopwatch Sw;
-            private readonly string _id;
 
-            public TaskTimerStopwatch(string id)
+            public DisposableSw()
             {
-                _id = id;
                 Sw = Stopwatch.StartNew();
-                PendingStopwatches.GetOrAdd(id, _ => new ConcurrentDictionary<Stopwatch, bool>())[Sw] = true;
             }
 
             public void Dispose()
             {
                 Sw.Stop();
-                if (PendingStopwatches.TryGetValue(_id, out var list))
-                {
-                    list.TryRemove(Sw, out _);
-                }
-
-                TimeCosts[_id] = TimeCosts.GetValueOrDefault(_id).Add(Sw.Elapsed);
             }
         }
 
-        private static readonly ConcurrentDictionary<string, TimeSpan> TimeCosts = new();
+        private DisposableSw StartNewStopwatch(string id)
+        {
+            var ts = new DisposableSw();
+            _timeCosts.GetOrAdd(id, _ => new ConcurrentDictionary<Stopwatch, bool>())[ts.Sw] = true;
+            return ts;
+        }
 
         /// <summary>
-        /// id - sw - nothing
+        /// id - fake concurrent hashset
         /// </summary>
-        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<Stopwatch, bool>> PendingStopwatches =
-            new();
+        private readonly ConcurrentDictionary<string, ConcurrentDictionary<Stopwatch, bool>> _timeCosts = new();
 
-        public static async Task StartTiming(string id, Func<Task> getTask)
+        public async Task StartTiming(string id, Func<Task> getTask)
         {
-            using var sw = new TaskTimerStopwatch(id);
+            using var sw = StartNewStopwatch(id);
             var task = getTask();
             await task;
         }
 
-        public static async Task<T> StartTiming<T>(string id, Func<Task<T>> getTask)
+        public async Task<T> StartTiming<T>(string id, Func<Task<T>> getTask)
         {
-            using var sw = new TaskTimerStopwatch(id);
+            using var sw = StartNewStopwatch(id);
             var result = await getTask();
             return result;
         }
 
-        public static async Task Delay(string id, TimeSpan delay, CancellationToken cancellationToken) =>
+        public async Task Delay(string id, TimeSpan delay, CancellationToken cancellationToken) =>
             await StartTiming(id, () => Task.Delay(delay, cancellationToken));
 
-        public static void Clear()
+        public void Clear()
         {
-            TimeCosts.Clear();
+            _timeCosts.Clear();
         }
 
-        public static void Clear(string id)
+        public void Clear(string id)
         {
-            TimeCosts.TryRemove(id, out _);
+            _timeCosts.TryRemove(id, out _);
         }
 
-        public static TimeSpan Get(string id)
+        public TimeSpan Get(string id)
         {
-            var t = TimeCosts.GetOrAdd(id, TimeSpan.Zero);
-            if (PendingStopwatches.TryGetValue(id, out var list))
-            {
-                t += list.Keys.Aggregate(TimeSpan.Zero, (s, a) => a.Elapsed.Add(s));
-            }
-
-            return t;
+            return _timeCosts.TryGetValue(id, out var list)
+                ? new TimeSpan(list.Keys.Sum(a => a.ElapsedTicks))
+                : TimeSpan.Zero;
         }
 
-        public static Dictionary<string, TimeSpan> GetAll() => TimeCosts.Keys.ToDictionary(a => a, Get);
+        public Dictionary<string, TimeSpan> GetAll() =>
+            _timeCosts.ToDictionary(a => a.Key, a => new TimeSpan(a.Value.Keys.Sum(b => b.ElapsedTicks)));
     }
 }
