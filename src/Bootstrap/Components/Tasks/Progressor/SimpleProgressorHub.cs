@@ -62,7 +62,7 @@ namespace Bootstrap.Components.Tasks.Progressor
                         break;
                     case ProgressorClientAction.Initialize:
                         await _progressDispatcher.Dispatch(p.Key, ProgressorEvent.StateChanged, p.State);
-                        if (p.State.Status == ProgressorStatus.Running)
+                        // if (p.State.Status == ProgressorStatus.Running)
                         {
                             await _progressDispatcher.Dispatch(p.Key, ProgressorEvent.ProgressChanged, p.Progress);
                         }
