@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -37,10 +38,12 @@ namespace Bootstrap.Components.Mobiles.Android
             _logger.LogInformation($"Before executing adb command: {command}");
 
             var errorSb = new StringBuilder();
+            await using var outputMs = new MemoryStream();
+            var consoleOutputPipeline = PipeTarget.ToStream(outputMs, true);
 
             var result = await Cli.Wrap(_options.Value.ExecutablePath)
                 .WithArguments(command)
-                .WithStandardOutputPipe(outputStream)
+                .WithStandardOutputPipe(PipeTarget.Merge(outputStream, consoleOutputPipeline))
                 .WithStandardErrorPipe(PipeTarget.ToStringBuilder(errorSb))
                 .ExecuteAsync();
 
@@ -51,7 +54,23 @@ namespace Bootstrap.Components.Mobiles.Android
 
             if (result.ExitCode != 0)
             {
-                throw new AdbInvalidExitCodeException(result.ExitCode, error);
+                var output = error;
+                if (outputMs.Length > 0)
+                {
+                    outputMs.Seek(0, SeekOrigin.Begin);
+                    using var sr = new StreamReader(outputMs);
+                    var info = await sr.ReadToEndAsync();
+                    if (output.IsNotEmpty())
+                    {
+                        output = info + Environment.NewLine + error;
+                    }
+                    else
+                    {
+                        output = info;
+                    }
+                }
+
+                throw new AdbInvalidExitCodeException(result.ExitCode, output);
             }
 
             if (error != null)

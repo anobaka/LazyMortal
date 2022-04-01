@@ -83,9 +83,14 @@ namespace Bootstrap.Components.Mobiles.Android.Infrastructures
             await Execute("kill-server");
         }
 
-        public async Task Connect(string ip, int port = 5555)
+        public async Task Connect(string host, int port)
         {
-            var output = await Execute($"connect {ip}:{port}");
+            await Connect($"{host}:{port}");
+        }
+
+        public async Task Connect(string serialNumber)
+        {
+            var output = await Execute($"connect {serialNumber}");
             if (!output.Contains("connected"))
             {
                 throw new AdbInternalException(AdbInternalError.FailedToConnectDevice, output);
