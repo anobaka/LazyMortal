@@ -43,6 +43,7 @@ namespace Bootstrap.Components.Mobiles.Android
 
             var result = await Cli.Wrap(_options.Value.ExecutablePath)
                 .WithArguments(command)
+                .WithValidation(CommandResultValidation.None)
                 .WithStandardOutputPipe(PipeTarget.Merge(outputStream, consoleOutputPipeline))
                 .WithStandardErrorPipe(PipeTarget.ToStringBuilder(errorSb))
                 .ExecuteAsync();
