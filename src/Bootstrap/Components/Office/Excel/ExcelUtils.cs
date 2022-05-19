@@ -7,7 +7,7 @@ namespace Bootstrap.Components.Office.Excel
 {
     public class ExcelUtils
     {
-        public static Stream CreateExcel(ExcelData data)
+        public static byte[] CreateExcel(ExcelData data)
         {
             var wb = new XSSFWorkbook();
             var sheet = wb.CreateSheet();
@@ -49,10 +49,9 @@ namespace Bootstrap.Components.Office.Excel
 
             wb.SetForceFormulaRecalculation(true);
 
-            var ms = new MemoryStream();
+            using var ms = new MemoryStream();
             wb.Write(ms, true);
-            ms.Seek(0, SeekOrigin.Begin);
-            return ms;
+            return ms.ToArray();
         }
     }
 }

@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Tiff;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace Bootstrap.Extensions
 {
@@ -111,6 +114,7 @@ namespace Bootstrap.Extensions
 
             return true;
         }
+
         public static Rectangle CropByGrid(this Rectangle rectangle, int rowCount, int columnCount, int firstRowIndex,
             int firstColumnIndex, int? lastRowIndex = null, int? lastColumnIndex = null)
         {
@@ -260,6 +264,46 @@ namespace Bootstrap.Extensions
         {
             using var ms = new MemoryStream();
             image.Save(ms, encoder);
+            ms.Seek(0, SeekOrigin.Begin);
+            return ms.ToArray();
+        }
+
+        public static async Task<byte[]> SaveAsync(this Image image, IImageFormat format)
+        {
+            await using var ms = new MemoryStream();
+            await image.SaveAsync(ms, format);
+            ms.Seek(0, SeekOrigin.Begin);
+            return ms.ToArray();
+        }
+
+        public static async Task<byte[]> SaveAsync(this Image image, IImageEncoder encoder)
+        {
+            await using var ms = new MemoryStream();
+            await image.SaveAsync(ms, encoder);
+            ms.Seek(0, SeekOrigin.Begin);
+            return ms.ToArray();
+        }
+
+        public static async Task<byte[]> ToPngDataAsync(this Image image)
+        {
+            await using var ms = new MemoryStream();
+            await image.SaveAsPngAsync(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+            return ms.ToArray();
+        }
+
+        public static async Task<byte[]> ToTiffDataAsync(this Image image)
+        {
+            await using var ms = new MemoryStream();
+            await image.SaveAsTiffAsync(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+            return ms.ToArray();
+        }
+
+        public static async Task<byte[]> ToTiffDataAsync(this Image image, TiffEncoder tiffEncoder)
+        {
+            await using var ms = new MemoryStream();
+            await image.SaveAsTiffAsync(ms, tiffEncoder);
             ms.Seek(0, SeekOrigin.Begin);
             return ms.ToArray();
         }

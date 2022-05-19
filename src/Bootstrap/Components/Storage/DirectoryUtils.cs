@@ -20,7 +20,7 @@ namespace Bootstrap.Components.Storage
         //     var files = dir.GetFileSystemInfos();
         // }
 
-        public static void Merge(DirectoryInfo source, DirectoryInfo target)
+        public static void Merge(DirectoryInfo source, DirectoryInfo target, bool overwrite)
         {
             if (string.Equals(source.FullName, target.FullName, StringComparison.CurrentCultureIgnoreCase))
             {
@@ -37,29 +37,22 @@ namespace Bootstrap.Components.Storage
             foreach (var fi in source.GetFiles())
             {
                 var path = Path.Combine(target.ToString(), fi.Name);
-                if (File.Exists(path))
-                {
-                    fi.Delete();
-                }
-                else
-                {
-                    fi.MoveTo(path);
-                }
+                fi.MoveTo(path, overwrite);
             }
 
             // Copy each sub directory using recursion.
             foreach (var diSourceSubDir in source.GetDirectories())
             {
                 var nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
-                Merge(diSourceSubDir, nextTargetSubDir);
+                Merge(diSourceSubDir, nextTargetSubDir, overwrite);
             }
 
             source.Delete();
         }
 
-        public static void Merge(string source, string target)
+        public static void Merge(string source, string target, bool overwrite)
         {
-            Merge(new DirectoryInfo(source), new DirectoryInfo(target));
+            Merge(new DirectoryInfo(source), new DirectoryInfo(target), overwrite);
         }
 
         public static void CopyFilesRecursively(string sourcePath, string targetPath)

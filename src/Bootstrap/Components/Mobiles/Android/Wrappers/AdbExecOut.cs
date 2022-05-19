@@ -15,12 +15,11 @@ namespace Bootstrap.Components.Mobiles.Android.Wrappers
         {
         }
 
-        public async Task<MemoryStream> ScreenCap()
+        public async Task<byte[]> ScreenCap()
         {
             var ms = new MemoryStream();
             await Execute("screencap -p", ms);
-            ms.Seek(0, SeekOrigin.Begin);
-            return ms;
+            return ms.ToArray();
         }
     }
 }
