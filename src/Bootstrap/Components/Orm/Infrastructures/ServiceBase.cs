@@ -23,7 +23,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
 
         #region Services
 
-        protected virtual TDbContext DbContext
+        public virtual TDbContext DbContext
         {
             get
             {
