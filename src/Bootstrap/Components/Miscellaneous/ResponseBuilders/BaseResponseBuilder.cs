@@ -15,6 +15,7 @@ namespace Bootstrap.Components.Miscellaneous.ResponseBuilders
         public static BaseResponse Conflict = Build(ResponseCode.Conflict);
         public static BaseResponse Unauthenticated = Build(ResponseCode.Unauthenticated);
         public static BaseResponse Timeout = Build(ResponseCode.Timeout);
+        public static BaseResponse NotModified = Build(ResponseCode.NotModified);
 
         public static BaseResponse Build(ResponseCode code, string message = null) =>
             new BaseResponse((int) code, message ?? code.GetDisplayName());
