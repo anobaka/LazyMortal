@@ -20,12 +20,12 @@ namespace Bootstrap.Components.Miscellaneous
                 var values = Enum.GetValues(t);
                 var keyToValue = string.Join(", ", values.Cast<object>().Select(a => $"{a} = {(int) a}"));
                 var ktvDefinition = $"export enum {t.Name} {{{keyToValue}}}";
-                codes.Add(ktvDefinition); 
+                codes.Add(ktvDefinition);
                 // var valueToKey = string.Join(", ", values.Cast<object>().Select(a => $"{(int) a}: \"{a}\""));
                 // var kvtDefinition = $"export const {t.Name}Label = {{{valueToKey}}};";
                 // codes.Add(kvtDefinition);
                 var listDefinition =
-                    $"export const {t.Name.Camelize().Pluralize()} = Object.keys({t.Name}).map(t => ({{label: t, value: {t.Name}[t]}}));";
+                    $"export const {t.Name.Camelize().Pluralize()} = Object.keys({t.Name}).filter(k => typeof {t.Name}[k] === 'number').map(t => ({{label: t, value: {t.Name}[t]}}));";
                 codes.Add(listDefinition);
             });
             return string.Join(Environment.NewLine, codes);
