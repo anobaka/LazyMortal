@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.FileIO;
@@ -103,6 +104,35 @@ namespace Bootstrap.Components.Storage
             catch
             {
                 return false;
+            }
+        }
+
+        public static async Task Move(string sourcePath, string destinationPath, bool overwrite,
+            Func<int, Task> onProgressChange, CancellationToken ct)
+        {
+            //Now Create all of the directories
+            foreach (var dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                Directory.CreateDirectory(dirPath.Replace(sourcePath, destinationPath));
+            }
+
+            //Copy all the files & Replaces any files with the same name
+            var files = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories);
+            var percentage = 0;
+            var singleFilePercentage = 100 / (decimal) files.Length;
+            for (var i = 0; i < files.Length; i++)
+            {
+                var filePath = files[i];
+                var dest = filePath.Replace(sourcePath, destinationPath);
+                await FileUtils.MoveAsync(filePath, dest, overwrite, async fileProgress =>
+                {
+                    var newPercentage = (int) (singleFilePercentage * i + singleFilePercentage * fileProgress / 100);
+                    if (newPercentage != percentage)
+                    {
+                        await onProgressChange(newPercentage);
+                        percentage = newPercentage;
+                    }
+                }, ct);
             }
         }
     }

@@ -2,7 +2,9 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Primitives;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.FileIO;
 using FileSystem = Microsoft.VisualBasic.FileIO.FileSystem;
@@ -136,6 +138,50 @@ namespace Bootstrap.Components.Storage
             catch
             {
                 return false;
+            }
+        }
+
+
+        public static async Task MoveAsync(string sourcePath, string destinationPath, bool overwrite,
+            Func<int, Task> onProgressChange, CancellationToken ct)
+        {
+            await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, ct);
+            File.Delete(sourcePath);
+        }
+
+        public static async Task CopyAsync(string sourcePath, string destinationPath, bool overwrite,
+            Func<int, Task> onProgressChange, CancellationToken ct)
+        {
+            await using Stream destination = File.OpenWrite(destinationPath);
+            if (destination.Length > 0)
+            {
+                if (!overwrite)
+                {
+                    throw new Exception($"{destinationPath} exists and {nameof(overwrite)} is set to false");
+                }
+            }
+
+            await using Stream source = File.OpenRead(sourcePath);
+            var buffer = new byte[1024 * 1024];
+            var totalLength = source.Length;
+            var copiedBytesLength = 0;
+            var percentage = 0;
+            while (true)
+            {
+                var readBytesLength = await source.ReadAsync(buffer, 0, buffer.Length, ct);
+                if (readBytesLength == 0)
+                {
+                    break;
+                }
+
+                await destination.WriteAsync(buffer, ct);
+                copiedBytesLength += readBytesLength;
+                var newPercentage = (int) (copiedBytesLength * 100 / totalLength);
+                if (newPercentage != percentage)
+                {
+                    await onProgressChange(newPercentage);
+                    percentage = newPercentage;
+                }
             }
         }
     }
