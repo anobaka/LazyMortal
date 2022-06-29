@@ -21,7 +21,7 @@ namespace Bootstrap.Components.Orm
         {
         }
 
-        public async Task<List<TActiveMultilevelResource>> GetPath(TKey id, bool useNewDbContext = false)
+        public async Task<List<TActiveMultilevelResource>> GetPath(TKey id)
         {
             var resource = await GetByKey(id);
             if (resource == null)
@@ -29,8 +29,7 @@ namespace Bootstrap.Components.Orm
                 return null;
             }
 
-            return GetPath((useNewDbContext ? NewScopeDbContext : DbContext).Set<TActiveMultilevelResource>(),
-                resource);
+            return GetPath(DbContext.Set<TActiveMultilevelResource>(), resource);
         }
 
         public List<TActiveMultilevelResource> GetPath(IEnumerable<TActiveMultilevelResource> allResources, TActiveMultilevelResource child)
@@ -86,9 +85,9 @@ namespace Bootstrap.Components.Orm
             return BaseResponseBuilder.Ok;
         }
 
-        public override async Task<SingletonResponse<TActiveMultilevelResource>> Add(TActiveMultilevelResource resource, bool useNewDbContext = false)
+        public override async Task<SingletonResponse<TActiveMultilevelResource>> Add(TActiveMultilevelResource resource)
         {
-            var rsp = await base.Add(resource, useNewDbContext);
+            var rsp = await base.Add(resource);
             await BuildTree();
             return rsp;
         }

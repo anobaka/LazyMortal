@@ -34,7 +34,7 @@ namespace Bootstrap.Components.Notification.Implementations
             var isNewMessage = message.Id == 0;
             if (isNewMessage)
             {
-                await _messageService.Add(message, true);
+                await _messageService.Add(message);
             }
 
             if (!message.ScheduleDt.HasValue || !isNewMessage)

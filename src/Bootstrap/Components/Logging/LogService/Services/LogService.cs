@@ -15,7 +15,7 @@ namespace Bootstrap.Components.Logging.LogService.Services
 
         public async Task Log(string logger, LogLevel level, object @event, string message)
         {
-            await Add(new Log {Logger = logger, Level = level, Event = @event.ToString(), Message = message}, true);
+            await Add(new Log {Logger = logger, Level = level, Event = @event.ToString(), Message = message});
         }
 
         public async Task<BaseResponse> ReadAll()

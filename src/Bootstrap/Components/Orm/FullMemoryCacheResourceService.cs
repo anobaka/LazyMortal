@@ -9,6 +9,7 @@ using Bootstrap.Extensions;
 using Bootstrap.Models.Constants;
 using Bootstrap.Models.ResponseModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bootstrap.Components.Orm
 {
@@ -16,43 +17,63 @@ namespace Bootstrap.Components.Orm
         where TDbContext : DbContext where TResource : class
     {
         protected ResourceService<TDbContext, TResource, TKey> ResourceService;
-        protected ConcurrentDictionary<TKey, TResource> CacheVault;
+        private readonly GlobalCacheVault _cacheVault;
+
+        protected async Task<ConcurrentDictionary<TKey, TResource>> GetCacheVault()
+        {
+            var key = SpecificTypeUtils<TResource>.Type.FullName!;
+            if (!_cacheVault.TryGetValue(key, out var vault))
+            {
+                var @lock = await _cacheVault.RequestLock(key);
+                // ignore the other concurrent requests
+                if (!_cacheVault.TryGetValue(key, out vault))
+                {
+                    var data = await ResourceService.GetAll(null, false, true);
+                    _cacheVault[key] = vault =
+                        new ConcurrentDictionary<TKey, TResource>(
+                            data.ToDictionary(FuncExtensions.BuildKeySelector<TResource, TKey>(), t => t));
+                }
+
+                @lock.Release();
+            }
+
+            return vault as ConcurrentDictionary<TKey, TResource>;
+        }
 
         public FullMemoryCacheResourceService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
             ResourceService = new ResourceService<TDbContext, TResource, TKey>(serviceProvider);
-            var data = ResourceService.GetAll(null, false, true).ConfigureAwait(false).GetAwaiter().GetResult()
-                .ToDictionary(FuncExtensions.BuildKeySelector<TResource, TKey>(), t => t);
-            CacheVault = new ConcurrentDictionary<TKey, TResource>(data);
+            _cacheVault = serviceProvider.GetRequiredService<GlobalCacheVault>();
         }
 
-        public virtual Task<TResource> GetByKey(TKey key, bool returnCopy = true)
+        public virtual async Task<TResource> GetByKey(TKey key, bool returnCopy = true)
         {
-            var data = CacheVault.TryGetValue(key, out var v) ? v : null;
+            var data = (await GetCacheVault()).TryGetValue(key, out var v) ? v : null;
             if (returnCopy)
             {
                 data = data.JsonCopy();
             }
 
-            return Task.FromResult(data);
+            return data;
         }
 
-        public virtual Task<TResource[]> GetByKeys(IEnumerable<TKey> keys, bool returnCopy = true)
+        public virtual async Task<TResource[]> GetByKeys(IEnumerable<TKey> keys, bool returnCopy = true)
         {
-            var data = keys.Select(k => CacheVault.TryGetValue(k, out var v) ? v : null).Where(v => v != null)
+            var cache = await GetCacheVault();
+            var data = keys.Select(k => cache.TryGetValue(k, out var v) ? v : null).Where(v => v != null)
                 .ToArray();
             if (returnCopy)
             {
                 data = data.JsonCopy();
             }
 
-            return Task.FromResult(data);
+            return data;
         }
 
-        public virtual Task<TResource> GetFirst(Expression<Func<TResource, bool>> selector,
+        public virtual async Task<TResource> GetFirst(Expression<Func<TResource, bool>> selector,
             Expression<Func<TResource, object>> orderBy = null, bool asc = false, bool returnCopy = true)
         {
-            var list = CacheVault.Values.Where(selector.Compile());
+            var list = (await GetCacheVault()).Values.Where(selector.Compile());
             if (orderBy != null)
             {
                 var ob = orderBy.Compile();
@@ -65,23 +86,24 @@ namespace Bootstrap.Components.Orm
                 data = data.JsonCopy();
             }
 
-            return Task.FromResult(data);
+            return data;
         }
 
-        public virtual Task<TResource[]> GetAll(Expression<Func<TResource, bool>> selector = null, bool returnCopy = true)
+        public virtual async Task<TResource[]> GetAll(Expression<Func<TResource, bool>> selector = null, bool returnCopy = true)
         {
-            var data = (selector == null ? CacheVault.Values : CacheVault.Values.Where(selector.Compile()))
+            var data = (selector == null ? (await GetCacheVault()).Values : (await GetCacheVault()).Values.Where(selector.Compile()))
                 .ToArray();
             if (returnCopy)
             {
                 data = data.JsonCopy();
             }
 
-            return Task.FromResult(data);
+            return data;
         }
 
-        public virtual Task<int> Count(Func<TResource, bool> selector = null) =>
-            Task.FromResult(selector == null ? CacheVault.Values.Count : CacheVault.Values.Count(selector));
+        public virtual async Task<int> Count(Func<TResource, bool> selector = null) => selector == null
+            ? (await GetCacheVault()).Values.Count
+            : (await GetCacheVault()).Values.Count(selector);
 
         /// <summary>
         /// 
@@ -92,11 +114,12 @@ namespace Bootstrap.Components.Orm
         /// <param name="orders">Key Selector - Asc</param>
         /// <param name="returnCopy"></param>
         /// <returns></returns>
-        public virtual Task<SearchResponse<TResource>> Search(Func<TResource, bool> selector,
+        public virtual async Task<SearchResponse<TResource>> Search(Func<TResource, bool> selector,
             int pageIndex, int pageSize, (Func<TResource, object> SelectKey, bool Asc)[] orders,
             bool returnCopy = true)
         {
-            var resources = CacheVault.Values.ToList();
+            var cache = await GetCacheVault();
+            var resources = cache.Values.ToList();
             if (selector != null)
             {
                 resources = resources.Where(selector).ToList();
@@ -122,7 +145,7 @@ namespace Bootstrap.Components.Orm
             }
 
             var result = new SearchResponse<TResource>(data, count, pageIndex, pageSize);
-            return Task.FromResult(result);
+            return result;
         }
 
         public virtual Task<SearchResponse<TResource>> Search(Func<TResource, bool> selector,
@@ -138,7 +161,7 @@ namespace Bootstrap.Components.Orm
             var rsp = await ResourceService.Remove(resource);
             if (rsp.Code == (int) ResponseCode.Success)
             {
-                CacheVault.Remove(resource.GetKeyPropertyValue<TKey>(), out _);
+                (await GetCacheVault()).Remove(resource.GetKeyPropertyValue<TKey>(), out _);
             }
 
             return rsp;
@@ -152,7 +175,7 @@ namespace Bootstrap.Components.Orm
             {
                 foreach (var r in rs)
                 {
-                    CacheVault.Remove(r.GetKeyPropertyValue<TKey>(), out _);
+                    (await GetCacheVault()).Remove(r.GetKeyPropertyValue<TKey>(), out _);
                 }
             }
 
@@ -160,29 +183,30 @@ namespace Bootstrap.Components.Orm
         }
 
 
-        public virtual Task<BaseResponse> RemoveAll(Expression<Func<TResource, bool>> selector)
+        public virtual async Task<BaseResponse> RemoveAll(Expression<Func<TResource, bool>> selector)
         {
             var func = selector.Compile();
-            var keys = CacheVault.Where(t => func(t.Value)).Select(a => a.Key);
+            var keys = (await GetCacheVault()).Where(t => func(t.Value)).Select(a => a.Key);
             foreach (var k in keys)
             {
-                CacheVault.Remove(k, out _);
+                (await GetCacheVault()).Remove(k, out _);
             }
 
-            return ResourceService.RemoveAll(selector);
+            return await ResourceService.RemoveAll(selector);
         }
 
-        public virtual Task<BaseResponse> RemoveByKey(TKey key)
+        public virtual async Task<BaseResponse> RemoveByKey(TKey key)
         {
-            CacheVault.Remove(key, out _);
-            return ResourceService.RemoveByKey(key);
+            (await GetCacheVault()).Remove(key, out _);
+            return await ResourceService.RemoveByKey(key);
         }
 
-        public virtual Task<BaseResponse> RemoveByKeys(IEnumerable<TKey> keys)
+        public virtual async Task<BaseResponse> RemoveByKeys(IEnumerable<TKey> keys)
         {
             var ks = keys.ToList();
-            ks.ForEach(k => CacheVault.Remove(k, out _));
-            return ResourceService.RemoveByKeys(ks);
+            var cache = await GetCacheVault();
+            ks.ForEach(k => cache.Remove(k, out _));
+            return await ResourceService.RemoveByKeys(ks);
         }
 
         public virtual async Task<SingletonResponse<TResource>> Add(TResource resource)
@@ -191,7 +215,7 @@ namespace Bootstrap.Components.Orm
             if (rsp.Data != null)
             {
                 var d = rsp.Data;
-                CacheVault[d.GetKeyPropertyValue<TKey>()] = d;
+                (await GetCacheVault())[d.GetKeyPropertyValue<TKey>()] = d;
             }
 
             rsp.Data = rsp.Data.JsonCopy();
@@ -205,7 +229,7 @@ namespace Bootstrap.Components.Orm
             {
                 foreach (var d in rsp.Data)
                 {
-                    CacheVault[d.GetKeyPropertyValue<TKey>()] = d;
+                    (await GetCacheVault())[d.GetKeyPropertyValue<TKey>()] = d;
                 }
             }
 
@@ -218,7 +242,7 @@ namespace Bootstrap.Components.Orm
             var rsp = await ResourceService.UpdateByKey(key, modify);
             if (rsp.Data != null)
             {
-                CacheVault[rsp.Data.GetKeyPropertyValue<TKey>()] = rsp.Data;
+                (await GetCacheVault())[rsp.Data.GetKeyPropertyValue<TKey>()] = rsp.Data;
             }
 
             rsp.Data = rsp.Data.JsonCopy();
@@ -230,7 +254,7 @@ namespace Bootstrap.Components.Orm
             var rsp = await ResourceService.Update(resource);
             if (rsp.Code == (int) ResponseCode.Success)
             {
-                CacheVault[resource.GetKeyPropertyValue<TKey>()] = resource;
+                (await GetCacheVault())[resource.GetKeyPropertyValue<TKey>()] = resource;
             }
 
             return rsp;
@@ -243,7 +267,7 @@ namespace Bootstrap.Components.Orm
             {
                 foreach (var resource in resources)
                 {
-                    CacheVault[resource.GetKeyPropertyValue<TKey>()] = resource;
+                    (await GetCacheVault())[resource.GetKeyPropertyValue<TKey>()] = resource;
                 }
             }
 
@@ -258,7 +282,7 @@ namespace Bootstrap.Components.Orm
             {
                 foreach (var d in rsp.Data)
                 {
-                    CacheVault[d.GetKeyPropertyValue<TKey>()] = d;
+                    (await GetCacheVault())[d.GetKeyPropertyValue<TKey>()] = d;
                 }
             }
 
@@ -272,7 +296,7 @@ namespace Bootstrap.Components.Orm
             var rsp = await ResourceService.UpdateFirst(selector, modify);
             if (rsp.Data != null)
             {
-                CacheVault[rsp.Data.GetKeyPropertyValue<TKey>()] = rsp.Data;
+                (await GetCacheVault())[rsp.Data.GetKeyPropertyValue<TKey>()] = rsp.Data;
             }
 
             rsp.Data = rsp.Data.JsonCopy();
@@ -287,7 +311,7 @@ namespace Bootstrap.Components.Orm
             {
                 foreach (var d in rsp.Data)
                 {
-                    CacheVault[d.GetKeyPropertyValue<TKey>()] = d;
+                    (await GetCacheVault())[d.GetKeyPropertyValue<TKey>()] = d;
                 }
             }
 

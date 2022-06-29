@@ -18,8 +18,5 @@ namespace Bootstrap.Components.Orm.Abstractions
         {
             ServiceProvider = serviceProvider;
         }
-
-        public IResourceService<TDbContext, TResource, TKey> UseNewScope() =>
-            new ResourceService<TDbContext, TResource, TKey>(ServiceProvider.CreateScope().ServiceProvider);
     }
 }

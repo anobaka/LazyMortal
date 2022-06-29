@@ -23,29 +23,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
 
         #region Services
 
-        public virtual TDbContext DbContext
-        {
-            get
-            {
-                try
-                {
-                    return GetRequiredService<TDbContext>();
-                }
-                catch (Exception e)
-                {
-                    Logger.LogWarning(e, e.Message);
-                    return NewScopeDbContext;
-                }
-            }
-        }
-
-        protected virtual TDbContext NewScopeDbContext => GetRequiredService<TDbContext>(true);
-
-        protected virtual IDbContextTransaction BeginTransaction(bool createNew, out bool isNewTransaction)
-        {
-            isNewTransaction = createNew || DbContext.Database.CurrentTransaction == null;
-            return isNewTransaction ? DbContext.Database.BeginTransaction() : DbContext.Database.CurrentTransaction;
-        }
+        public virtual TDbContext DbContext => GetRequiredService<TDbContext>();
 
         /// <summary>
         /// 

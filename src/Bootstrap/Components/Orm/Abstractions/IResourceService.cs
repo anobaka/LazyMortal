@@ -18,7 +18,6 @@ namespace Bootstrap.Components.Orm.Abstractions
     {
         IServiceProvider ServiceProvider { get; }
         TDbContext DbContext => ServiceProvider.GetRequiredService<TDbContext>();
-        IResourceService<TDbContext, TResource, TKey> UseNewScope();
 
         Task<TResource> GetByKey(TKey key)
         {

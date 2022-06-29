@@ -20,8 +20,9 @@ namespace Bootstrap.Components.Orm.Extensions
             this IServiceCollection services, Action<DbContextOptionsBuilder> configure = null)
             where TDbContext : DbContext where TDbContextImplementation : TDbContext
         {
-            services.TryAddSingleton<BaseService<TDbContext>>();
+            services.TryAddScoped<BaseService<TDbContext>>();
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.TryAddSingleton<GlobalCacheVault>();
             services.AddDbContext<TDbContext, TDbContextImplementation>(configure);
             return services;
         }

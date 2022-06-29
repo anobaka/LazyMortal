@@ -74,7 +74,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// </summary>
         /// <param name="resource"></param>
         /// <returns></returns>
-        public virtual Task<SingletonResponse<TResource>> Add(TResource resource, bool useNewDbContext = false) => BaseService.Add(resource, useNewDbContext);
+        public virtual Task<SingletonResponse<TResource>> Add(TResource resource) => BaseService.Add(resource);
 
         /// <summary>
         /// 创建默认资源

@@ -181,8 +181,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
             bool useNewDbContext = false, bool asNoTracking = false)
             where TResource : class
         {
-            var dbContext = useNewDbContext ? NewScopeDbContext : DbContext;
-            IQueryable<TResource> query = dbContext.Set<TResource>();
+            IQueryable<TResource> query = DbContext.Set<TResource>();
             if (selector != null)
             {
                 query = query.Where(selector);
@@ -253,12 +252,11 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <typeparam name="TResource"></typeparam>
         /// <param name="resource"></param>
         /// <returns></returns>
-        public virtual async Task<SingletonResponse<TResource>> Add<TResource>(TResource resource, bool useNewDbContext = false)
+        public virtual async Task<SingletonResponse<TResource>> Add<TResource>(TResource resource)
             where TResource : class
         {
-            var ctx = useNewDbContext ? NewScopeDbContext : DbContext;
-            ctx.Add(resource);
-            await ctx.SaveChangesAsync();
+            DbContext.Add(resource);
+            await DbContext.SaveChangesAsync();
             return new SingletonResponse<TResource>(resource);
         }
 
