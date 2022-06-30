@@ -14,7 +14,7 @@ namespace Bootstrap.Components.Notification.Abstractions.Extensions
             this IServiceCollection services, Action<DbContextOptionsBuilder> configure = null)
             where TDbContextImplementation : NotificationDbContext
         {
-            return services.AddSingleServiceBootstrapServices<NotificationDbContext, TDbContextImplementation>(
+            return services.AddServiceBootstrapServices<NotificationDbContext, TDbContextImplementation>(
                 SpecificTypeUtils<MessageService>.Type, configure);
         }
     }

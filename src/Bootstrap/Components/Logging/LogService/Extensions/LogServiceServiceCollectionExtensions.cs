@@ -13,7 +13,7 @@ namespace Bootstrap.Components.Logging.LogService.Extensions
             this IServiceCollection services, Action<DbContextOptionsBuilder> configure = null)
             where TDbContextImplementation : LogDbContext
         {
-            return services.AddSingleServiceBootstrapServices<LogDbContext, TDbContextImplementation>(
+            return services.AddServiceBootstrapServices<LogDbContext, TDbContextImplementation>(
                 SpecificTypeUtils<Services.LogService>.Type, configure);
         }
     }

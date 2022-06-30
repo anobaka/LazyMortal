@@ -36,14 +36,16 @@ namespace Bootstrap.Components.Logging.LogService.Controllers
         [SwaggerOperation(OperationId = "ReadLog")]
         public async Task<BaseResponse> Read(int id)
         {
-            return await _service.Read(id);
+            await _service.Read(id);
+            return BaseResponseBuilder.Ok;
         }
 
         [HttpPatch("read")]
         [SwaggerOperation(OperationId = "ReadAllLog")]
         public async Task<BaseResponse> ReadAll()
         {
-            return await _service.ReadAll();
+            await _service.ReadAll();
+            return BaseResponseBuilder.Ok;
         }
 
         [HttpDelete]

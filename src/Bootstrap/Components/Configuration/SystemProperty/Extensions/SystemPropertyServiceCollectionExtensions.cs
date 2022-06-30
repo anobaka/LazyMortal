@@ -24,7 +24,7 @@ namespace Bootstrap.Components.Configuration.SystemProperty.Extensions
             this IServiceCollection services, Action<DbContextOptionsBuilder> configure = null)
             where TDbContextImplementation : SystemPropertyDbContext
         {
-            return services.AddSingleServiceBootstrapServices<SystemPropertyDbContext, TDbContextImplementation>(
+            return services.AddServiceBootstrapServices<SystemPropertyDbContext, TDbContextImplementation>(
                 SpecificTypeUtils<SystemPropertyService>.Type, configure);
         }
     }

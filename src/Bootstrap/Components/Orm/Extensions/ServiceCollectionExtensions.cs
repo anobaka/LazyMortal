@@ -35,11 +35,11 @@ namespace Bootstrap.Components.Orm.Extensions
         /// <param name="serviceType"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        public static IServiceCollection AddSingleServiceBootstrapServices<TDbContext>(
+        public static IServiceCollection AddServiceBootstrapServices<TDbContext>(
             this IServiceCollection services, Type serviceType, Action<DbContextOptionsBuilder> configure = null)
             where TDbContext : DbContext
         {
-            return services.AddSingleServiceBootstrapServices<TDbContext, TDbContext>(serviceType, configure);
+            return services.AddServiceBootstrapServices<TDbContext, TDbContext>(serviceType, configure);
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace Bootstrap.Components.Orm.Extensions
         /// <param name="serviceType"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        public static IServiceCollection AddSingleServiceBootstrapServices<TDbContext, TDbContextImplementation>(
+        public static IServiceCollection AddServiceBootstrapServices<TDbContext, TDbContextImplementation>(
             this IServiceCollection services, Type serviceType, Action<DbContextOptionsBuilder> configure = null)
             where TDbContextImplementation : TDbContext where TDbContext : DbContext
         {
