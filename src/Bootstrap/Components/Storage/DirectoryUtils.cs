@@ -107,17 +107,54 @@ namespace Bootstrap.Components.Storage
             }
         }
 
+        public static async Task Move(Dictionary<string, string> sourcesAndDestinations, bool overwrite,
+            Func<int, Task> onProgressChange, CancellationToken ct)
+        {
+            var unitPercentage = (decimal) 100 / sourcesAndDestinations.Count;
+            var doneCount = 0;
+            var percentage = 0;
+            foreach (var (source, dest) in sourcesAndDestinations)
+            {
+                await Move(source, dest, overwrite, async fileProgress =>
+                {
+                    var newPercentage = (int) (unitPercentage * doneCount + unitPercentage * fileProgress / 100);
+                    if (newPercentage != percentage)
+                    {
+                        await onProgressChange(newPercentage);
+                        percentage = newPercentage;
+                    }
+                }, ct);
+                doneCount++;
+            }
+        }
+
         public static async Task Move(string sourcePath, string destinationPath, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
-            //Now Create all of the directories
-            foreach (var dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+            string[] files;
+            if (Directory.Exists(sourcePath))
             {
-                Directory.CreateDirectory(dirPath.Replace(sourcePath, destinationPath));
+                //Now Create all of the directories
+                foreach (var dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+                {
+                    Directory.CreateDirectory(dirPath.Replace(sourcePath, destinationPath));
+                }
+
+                //Copy all the files & Replaces any files with the same name
+                files = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories);
+            }
+            else
+            {
+                if (File.Exists(sourcePath))
+                {
+                    files = new[] {sourcePath};
+                }
+                else
+                {
+                    throw new Exception($"{sourcePath} is not found");
+                }
             }
 
-            //Copy all the files & Replaces any files with the same name
-            var files = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories);
             var percentage = 0;
             var singleFilePercentage = 100 / (decimal) files.Length;
             for (var i = 0; i < files.Length; i++)

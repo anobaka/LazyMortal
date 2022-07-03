@@ -55,7 +55,7 @@ namespace Bootstrap.Components.Orm.Extensions
             this IServiceCollection services, Type serviceType, Action<DbContextOptionsBuilder> configure = null)
             where TDbContextImplementation : TDbContext where TDbContext : DbContext
         {
-            services.TryAddSingleton(serviceType);
+            services.TryAddScoped(serviceType);
             services.AddBootstrapServices<TDbContext, TDbContextImplementation>(configure);
             return services;
         }
