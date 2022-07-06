@@ -152,6 +152,7 @@ namespace Bootstrap.Components.Storage
         public static async Task CopyAsync(string sourcePath, string destinationPath, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(destinationPath));
             await using Stream destination = File.OpenWrite(destinationPath);
             if (destination.Length > 0)
             {
