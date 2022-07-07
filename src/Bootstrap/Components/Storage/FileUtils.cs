@@ -145,8 +145,16 @@ namespace Bootstrap.Components.Storage
         public static async Task MoveAsync(string sourcePath, string destinationPath, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
-            await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, ct);
-            File.Delete(sourcePath);
+            if (Path.GetPathRoot(sourcePath) == Path.GetPathRoot(destinationPath))
+            {
+                File.Move(sourcePath, destinationPath, overwrite);
+                await onProgressChange(100);
+            }
+            else
+            {
+                await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, ct);
+                File.Delete(sourcePath);
+            }
         }
 
         public static async Task CopyAsync(string sourcePath, string destinationPath, bool overwrite,
@@ -165,7 +173,7 @@ namespace Bootstrap.Components.Storage
             await using Stream source = File.OpenRead(sourcePath);
             var buffer = new byte[1024 * 1024];
             var totalLength = source.Length;
-            var copiedBytesLength = 0;
+            var copiedBytesLength = 0L;
             var percentage = 0;
             while (true)
             {
@@ -177,7 +185,7 @@ namespace Bootstrap.Components.Storage
 
                 await destination.WriteAsync(buffer, ct);
                 copiedBytesLength += readBytesLength;
-                var newPercentage = (int) (copiedBytesLength * 100 / totalLength);
+                var newPercentage = (int) ((decimal) copiedBytesLength / totalLength * 100);
                 if (newPercentage != percentage)
                 {
                     await onProgressChange(newPercentage);
