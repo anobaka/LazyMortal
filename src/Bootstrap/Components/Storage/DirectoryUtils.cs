@@ -107,7 +107,7 @@ namespace Bootstrap.Components.Storage
             }
         }
 
-        public static async Task Move(Dictionary<string, string> sourcesAndDestinations, bool overwrite,
+        public static async Task MoveAsync(Dictionary<string, string> sourcesAndDestinations, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
             var unitPercentage = (decimal) 100 / sourcesAndDestinations.Count;
@@ -115,7 +115,7 @@ namespace Bootstrap.Components.Storage
             var percentage = 0;
             foreach (var (source, dest) in sourcesAndDestinations)
             {
-                await Move(source, dest, overwrite, async fileProgress =>
+                await MoveAsync(source, dest, overwrite, async fileProgress =>
                 {
                     var newPercentage = (int) (unitPercentage * doneCount + unitPercentage * fileProgress / 100);
                     if (newPercentage != percentage)
@@ -128,25 +128,30 @@ namespace Bootstrap.Components.Storage
             }
         }
 
-        public static async Task Move(string sourcePath, string destinationPath, bool overwrite,
+        public static async Task MoveAsync(string sourcePath, string destinationPath, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
             string[] files;
+            string basePath;
             if (Directory.Exists(sourcePath))
             {
+                basePath = Path.GetDirectoryName(sourcePath)!;
                 //Now Create all of the directories
                 foreach (var dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
                 {
-                    Directory.CreateDirectory(dirPath.Replace(sourcePath, destinationPath));
+                    Directory.CreateDirectory(dirPath.Replace(basePath, destinationPath));
                 }
 
                 //Copy all the files & Replaces any files with the same name
                 files = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories);
+
+                Directory.CreateDirectory(sourcePath.Replace(basePath, destinationPath));
             }
             else
             {
                 if (File.Exists(sourcePath))
                 {
+                    basePath = sourcePath;
                     files = new[] {sourcePath};
                 }
                 else
@@ -160,7 +165,7 @@ namespace Bootstrap.Components.Storage
             for (var i = 0; i < files.Length; i++)
             {
                 var filePath = files[i];
-                var dest = filePath.Replace(sourcePath, destinationPath);
+                var dest = filePath.Replace(basePath, destinationPath);
                 await FileUtils.MoveAsync(filePath, dest, overwrite, async fileProgress =>
                 {
                     var newPercentage = (int) (singleFilePercentage * i + singleFilePercentage * fileProgress / 100);
@@ -170,6 +175,11 @@ namespace Bootstrap.Components.Storage
                         percentage = newPercentage;
                     }
                 }, ct);
+            }
+
+            if (Directory.Exists(sourcePath))
+            {
+                Directory.Delete(sourcePath);
             }
         }
     }
