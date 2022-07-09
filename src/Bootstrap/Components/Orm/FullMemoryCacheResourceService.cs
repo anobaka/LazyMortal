@@ -89,10 +89,12 @@ namespace Bootstrap.Components.Orm
             return data;
         }
 
-        public virtual async Task<TResource[]> GetAll(Expression<Func<TResource, bool>> selector = null, bool returnCopy = true)
+        public virtual async Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null, bool returnCopy = true)
         {
-            var data = (selector == null ? (await GetCacheVault()).Values : (await GetCacheVault()).Values.Where(selector.Compile()))
-                .ToArray();
+            var data = (selector == null
+                    ? (await GetCacheVault()).Values
+                    : (await GetCacheVault()).Values.Where(selector.Compile()))
+                .ToList();
             if (returnCopy)
             {
                 data = data.JsonCopy();
