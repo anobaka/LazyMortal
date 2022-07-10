@@ -48,7 +48,10 @@ namespace Bootstrap.Components.Storage
                 Merge(diSourceSubDir, nextTargetSubDir, overwrite);
             }
 
-            source.Delete();
+            if (source.GetFileSystemInfos().Length == 0)
+            {
+                source.Delete();
+            }
         }
 
         public static void Merge(string source, string target, bool overwrite)
@@ -162,19 +165,48 @@ namespace Bootstrap.Components.Storage
 
             var percentage = 0;
             var singleFilePercentage = 100 / (decimal) files.Length;
+            var existedFiles = new List<string>();
             for (var i = 0; i < files.Length; i++)
             {
                 var filePath = files[i];
                 var dest = filePath.Replace(basePath, destinationPath);
-                await FileUtils.MoveAsync(filePath, dest, overwrite, async fileProgress =>
+                if (File.Exists(dest) && !overwrite)
                 {
-                    var newPercentage = (int) (singleFilePercentage * i + singleFilePercentage * fileProgress / 100);
-                    if (newPercentage != percentage)
+                    existedFiles.Add(filePath);
+                }
+                else
+                {
+                    await FileUtils.MoveAsync(filePath, dest, overwrite, async fileProgress =>
                     {
-                        await onProgressChange(newPercentage);
-                        percentage = newPercentage;
-                    }
-                }, ct);
+                        var newPercentage =
+                            (int) (singleFilePercentage * i + singleFilePercentage * fileProgress / 100);
+                        if (newPercentage != percentage)
+                        {
+                            if (onProgressChange != null)
+                            {
+                                await onProgressChange(newPercentage);
+                                percentage = newPercentage;
+                            }
+                        }
+                    }, ct);
+                }
+            }
+
+            if (existedFiles.Any())
+            {
+                var sb = new StringBuilder(@$"Failed to move {existedFiles.Count} files due to files exist.");
+                const int maxShownFilesCount = 10;
+                foreach (var f in existedFiles.Take(maxShownFilesCount))
+                {
+                    sb.Append(Environment.NewLine).Append(f);
+                }
+
+                if (existedFiles.Count > maxShownFilesCount)
+                {
+                    sb.Append(Environment.NewLine).Append("...");
+                }
+
+                throw new Exception(sb.ToString());
             }
 
             if (Directory.Exists(sourcePath))
