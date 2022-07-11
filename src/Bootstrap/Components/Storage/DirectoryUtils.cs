@@ -134,8 +134,15 @@ namespace Bootstrap.Components.Storage
         public static async Task MoveAsync(string sourcePath, string destinationPath, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
+            if (!Directory.Exists(sourcePath) && !File.Exists(sourcePath))
+            {
+                throw new Exception($"{sourcePath} is not found");
+            }
+
             string[] files;
             string basePath;
+            // {key} is removable if {value} is empty.
+            var fileEntriesDependencies = new Dictionary<string, HashSet<string>>();
             if (Directory.Exists(sourcePath))
             {
                 basePath = Path.GetDirectoryName(sourcePath)!;
@@ -143,32 +150,47 @@ namespace Bootstrap.Components.Storage
                 foreach (var dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
                 {
                     Directory.CreateDirectory(dirPath.Replace(basePath, destinationPath));
+                    fileEntriesDependencies[dirPath] = Directory.GetFileSystemEntries(dirPath).ToHashSet();
                 }
 
                 //Copy all the files & Replaces any files with the same name
                 files = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories);
 
                 Directory.CreateDirectory(sourcePath.Replace(basePath, destinationPath));
+                fileEntriesDependencies[sourcePath] = Directory.GetFileSystemEntries(sourcePath).ToHashSet();
             }
             else
             {
-                if (File.Exists(sourcePath))
+                basePath = sourcePath;
+                files = new[] {sourcePath};
+                fileEntriesDependencies[sourcePath] = new HashSet<string> {sourcePath};
+            }
+
+            // {key} belongs to {value}
+            var fileEntriesReversedDependencies = new Dictionary<string, string>();
+            foreach (var (key, value) in fileEntriesDependencies)
+            {
+                foreach (var v in value)
                 {
-                    basePath = sourcePath;
-                    files = new[] {sourcePath};
-                }
-                else
-                {
-                    throw new Exception($"{sourcePath} is not found");
+                    fileEntriesReversedDependencies[v] = key;
                 }
             }
 
             var percentage = 0;
             var singleFilePercentage = 100 / (decimal) files.Length;
             var existedFiles = new List<string>();
+            var missingFiles = new List<string>();
             for (var i = 0; i < files.Length; i++)
             {
                 var filePath = files[i];
+                var parent = fileEntriesReversedDependencies[filePath];
+                var neighbors = fileEntriesDependencies[parent];
+                if (!File.Exists(filePath))
+                {
+                    missingFiles.Add(filePath);
+                    neighbors.Remove(filePath);
+                }
+
                 var dest = filePath.Replace(basePath, destinationPath);
                 if (File.Exists(dest) && !overwrite)
                 {
@@ -189,29 +211,56 @@ namespace Bootstrap.Components.Storage
                             }
                         }
                     }, ct);
+                    neighbors.Remove(filePath);
                 }
             }
 
-            if (existedFiles.Any())
+            foreach (var parent in fileEntriesDependencies.Select(t => t.Key).OrderByDescending(t => t.Length))
             {
-                var sb = new StringBuilder(@$"Failed to move {existedFiles.Count} files due to files exist.");
-                const int maxShownFilesCount = 10;
-                foreach (var f in existedFiles.Take(maxShownFilesCount))
+                if (Directory.Exists(parent) && Directory.GetFileSystemEntries(parent).Length == 0)
                 {
-                    sb.Append(Environment.NewLine).Append(f);
+                    Directory.Delete(parent);
+                    fileEntriesDependencies[fileEntriesReversedDependencies[parent]].Remove(parent);
+                }
+            }
+
+            if (existedFiles.Any() || missingFiles.Any())
+            {
+                const int maxShownFilesCount = 10;
+                var sb = new StringBuilder();
+                if (existedFiles.Any())
+                {
+                    sb.Append(@$"Failed to move {existedFiles.Count} files due to files exist.");
+                    foreach (var f in existedFiles.Take(maxShownFilesCount))
+                    {
+                        sb.Append(Environment.NewLine).Append(f);
+                    }
+
+                    if (existedFiles.Count > maxShownFilesCount)
+                    {
+                        sb.Append(Environment.NewLine).Append("...");
+                    }
+
+                    sb.Append(Environment.NewLine);
                 }
 
-                if (existedFiles.Count > maxShownFilesCount)
+                if (existedFiles.Any())
                 {
-                    sb.Append(Environment.NewLine).Append("...");
+                    sb.Append(@$"Failed to move {missingFiles.Count} files due to files are not found.");
+                    foreach (var f in missingFiles.Take(maxShownFilesCount))
+                    {
+                        sb.Append(Environment.NewLine).Append(f);
+                    }
+
+                    if (missingFiles.Count > maxShownFilesCount)
+                    {
+                        sb.Append(Environment.NewLine).Append("...");
+                    }
+
+                    sb.Append(Environment.NewLine);
                 }
 
                 throw new Exception(sb.ToString());
-            }
-
-            if (Directory.Exists(sourcePath))
-            {
-                Directory.Delete(sourcePath);
             }
         }
     }
