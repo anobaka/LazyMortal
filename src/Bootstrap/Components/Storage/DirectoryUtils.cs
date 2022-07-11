@@ -146,7 +146,7 @@ namespace Bootstrap.Components.Storage
             if (Directory.Exists(sourcePath))
             {
                 basePath = Path.GetDirectoryName(sourcePath)!;
-                //Now Create all of the directories
+                // Now Create all of the directories
                 foreach (var dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
                 {
                     Directory.CreateDirectory(dirPath.Replace(basePath, destinationPath));
@@ -215,12 +215,14 @@ namespace Bootstrap.Components.Storage
                 }
             }
 
-            foreach (var parent in fileEntriesDependencies.Select(t => t.Key).OrderByDescending(t => t.Length))
+            foreach (var directory in fileEntriesDependencies.Select(t => t.Key).OrderByDescending(t => t.Length))
             {
-                if (Directory.Exists(parent) && Directory.GetFileSystemEntries(parent).Length == 0)
+                // We've got all sub directories from Directory.GetDirectories,
+                // so there is not need to worry about scenarios like sourcePath is /a, and the only sub-directory is /a/b/c/d/e
+                if (Directory.Exists(directory) && Directory.GetFileSystemEntries(directory).Length == 0)
                 {
-                    Directory.Delete(parent);
-                    fileEntriesDependencies[fileEntriesReversedDependencies[parent]].Remove(parent);
+                    Directory.Delete(directory);
+                    fileEntriesDependencies[fileEntriesReversedDependencies[directory]].Remove(directory);
                 }
             }
 
