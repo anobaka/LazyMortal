@@ -140,28 +140,25 @@ namespace Bootstrap.Components.Storage
             }
 
             string[] files;
-            string basePath;
             // {key} is removable if {value} is empty.
             var fileEntriesDependencies = new Dictionary<string, HashSet<string>>();
             if (Directory.Exists(sourcePath))
             {
-                basePath = Path.GetDirectoryName(sourcePath)!;
                 // Now Create all of the directories
                 foreach (var dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
                 {
-                    Directory.CreateDirectory(dirPath.Replace(basePath, destinationPath));
+                    Directory.CreateDirectory(dirPath.Replace(sourcePath, destinationPath));
                     fileEntriesDependencies[dirPath] = Directory.GetFileSystemEntries(dirPath).ToHashSet();
                 }
 
                 //Copy all the files & Replaces any files with the same name
                 files = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories);
 
-                Directory.CreateDirectory(sourcePath.Replace(basePath, destinationPath));
+                Directory.CreateDirectory(sourcePath.Replace(sourcePath, destinationPath));
                 fileEntriesDependencies[sourcePath] = Directory.GetFileSystemEntries(sourcePath).ToHashSet();
             }
             else
             {
-                basePath = sourcePath;
                 files = new[] {sourcePath};
                 fileEntriesDependencies[sourcePath] = new HashSet<string> {sourcePath};
             }
@@ -191,7 +188,7 @@ namespace Bootstrap.Components.Storage
                     neighbors.Remove(filePath);
                 }
 
-                var dest = filePath.Replace(basePath, destinationPath);
+                var dest = filePath.Replace(sourcePath, destinationPath);
                 if (File.Exists(dest) && !overwrite)
                 {
                     existedFiles.Add(filePath);
@@ -222,7 +219,10 @@ namespace Bootstrap.Components.Storage
                 if (Directory.Exists(directory) && Directory.GetFileSystemEntries(directory).Length == 0)
                 {
                     Directory.Delete(directory);
-                    fileEntriesDependencies[fileEntriesReversedDependencies[directory]].Remove(directory);
+                    if (directory != sourcePath)
+                    {
+                        fileEntriesDependencies[fileEntriesReversedDependencies[directory]].Remove(directory);
+                    }
                 }
             }
 
