@@ -174,7 +174,7 @@ namespace Bootstrap.Components.Storage
             }
 
             var percentage = 0;
-            var singleFilePercentage = 100 / (decimal) files.Length;
+            var singleFilePercentage = files.Length == 0 ? 0 : 100 / (decimal) files.Length;
             var existedFiles = new List<string>();
             var missingFiles = new List<string>();
             for (var i = 0; i < files.Length; i++)
