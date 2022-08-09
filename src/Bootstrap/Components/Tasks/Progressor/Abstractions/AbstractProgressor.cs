@@ -73,7 +73,6 @@ namespace Bootstrap.Components.Tasks.Progressor.Abstractions
                     StartCountingInBackground(mixedCt);
                     await StartCore(@params, mixedCt);
                     _sw.Stop();
-                    cts.Cancel();
                     await UpdateState(a => { a.Status = ProgressorStatus.Complete; });
                     await UpdateProgress(_ => { });
                 }

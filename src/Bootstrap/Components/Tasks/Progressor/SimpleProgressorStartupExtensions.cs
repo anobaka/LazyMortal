@@ -11,7 +11,8 @@ namespace Bootstrap.Components.Tasks.Progressor
         public static IServiceCollection AddSimpleProgressor<TProgressor>(this IServiceCollection services)
             where TProgressor : class, IProgressor
         {
-            services.AddSingleton<IProgressor, TProgressor>();
+            services.AddSingleton<TProgressor>();
+            services.AddSingleton<IProgressor>(t => t.GetRequiredService<TProgressor>());
             services.AddSingleton<IProgressDispatcher, SimpleProgressorHubDispatcher>();
             return services;
         }
