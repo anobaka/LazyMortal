@@ -80,6 +80,13 @@ namespace Bootstrap.Components.Storage
             return await sr.ReadToEndAsync();
         }
 
+        public static string Read(string fullname)
+        {
+            using var fs = new FileStream(fullname, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var sr = new StreamReader(fs);
+            return sr.ReadToEnd();
+        }
+
         public static async Task CopyAsync(string sourcePath, string destinationPath)
         {
             await using Stream source = File.OpenRead(sourcePath);
