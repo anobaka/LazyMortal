@@ -21,7 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.13.0" />
+	<PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.13.0" />
+	<PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="2.2.0" />
     <PackageReference Include="Humanizer" Version="2.13.14" />
     <PackageReference Include="Aliyun.Api.LogService" Version="1.1.0" />
     <PackageReference Include="MailKit" Version="3.0.0" />
