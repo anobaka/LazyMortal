@@ -246,7 +246,7 @@ namespace Bootstrap.Components.Storage
                     sb.Append(Environment.NewLine);
                 }
 
-                if (existedFiles.Any())
+                if (missingFiles.Any())
                 {
                     sb.Append(@$"Failed to move {missingFiles.Count} files due to files are not found.");
                     foreach (var f in missingFiles.Take(maxShownFilesCount))
