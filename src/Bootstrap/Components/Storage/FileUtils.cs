@@ -182,22 +182,34 @@ namespace Bootstrap.Components.Storage
             var totalLength = source.Length;
             var copiedBytesLength = 0L;
             var percentage = 0;
-            while (true)
+            try
             {
-                var readBytesLength = await source.ReadAsync(buffer, 0, buffer.Length, ct);
-                if (readBytesLength == 0)
+                while (true)
                 {
-                    break;
+                    var readBytesLength = await source.ReadAsync(buffer, 0, buffer.Length, ct);
+                    if (readBytesLength == 0)
+                    {
+                        break;
+                    }
+
+                    await destination.WriteAsync(buffer, ct);
+                    copiedBytesLength += readBytesLength;
+                    var newPercentage = (int) ((decimal) copiedBytesLength / totalLength * 100);
+                    if (newPercentage != percentage)
+                    {
+                        await onProgressChange(newPercentage);
+                        percentage = newPercentage;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                if (File.Exists(destinationPath))
+                {
+                    File.Delete(destinationPath);
                 }
 
-                await destination.WriteAsync(buffer, ct);
-                copiedBytesLength += readBytesLength;
-                var newPercentage = (int) ((decimal) copiedBytesLength / totalLength * 100);
-                if (newPercentage != percentage)
-                {
-                    await onProgressChange(newPercentage);
-                    percentage = newPercentage;
-                }
+                throw;
             }
         }
     }
