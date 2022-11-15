@@ -1,4 +1,6 @@
-﻿namespace Bootstrap.Models.ResponseModels
+﻿using Microsoft.Extensions.Localization;
+
+namespace Bootstrap.Models.ResponseModels
 {
     public class BaseResponse
     {
