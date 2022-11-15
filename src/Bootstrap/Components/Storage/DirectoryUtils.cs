@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using MailKit;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.FileIO;
 using FileSystem = Microsoft.VisualBasic.FileIO.FileSystem;
@@ -110,7 +111,7 @@ namespace Bootstrap.Components.Storage
             }
         }
 
-        public static async Task MoveAsync(Dictionary<string, string> sourcesAndDestinations, bool overwrite,
+        public static async Task MergeAsync(Dictionary<string, string> sourcesAndDestinations, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
             var unitPercentage = (decimal) 100 / sourcesAndDestinations.Count;
@@ -118,7 +119,7 @@ namespace Bootstrap.Components.Storage
             var percentage = 0;
             foreach (var (source, dest) in sourcesAndDestinations)
             {
-                await MoveAsync(source, dest, overwrite, async fileProgress =>
+                await MergeAsync(source, dest, overwrite, async fileProgress =>
                 {
                     var newPercentage = (int) (unitPercentage * doneCount + unitPercentage * fileProgress / 100);
                     if (newPercentage != percentage)
@@ -132,6 +133,28 @@ namespace Bootstrap.Components.Storage
         }
 
         public static async Task MoveAsync(string sourcePath, string destinationPath, bool overwrite,
+            Func<int, Task> onProgressChange, CancellationToken ct)
+        {
+            if (Directory.Exists(sourcePath))
+            {
+                var name = Path.GetFileName(sourcePath);
+                destinationPath = Path.Combine(destinationPath, name);
+            }
+
+            await MergeAsync(sourcePath, destinationPath, overwrite, onProgressChange, ct);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sourcePath"></param>
+        /// <param name="destinationPath"></param>
+        /// <param name="overwrite"></param>
+        /// <param name="onProgressChange"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public static async Task MergeAsync(string sourcePath, string destinationPath, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
             if (!Directory.Exists(sourcePath) && !File.Exists(sourcePath))
