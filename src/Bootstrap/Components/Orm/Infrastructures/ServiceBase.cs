@@ -32,6 +32,8 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <returns>Resolved service from current request scope. Or from global scope if it doesn't exist.</returns>
         protected virtual T GetRequiredService<T>() => ServiceProvider.GetRequiredService<T>();
 
+        protected virtual T GetService<T>() => ServiceProvider.GetService<T>();
+
         /// <summary>
         /// 
         /// </summary>
