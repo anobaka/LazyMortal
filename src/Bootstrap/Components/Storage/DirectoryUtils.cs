@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Bootstrap.Extensions;
 using MailKit;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.FileIO;
@@ -35,23 +36,60 @@ namespace Bootstrap.Components.Storage
                 Directory.CreateDirectory(target.FullName);
             }
 
+            var sourceIsInSubFileDestinations = false;
             // Copy each file into it's new directory.
             foreach (var fi in source.GetFiles())
             {
-                var path = Path.Combine(target.ToString(), fi.Name);
-                fi.MoveTo(path, overwrite);
+                var path = Path.Combine(target.FullName, fi.Name);
+                if (path == source.FullName)
+                {
+                    sourceIsInSubFileDestinations = true;
+                }
+                else
+                {
+                    fi.MoveTo(path, overwrite);
+                }
             }
 
+            var topLevelDirectories = source.GetDirectories();
+            var sourceIsInSubDirectoryDestinations = false;
             // Copy each sub directory using recursion.
-            foreach (var diSourceSubDir in source.GetDirectories())
+            foreach (var diSourceSubDir in topLevelDirectories)
             {
                 var nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
+                if (nextTargetSubDir.FullName == source.FullName)
+                {
+                    sourceIsInSubDirectoryDestinations = true;
+                }
                 Merge(diSourceSubDir, nextTargetSubDir, overwrite);
             }
 
-            if (source.GetFileSystemInfos().Length == 0)
+            if (sourceIsInSubFileDestinations)
             {
-                source.Delete();
+
+            }
+
+            var restEntries = source.GetFileSystemInfos();
+
+            if (restEntries.Length == 0)
+            {
+                if (!sourceIsInSubDirectoryDestinations)
+                {
+                    source.Delete();
+                }
+            }
+            else
+            {
+                if (restEntries.Length == 1 && sourceIsInSubFileDestinations)
+                {
+                    var tempSource = Path.Combine(source.Parent!.FullName,
+                        $"{source.Name}_tmp_{DateTime.Now.ToMillisecondTimestamp()}_{Guid.NewGuid().ToString("N")[..6]}");
+                    var sameNameFilePath = Path.Combine(tempSource, source.Name);
+                    var sameNameFileTargetPath = Path.Combine(target.FullName, source.Name);
+                    source.MoveTo(tempSource);
+                    File.Move(sameNameFilePath, sameNameFileTargetPath);
+                    source.Delete();
+                }
             }
         }
 
@@ -60,7 +98,7 @@ namespace Bootstrap.Components.Storage
             Merge(new DirectoryInfo(source), new DirectoryInfo(target), overwrite);
         }
 
-        public static void CopyFilesRecursively(string sourcePath, string targetPath)
+        public static void CopyFilesRecursively(string sourcePath, string targetPath, bool overwrite)
         {
             //Now Create all of the directories
             foreach (var dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
@@ -69,9 +107,13 @@ namespace Bootstrap.Components.Storage
             }
 
             //Copy all the files & Replaces any files with the same name
-            foreach (var newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
+            foreach (var oldPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
             {
-                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+                var newPath = oldPath.Replace(sourcePath, targetPath);
+                if (overwrite || !File.Exists(newPath))
+                {
+                    File.Copy(oldPath, newPath, overwrite);
+                }
             }
         }
 
