@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
+using NPOI.HPSF;
 
 namespace Bootstrap.Extensions
 {
@@ -50,10 +51,49 @@ namespace Bootstrap.Extensions
 
         public static string Format(this string s, params object[] args) => string.Format(s, args);
 
-        public static string RemoveInvalidFileNameChars(this string fullname, string invalidCharReplacement = "_") =>
-            fullname.IsNullOrEmpty()
-                ? null
-                : string.Join(invalidCharReplacement, fullname.Split(Path.GetInvalidFileNameChars()));
+        public static string RemoveInvalidFileNameChars(this string filename, string invalidCharReplacement = "_")
+        {
+            if (filename.IsNullOrEmpty())
+            {
+                return null;
+            }
+
+            // invalidChars
+            filename = string.Join(invalidCharReplacement, filename.Split(Path.GetInvalidFileNameChars()));
+
+            return filename;
+        }
+
+        public static string RemoveInvalidFilePathChars(this string fullname, string invalidCharReplacement = "_")
+        {
+            if (fullname.IsNullOrEmpty())
+            {
+                return null;
+            }
+
+            fullname = string.Join(Path.DirectorySeparatorChar, fullname
+                .Split(Path.PathSeparator, Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar)
+                .Where(a => a.IsNotEmpty()).Select(
+                    a =>
+                    {
+                        // Remove leading or trailing dots
+                        while (a.Length > 0 && a[0] == '.')
+                        {
+                            a = a[1..];
+                        }
+
+                        while (a.Length > 0 && a[^1] == '.')
+                        {
+                            a = a[..^1];
+                        }
+
+                        // Remove other bad chars
+                        return a.RemoveInvalidFileNameChars(invalidCharReplacement);
+                    }));
+
+
+            return fullname;
+        }
 
 
         /// <summary>
