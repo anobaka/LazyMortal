@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Bootstrap.Extensions;
 using Microsoft.Extensions.Primitives;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.FileIO;
@@ -102,6 +104,18 @@ namespace Bootstrap.Components.Storage
             var values = Environment.GetEnvironmentVariable("PATH");
             return values?.Split(Path.PathSeparator).Select(path => Path.Combine(path, filename))
                 .FirstOrDefault(File.Exists);
+        }
+
+        public static string[] GetSameLayerFiles(string sampleFile)
+        {
+            var dir = new FileInfo(sampleFile).Directory!.FullName;
+            var sameLayerDirectories = DirectoryUtils.GetSameLayerDirectories(dir);
+            var files = new ConcurrentBag<string>();
+            Parallel.ForEach(sameLayerDirectories, d =>
+            {
+                files.AddRange(Directory.GetFiles(d));
+            });
+            return files.ToArray();
         }
 
         /// <summary>

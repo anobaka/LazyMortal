@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -115,6 +116,22 @@ namespace Bootstrap.Components.Storage
                     File.Copy(oldPath, newPath, overwrite);
                 }
             }
+        }
+
+        public static string[] GetSameLayerDirectories(string sampleDirectory)
+        {
+            var segments = sampleDirectory
+                .Split(Path.DirectorySeparatorChar, Path.PathSeparator, Path.AltDirectorySeparatorChar)
+                .Where(a => a.IsNotEmpty()).ToArray();
+            var directories = new[] {segments[0]};
+            for (var i = 0; i < segments.Length; i++)
+            {
+                var nextLevelDirectories = new ConcurrentBag<string>();
+                Parallel.ForEach(directories, a => { nextLevelDirectories.AddRange(Directory.GetDirectories(a)); });
+                directories = nextLevelDirectories.ToArray();
+            }
+
+            return directories;
         }
 
         public static void Delete(string fullname, bool ignoreError, bool sendToRecycleBin)
