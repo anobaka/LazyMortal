@@ -123,11 +123,21 @@ namespace Bootstrap.Components.Storage
             var segments = sampleDirectory
                 .Split(Path.DirectorySeparatorChar, Path.PathSeparator, Path.AltDirectorySeparatorChar)
                 .Where(a => a.IsNotEmpty()).ToArray();
-            var directories = new[] {segments[0]};
+            var directories = new[] {Path.GetPathRoot(sampleDirectory)};
             for (var i = 0; i < segments.Length; i++)
             {
                 var nextLevelDirectories = new ConcurrentBag<string>();
-                Parallel.ForEach(directories, a => { nextLevelDirectories.AddRange(Directory.GetDirectories(a)); });
+                Parallel.ForEach(directories, a =>
+                {
+                    try
+                    {
+                        nextLevelDirectories.AddRange(Directory.GetDirectories(a));
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                });
                 directories = nextLevelDirectories.ToArray();
             }
 

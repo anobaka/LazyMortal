@@ -113,7 +113,14 @@ namespace Bootstrap.Components.Storage
             var files = new ConcurrentBag<string>();
             Parallel.ForEach(sameLayerDirectories, d =>
             {
-                files.AddRange(Directory.GetFiles(d));
+                try
+                {
+                    files.AddRange(Directory.GetFiles(d));
+                }
+                catch
+                {
+                    // ignored
+                }
             });
             return files.ToArray();
         }
