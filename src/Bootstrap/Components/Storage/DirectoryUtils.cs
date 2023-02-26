@@ -118,13 +118,27 @@ namespace Bootstrap.Components.Storage
             }
         }
 
-        public static string[] GetSameLayerDirectories(string sampleDirectory)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sampleDirectory"></param>
+        /// <param name="startLayer">Starts from 0. (usually it's drive root)</param>
+        /// <returns></returns>
+        public static string[] GetSameLayerDirectories(string sampleDirectory, int startLayer = 0)
         {
             var segments = sampleDirectory
                 .Split(Path.DirectorySeparatorChar, Path.PathSeparator, Path.AltDirectorySeparatorChar)
                 .Where(a => a.IsNotEmpty()).ToArray();
-            var directories = new[] {Path.GetPathRoot(sampleDirectory)};
-            for (var i = 0; i < segments.Length; i++)
+
+            var pathRoot = Path.GetPathRoot(sampleDirectory)!;
+
+            var directories = new[]
+            {
+                startLayer == 0
+                    ? pathRoot
+                    : Path.Combine(pathRoot, Path.Combine(segments.Skip(1).Take(startLayer).ToArray()))
+            };
+            for (var i = startLayer + 1; i < segments.Length; i++)
             {
                 var nextLevelDirectories = new ConcurrentBag<string>();
                 Parallel.ForEach(directories, a =>

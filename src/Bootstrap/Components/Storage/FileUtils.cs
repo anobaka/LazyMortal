@@ -106,10 +106,16 @@ namespace Bootstrap.Components.Storage
                 .FirstOrDefault(File.Exists);
         }
 
-        public static string[] GetSameLayerFiles(string sampleFile)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sampleFile"></param>
+        /// <param name="startLayer">Starts from 0. (usually it's drive root)</param>
+        /// <returns></returns>
+        public static string[] GetSameLayerFiles(string sampleFile, int startLayer = 0)
         {
             var dir = new FileInfo(sampleFile).Directory!.FullName;
-            var sameLayerDirectories = DirectoryUtils.GetSameLayerDirectories(dir);
+            var sameLayerDirectories = DirectoryUtils.GetSameLayerDirectories(dir, startLayer);
             var files = new ConcurrentBag<string>();
             Parallel.ForEach(sameLayerDirectories, d =>
             {

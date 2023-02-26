@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using JetBrains.Annotations;
 using NPOI.HPSF;
 
@@ -166,6 +167,25 @@ namespace Bootstrap.Extensions
             }
 
             return uniquePaths.Except(childrenPaths).ToArray();
+        }
+
+        public static string StripInvalidXmlCharacters(this string str)
+        {
+            if (str.IsNullOrEmpty())
+            {
+                return null;
+            }
+
+            var sb = new StringBuilder();
+            foreach (var current in str.Where(current =>
+                         (current == 0x9) || (current == 0xA) || (current == 0xD) ||
+                         ((current >= 0x20) && (current <= 0xD7FF)) || ((current >= 0xE000) && (current <= 0xFFFD)) ||
+                         ((current >= 0x10000) && (current <= 0x10FFFF))))
+            {
+                sb.Append(current);
+            }
+
+            return sb.ToString();
         }
     }
 }
