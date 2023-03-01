@@ -3,9 +3,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Bootstrap.Components.Logging.LogService.Models;
 using Bootstrap.Components.Logging.LogService.Models.Entities;
 using Bootstrap.Components.Miscellaneous.ResponseBuilders;
 using Bootstrap.Components.Orm.Infrastructures;
+using Bootstrap.Extensions;
 using Bootstrap.Models.ResponseModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,6 +40,23 @@ namespace Bootstrap.Components.Logging.LogService.Services
             using var scope = CreateNewScope();
             DbContext.Add(new Log {Logger = logger, Level = level, Event = @event.ToString(), Message = message});
             await DbContext.SaveChangesAsync();
+        }
+
+        public async Task<SearchResponse<Log>> Search(LogSearchRequestModel model)
+        {
+            using var scope = CreateNewScope();
+            Expression<Func<Log, bool>> exp =
+                l => (!model.Level.HasValue || model.Level.Value == l.Level)
+                     && (!model.StartDt.HasValue || model.StartDt <= l.DateTime)
+                     && (!model.EndDt.HasValue || model.EndDt >= l.DateTime)
+                     && (string.IsNullOrEmpty(model.Logger) || l.Logger.Contains(model.Logger))
+                     && (string.IsNullOrEmpty(model.Event) || l.Logger.Contains(model.Event))
+                     && (string.IsNullOrEmpty(model.Message) || l.Logger.Contains(model.Message));
+            var data = await DbContext.Logs.OrderByDescending(a => a.DateTime).Where(exp).Skip(model.SkipCount)
+                .Take(model.PageSize).ToListAsync();
+            var count = await DbContext.Logs.CountAsync(exp);
+
+            return model.BuildResponse(data, count);
         }
 
         public async Task ReadAll()

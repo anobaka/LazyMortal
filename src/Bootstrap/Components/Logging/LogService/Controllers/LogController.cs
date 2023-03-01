@@ -1,5 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Bootstrap.Components.Logging.LogService.Models;
 using Bootstrap.Components.Logging.LogService.Models.Entities;
 using Bootstrap.Components.Miscellaneous.ResponseBuilders;
 using Bootstrap.Models.ResponseModels;
@@ -23,6 +26,13 @@ namespace Bootstrap.Components.Logging.LogService.Controllers
         public async Task<ListResponse<Log>> GetAll()
         {
             return new((await _service.GetAll()).OrderByDescending(a => a.DateTime));
+        }
+
+        [HttpGet("filtered")]
+        [SwaggerOperation(OperationId = "SearchLogs")]
+        public async Task<SearchResponse<Log>> Search([FromQuery]LogSearchRequestModel model)
+        {
+            return await _service.Search(model);
         }
 
         [HttpGet("unread/count")]
