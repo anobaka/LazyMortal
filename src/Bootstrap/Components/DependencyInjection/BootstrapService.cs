@@ -11,33 +11,14 @@ namespace Bootstrap.Components.DependencyInjection
 {
     public abstract class BootstrapService
     {
-        private static IServiceProvider _rootServiceProvider;
+        private readonly IServiceProvider _serviceProvider;
 
-        public static IServiceProvider RootServiceProvider
+        protected BootstrapService(IServiceProvider serviceProvider)
         {
-            get
-            {
-                if (_rootServiceProvider == null)
-                {
-                    throw new Exception(
-                        "Root service provider is not configured, use IApplicationBuilder.ConfigureBootstrapService to configure it or set BootstrapService.RootServiceProvider manually.");
-                }
-
-                return _rootServiceProvider;
-            }
-            set => _rootServiceProvider = value;
+            _serviceProvider = serviceProvider;
         }
 
-        public T GetRequiredService<T>() => RootServiceProvider.GetRequiredService<T>();
-        public T GetService<T>() => RootServiceProvider.GetService<T>();
-    }
-
-    public static class BootstrapServiceExtensions
-    {
-        public static IApplicationBuilder ConfigureBootstrapService(this IApplicationBuilder app)
-        {
-            BootstrapService.RootServiceProvider = app.ApplicationServices;
-            return app;
-        }
+        public T GetRequiredService<T>() => _serviceProvider.GetRequiredService<T>();
+        public T GetService<T>() => _serviceProvider.GetService<T>();
     }
 }
