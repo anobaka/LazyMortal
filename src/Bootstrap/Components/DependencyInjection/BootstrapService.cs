@@ -19,6 +19,7 @@ namespace Bootstrap.Components.DependencyInjection
         }
 
         public T GetRequiredService<T>() => _serviceProvider.GetRequiredService<T>();
+        public object GetRequiredService(Type serviceType) => _serviceProvider.GetRequiredService(serviceType);
         public T GetService<T>() => _serviceProvider.GetService<T>();
     }
 }
