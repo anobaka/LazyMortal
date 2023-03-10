@@ -33,12 +33,10 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// 获取全部默认资源
         /// </summary>
         /// <param name="selector">为空则获取全部</param>
-        /// <param name="useNewDbContext"></param>
         /// <param name="asNoTracking"></param>
         /// <returns></returns>
-        public virtual Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null,
-            bool useNewDbContext = false, bool asNoTracking = false) =>
-            BaseService.GetAll(selector, useNewDbContext, asNoTracking);
+        public virtual Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null, bool asNoTracking = false) =>
+            BaseService.GetAll(selector, asNoTracking);
 
         /// <summary>
         /// 搜索默认资源

@@ -174,11 +174,9 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// </summary>
         /// <typeparam name="TResource"></typeparam>
         /// <param name="selector">Null for getting all resources.</param>
-        /// <param name="useNewDbContext"></param>
         /// <param name="asNoTracking"></param>
         /// <returns></returns>
-        public virtual async Task<List<TResource>> GetAll<TResource>(Expression<Func<TResource, bool>> selector,
-            bool useNewDbContext = false, bool asNoTracking = false)
+        public virtual async Task<List<TResource>> GetAll<TResource>(Expression<Func<TResource, bool>> selector, bool asNoTracking = false)
             where TResource : class
         {
             IQueryable<TResource> query = DbContext.Set<TResource>();

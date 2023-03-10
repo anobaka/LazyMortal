@@ -28,7 +28,7 @@ namespace Bootstrap.Components.Orm
                 // ignore the other concurrent requests
                 if (!_cacheVault.TryGetValue(key, out vault))
                 {
-                    var data = await ResourceService.GetAll(null, false, true);
+                    var data = await ResourceService.GetAll(null, true);
                     _cacheVault[key] = vault =
                         new ConcurrentDictionary<TKey, TResource>(
                             data.ToDictionary(FuncExtensions.BuildKeySelector<TResource, TKey>(), t => t));
