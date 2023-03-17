@@ -21,5 +21,9 @@ namespace Bootstrap.Models.ResponseModels
             Code = code;
             Message = message;
         }
+
+        public SingletonResponse<TData> ToSingletonResponse<TData>() => new(Code, Message);
+        public ListResponse<TData> ToListResponse<TData>() => new(Code, Message);
+        public SearchResponse<TData> ToSearchResponse<TData>() => new(Code, Message);
     }
 }
