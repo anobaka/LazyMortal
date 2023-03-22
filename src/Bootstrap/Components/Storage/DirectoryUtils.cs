@@ -215,32 +215,33 @@ namespace Bootstrap.Components.Storage
             }
         }
 
-        public static async Task MoveAsync(string sourcePath, string destinationPath, bool overwrite,
+        public static async Task MoveAsync(string sourcePath, string destinationDirectory, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
             if (Directory.Exists(sourcePath))
             {
                 var name = Path.GetFileName(sourcePath);
-                destinationPath = Path.Combine(destinationPath, name);
+                destinationDirectory = Path.Combine(destinationDirectory, name);
             }
 
-            await MergeAsync(sourcePath, destinationPath, overwrite, onProgressChange, ct);
+            await MergeAsync(sourcePath, destinationDirectory, overwrite, onProgressChange, ct);
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="sourcePath"></param>
-        /// <param name="destinationPath"></param>
+        /// <param name="destinationDirectory"></param>
         /// <param name="overwrite"></param>
         /// <param name="onProgressChange"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static async Task MergeAsync(string sourcePath, string destinationPath, bool overwrite,
+        public static async Task MergeAsync(string sourcePath, string destinationDirectory, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
-            if (!Directory.Exists(sourcePath) && !File.Exists(sourcePath))
+            var sourceIsDirectory = Directory.Exists(sourcePath);
+            if (!sourceIsDirectory && !File.Exists(sourcePath))
             {
                 throw new Exception($"{sourcePath} is not found");
             }
@@ -248,25 +249,25 @@ namespace Bootstrap.Components.Storage
             string[] files;
             // {key} is removable if {value} is empty.
             var fileEntriesDependencies = new Dictionary<string, HashSet<string>>();
-            if (Directory.Exists(sourcePath))
+            if (sourceIsDirectory)
             {
                 // Now Create all of the directories
                 foreach (var dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
                 {
-                    Directory.CreateDirectory(dirPath.Replace(sourcePath, destinationPath));
+                    Directory.CreateDirectory(dirPath.Replace(sourcePath, destinationDirectory));
                     fileEntriesDependencies[dirPath] = Directory.GetFileSystemEntries(dirPath).ToHashSet();
                 }
 
                 //Copy all the files & Replaces any files with the same name
                 files = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories);
 
-                Directory.CreateDirectory(sourcePath.Replace(sourcePath, destinationPath));
+                Directory.CreateDirectory(sourcePath.Replace(sourcePath, destinationDirectory));
                 fileEntriesDependencies[sourcePath] = Directory.GetFileSystemEntries(sourcePath).ToHashSet();
             }
             else
             {
                 files = new[] {sourcePath};
-                fileEntriesDependencies[sourcePath] = new HashSet<string> {sourcePath};
+                fileEntriesDependencies[Path.GetDirectoryName(sourcePath)!] = new HashSet<string> {sourcePath};
             }
 
             // {key} belongs to {value}
@@ -294,7 +295,9 @@ namespace Bootstrap.Components.Storage
                     neighbors.Remove(filePath);
                 }
 
-                var dest = filePath.Replace(sourcePath, destinationPath);
+                var dest = sourceIsDirectory
+                    ? filePath.Replace(sourcePath, destinationDirectory)
+                    : Path.Combine(destinationDirectory, Path.GetFileName(filePath));
                 if (File.Exists(dest) && !overwrite)
                 {
                     existedFiles.Add(filePath);
