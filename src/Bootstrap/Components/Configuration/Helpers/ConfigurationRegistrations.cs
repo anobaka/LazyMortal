@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.SignalR;
 using Bootstrap.Components.Configuration.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace Bootstrap.Components.Configuration.Helpers
 {
@@ -97,17 +98,21 @@ namespace Bootstrap.Components.Configuration.Helpers
 
             // inject IOptionsManager
             var monitorType = typeof(IOptionsMonitor<>).MakeGenericType(optionsDescriber.OptionsType);
+            var loggerType =
+                typeof(ILogger<>).MakeGenericType(
+                    typeof(AspNetCoreOptionsManager<>).MakeGenericType(optionsDescriber.OptionsType));
             var optionsManagerType = typeof(AspNetCoreOptionsManager<>).MakeGenericType(optionsDescriber.OptionsType);
             services.AddSingleton(optionsManagerType, sp =>
             {
                 try
                 {
                     var monitor = sp.GetRequiredService(monitorType);
-
+                    var logger = sp.GetRequiredService(loggerType);
                     var instance = Activator.CreateInstance(optionsManagerType,
                         optionsDescriber.FilePath,
                         optionsDescriber.OptionsKey,
-                        monitor
+                        monitor,
+                        logger
                     );
                     return instance;
                 }
