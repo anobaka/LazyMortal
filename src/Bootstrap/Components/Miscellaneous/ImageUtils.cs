@@ -9,9 +9,9 @@ namespace Bootstrap.Components.Miscellaneous
     {
         public static byte[] Crop(byte[] originalImage, Rectangle rect)
         {
-            using var image = Image.Load(originalImage, out var format);
+            using var image = Image.Load(originalImage);
             image.Mutate(t => t.Crop(rect));
-            return image.Save(format);
+            return image.Save();
         }
 
         public static byte[] Compress(byte[] originalImage, int quality)
