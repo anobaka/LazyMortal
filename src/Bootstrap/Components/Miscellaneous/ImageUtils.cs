@@ -11,7 +11,7 @@ namespace Bootstrap.Components.Miscellaneous
         {
             using var image = Image.Load(originalImage);
             image.Mutate(t => t.Crop(rect));
-            return image.Save();
+            return image.Save(image.Metadata.DecodedImageFormat);
         }
 
         public static byte[] Compress(byte[] originalImage, int quality)
