@@ -46,6 +46,12 @@ namespace Bootstrap.Components.Orm
             _cacheVault = serviceProvider.GetRequiredService<GlobalCacheVault>();
         }
 
+        public void ClearCache()
+        {
+            var key = SpecificTypeUtils<TResource>.Type.FullName!;
+            _cacheVault.TryRemove(key, out _);
+        }
+
         public virtual async Task<TResource> GetByKey(TKey key, bool returnCopy = true)
         {
             var data = (await GetCacheVault()).TryGetValue(key, out var v) ? v : null;
