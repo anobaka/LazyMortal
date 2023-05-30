@@ -15,18 +15,25 @@ namespace Bootstrap.Components.Miscellaneous
         public string GetAll()
         {
             var codes = new List<string>();
-            Types.ForEach(t =>
+            Types.Where(a => a.IsPublic).ToList().ForEach(t =>
             {
-                var values = Enum.GetValues(t);
-                var keyToValue = string.Join(", ", values.Cast<object>().Select(a => $"{a} = {(int) a}"));
-                var ktvDefinition = $"export enum {t.Name} {{{keyToValue}}}";
-                codes.Add(ktvDefinition);
-                // var valueToKey = string.Join(", ", values.Cast<object>().Select(a => $"{(int) a}: \"{a}\""));
-                // var kvtDefinition = $"export const {t.Name}Label = {{{valueToKey}}};";
-                // codes.Add(kvtDefinition);
-                var listDefinition =
-                    $"export const {t.Name.Camelize().Pluralize()} = Object.keys({t.Name}).filter(k => typeof {t.Name}[k] === 'number').map(t => ({{label: t, value: {t.Name}[t]}}));";
-                codes.Add(listDefinition);
+                try
+                {
+                    var values = Enum.GetValues(t);
+                    var keyToValue = string.Join(", ", values.Cast<object>().Select(a => $"{a} = {(int) a}"));
+                    var ktvDefinition = $"export enum {t.Name} {{{keyToValue}}}";
+                    codes.Add(ktvDefinition);
+                    // var valueToKey = string.Join(", ", values.Cast<object>().Select(a => $"{(int) a}: \"{a}\""));
+                    // var kvtDefinition = $"export const {t.Name}Label = {{{valueToKey}}};";
+                    // codes.Add(kvtDefinition);
+                    var listDefinition =
+                        $"export const {t.Name.Camelize().Pluralize()} = Object.keys({t.Name}).filter(k => typeof {t.Name}[k] === 'number').map(t => ({{label: t, value: {t.Name}[t]}}));";
+                    codes.Add(listDefinition);
+                }
+                catch (Exception e)
+                {
+
+                }
             });
             return string.Join(Environment.NewLine, codes);
         }
