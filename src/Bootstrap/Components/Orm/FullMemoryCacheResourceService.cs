@@ -193,6 +193,7 @@ namespace Bootstrap.Components.Orm
 
         public virtual async Task<BaseResponse> RemoveAll(Expression<Func<TResource, bool>> selector)
         {
+            var rsp = await ResourceService.RemoveAll(selector);
             var func = selector.Compile();
             var keys = (await GetCacheVault()).Where(t => func(t.Value)).Select(a => a.Key);
             foreach (var k in keys)
@@ -200,21 +201,23 @@ namespace Bootstrap.Components.Orm
                 (await GetCacheVault()).Remove(k, out _);
             }
 
-            return await ResourceService.RemoveAll(selector);
+            return rsp;
         }
 
         public virtual async Task<BaseResponse> RemoveByKey(TKey key)
         {
+            var rsp = await ResourceService.RemoveByKey(key);
             (await GetCacheVault()).Remove(key, out _);
-            return await ResourceService.RemoveByKey(key);
+            return rsp;
         }
 
         public virtual async Task<BaseResponse> RemoveByKeys(IEnumerable<TKey> keys)
         {
             var ks = keys.ToList();
+            var rsp = await ResourceService.RemoveByKeys(ks);
             var cache = await GetCacheVault();
             ks.ForEach(k => cache.Remove(k, out _));
-            return await ResourceService.RemoveByKeys(ks);
+            return rsp;
         }
 
         public virtual async Task<SingletonResponse<TResource>> Add(TResource resource)
