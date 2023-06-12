@@ -12,6 +12,14 @@
     <None Remove="Components\Weixin\**" />
   </ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.6" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.5" />
+	</ItemGroup>
+
   <ItemGroup>
 	<PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.13.0" />
 	<PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="2.3.0" />
@@ -26,7 +34,6 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
     <PackageReference Include="CliWrap" Version="3.6.0" />
-	<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.5" />
   </ItemGroup>
 
   <ItemGroup>

@@ -10,9 +10,9 @@ namespace Bootstrap.Extensions
 {
     public static class StringExtensions
     {
-        public static bool IsNullOrEmpty(this string s) => string.IsNullOrEmpty(s);
-        public static bool IsNotEmpty(this string s) => !s.IsNullOrEmpty();
-        public static string ToNullIfEmpty(this string s) => s.IsNullOrEmpty() ? null : s;
+        public static bool IsNullOrEmpty([CanBeNull] this string s) => string.IsNullOrEmpty(s);
+        public static bool IsNotEmpty([CanBeNull] this string s) => !s.IsNullOrEmpty();
+        public static string ToNullIfEmpty([CanBeNull] this string s) => s.IsNullOrEmpty() ? null : s;
 
         public static string TrimEnd(this string s, params string[] trimStrings)
         {
