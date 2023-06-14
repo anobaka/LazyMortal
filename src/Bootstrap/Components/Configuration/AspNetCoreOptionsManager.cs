@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -44,6 +45,18 @@ namespace Bootstrap.Components.Configuration
                     }
                 }
             }
+        }
+
+        public override void Save(TOptions options)
+        {
+            base.Save(options);
+            OnChange(options);
+        }
+
+        public override async Task SaveAsync(TOptions options)
+        {
+            await base.SaveAsync(options);
+            OnChange(options);
         }
 
         public IDisposable OnChange(Action<TOptions> handler)
