@@ -73,7 +73,7 @@ namespace Bootstrap.Extensions
             }
 
             fullname = string.Join(Path.DirectorySeparatorChar, fullname
-                .Split(Path.PathSeparator, Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar)
+                .Split(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar)
                 .Where(a => a.IsNotEmpty()).Select(
                     a =>
                     {

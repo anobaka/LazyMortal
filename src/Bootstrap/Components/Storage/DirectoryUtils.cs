@@ -127,7 +127,7 @@ namespace Bootstrap.Components.Storage
         public static string[] GetSameLayerDirectories(string sampleDirectory, int startLayer = 0)
         {
             var segments = sampleDirectory
-                .Split(Path.DirectorySeparatorChar, Path.PathSeparator, Path.AltDirectorySeparatorChar)
+                .Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
                 .Where(a => a.IsNotEmpty()).ToArray();
 
             var pathRoot = Path.GetPathRoot(sampleDirectory)!;
