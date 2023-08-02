@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Bootstrap.Extensions
 {
@@ -28,6 +29,18 @@ namespace Bootstrap.Extensions
         public static string BuildFullInformationText(this Exception e)
         {
             return string.Join(Environment.NewLine, _getExceptionInformationRecursively(e));
+        }
+
+        public static string BuildAllMessages(this Exception e)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(e.Message);
+            if (e.InnerException != null)
+            {
+                sb.AppendLine($"->{BuildAllMessages(e.InnerException)}");
+            }
+
+            return sb.ToString();
         }
     }
 }
