@@ -277,7 +277,9 @@ namespace Bootstrap.Components.Orm.Infrastructures
         public virtual async Task<int> Count<TResource>(Expression<Func<TResource, bool>> selector)
             where TResource : class
         {
-            return await DbContext.Set<TResource>().CountAsync(selector);
+            return selector == null
+                ? await DbContext.Set<TResource>().CountAsync()
+                : await DbContext.Set<TResource>().CountAsync(selector);
         }
 
         public virtual async Task<bool> Any<TResource>(Expression<Func<TResource, bool>> selector)
