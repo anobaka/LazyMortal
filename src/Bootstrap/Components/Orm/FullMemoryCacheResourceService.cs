@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ using Bootstrap.Models.Constants;
 using Bootstrap.Models.ResponseModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using NPOI.SS.Formula.Functions;
 
 namespace Bootstrap.Components.Orm
 {
@@ -123,7 +125,7 @@ namespace Bootstrap.Components.Orm
         /// <param name="returnCopy"></param>
         /// <returns></returns>
         public virtual async Task<SearchResponse<TResource>> Search(Func<TResource, bool> selector,
-            int pageIndex, int pageSize, (Func<TResource, object> SelectKey, bool Asc)[] orders,
+            int pageIndex, int pageSize, (Func<TResource, object> SelectKey, bool Asc, IComparer<object>? comparer)[] orders,
             bool returnCopy = true)
         {
             var cache = await GetCacheVault();
@@ -135,11 +137,11 @@ namespace Bootstrap.Components.Orm
 
             if (orders?.Any() == true)
             {
-                var (fk, fa) = orders[0];
-                var temp = fa ? resources.OrderBy(fk) : resources.OrderByDescending(fk);
-                foreach (var (k, asc) in orders.Skip(1))
+                var (fk, fa, comparer) = orders[0];
+                var temp = fa ? resources.OrderBy(fk, comparer) : resources.OrderByDescending(fk, comparer);
+                foreach (var (k, asc, c) in orders.Skip(1))
                 {
-                    temp = asc ? temp.ThenBy(k) : temp.ThenByDescending(k);
+                    temp = asc ? temp.ThenBy(k, c) : temp.ThenByDescending(k, c);
                 }
 
                 resources = temp.ToList();
@@ -157,9 +159,9 @@ namespace Bootstrap.Components.Orm
         }
 
         public virtual Task<SearchResponse<TResource>> Search(Func<TResource, bool> selector,
-            int pageIndex, int pageSize, Func<TResource, object> orderBy = null, bool asc = false, bool returnCopy = true)
+            int pageIndex, int pageSize, Func<TResource, object> orderBy = null, bool asc = false, IComparer<object>? comparer = null, bool returnCopy = true)
         {
-            var orders = orderBy == null ? null : new[] {(orderBy, asc)};
+            var orders = orderBy == null ? null : new[] {(orderBy, asc, comparer)};
             var r = Search(selector, pageIndex, pageSize, orders, returnCopy);
             return r;
         }
