@@ -321,16 +321,19 @@ namespace Bootstrap.Components.Storage
                 }
             }
 
-            foreach (var directory in fileEntriesDependencies.Select(t => t.Key).OrderByDescending(t => t.Length))
+            if (sourceIsDirectory)
             {
-                // We've got all sub directories from Directory.GetDirectories,
-                // so there is not need to worry about scenarios like sourcePath is /a, and the only sub-directory is /a/b/c/d/e
-                if (Directory.Exists(directory) && Directory.GetFileSystemEntries(directory).Length == 0)
+                foreach (var directory in fileEntriesDependencies.Select(t => t.Key).OrderByDescending(t => t.Length))
                 {
-                    Directory.Delete(directory);
-                    if (directory != sourcePath)
+                    // We've got all sub directories from Directory.GetDirectories,
+                    // so there is not need to worry about scenarios like sourcePath is /a, and the only sub-directory is /a/b/c/d/e
+                    if (Directory.Exists(directory) && Directory.GetFileSystemEntries(directory).Length == 0)
                     {
-                        fileEntriesDependencies[fileEntriesReversedDependencies[directory]].Remove(directory);
+                        Directory.Delete(directory);
+                        if (directory != sourcePath)
+                        {
+                            fileEntriesDependencies[fileEntriesReversedDependencies[directory]].Remove(directory);
+                        }
                     }
                 }
             }
