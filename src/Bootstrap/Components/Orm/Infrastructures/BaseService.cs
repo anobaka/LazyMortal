@@ -24,12 +24,13 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// </summary>
         /// <typeparam name="TResource"></typeparam>
         /// <param name="key"></param>
+        /// <param name="asNoTracking"></param>
         /// <returns></returns>
-        public virtual async Task<TResource> GetByKey<TResource>(object key)
+        public virtual async Task<TResource> GetByKey<TResource>(object key, bool asNoTracking = false)
             where TResource : class
         {
             var exp = ExpressionExtensions.BuildKeyEqualsExpression<TResource>(key);
-            return await GetFirst(exp);
+            return await GetFirst(exp, asNoTracking: asNoTracking);
         }
 
         /// <summary>
@@ -149,9 +150,10 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <param name="selector"></param>
         /// <param name="orderBy"></param>
         /// <param name="asc"></param>
+        /// <param name="asNoTracking"></param>
         /// <returns></returns>
         public virtual async Task<TResource> GetFirst<TResource>(Expression<Func<TResource, bool>> selector,
-            Expression<Func<TResource, object>> orderBy = null, bool asc = false)
+            Expression<Func<TResource, object>> orderBy = null, bool asc = false, bool asNoTracking = false)
             where TResource : class
         {
             IQueryable<TResource> query = DbContext.Set<TResource>();
@@ -163,6 +165,11 @@ namespace Bootstrap.Components.Orm.Infrastructures
             if (orderBy != null)
             {
                 query = asc ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
+            }
+
+            if (asNoTracking)
+            {
+	            query = query.AsNoTracking();
             }
 
             var result = await query.FirstOrDefaultAsync();

@@ -24,10 +24,11 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <param name="selector"></param>
         /// <param name="orderBy"></param>
         /// <param name="asc"></param>
+        /// <param name="asNoTracking"></param>
         /// <returns></returns>
         public virtual Task<TResource> GetFirst(Expression<Func<TResource, bool>> selector,
             Expression<Func<TResource, object>> orderBy = null,
-            bool asc = false) => BaseService.GetFirst(selector, orderBy, asc);
+            bool asc = false, bool asNoTracking = false) => BaseService.GetFirst(selector, orderBy, asc, asNoTracking);
 
         /// <summary>
         /// 获取全部默认资源
