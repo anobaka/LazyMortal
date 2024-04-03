@@ -18,7 +18,9 @@ namespace Bootstrap.Components.Doc.Swagger
         /// </summary>
         /// <param name="t"></param>
         /// <param name="docs"></param>
-        private static void Configure(this SwaggerGenOptions t, IEnumerable<KeyValuePair<string, OpenApiInfo>> docs)
+        private static void Configure<TCustomModelDocumentFilter>(this SwaggerGenOptions t,
+            IEnumerable<KeyValuePair<string, OpenApiInfo>> docs)
+            where TCustomModelDocumentFilter : SwaggerCustomModelDocumentFilter
         {
             if (docs != null)
             {
@@ -37,27 +39,33 @@ namespace Bootstrap.Components.Doc.Swagger
             t.EnableAnnotations();
 
             t.CustomSchemaIds(type => type.ToString());
+            t.DocumentFilter<TCustomModelDocumentFilter>();
         }
 
         public static IServiceCollection
-            AddBootstrapSwaggerGen(this IServiceCollection services, string docName, string docTitle) =>
-            services.AddBootstrapSwaggerGen(new Dictionary<string, OpenApiInfo>
+            AddBootstrapSwaggerGen<TCustomModelDocumentFilter>(this IServiceCollection services, string docName,
+                string docTitle) where TCustomModelDocumentFilter : SwaggerCustomModelDocumentFilter =>
+            services.AddBootstrapSwaggerGen<TCustomModelDocumentFilter>(new Dictionary<string, OpenApiInfo>
                 {{docName, new OpenApiInfo {Version = "v1", Title = docTitle}}});
 
-        public static IServiceCollection AddBootstrapSwaggerGen(this IServiceCollection services,
+        public static IServiceCollection AddBootstrapSwaggerGen<TCustomModelDocumentFilter>(
+            this IServiceCollection services,
             IEnumerable<KeyValuePair<string, OpenApiInfo>> docs)
+            where TCustomModelDocumentFilter : SwaggerCustomModelDocumentFilter
         {
-            return services.AddSwaggerGen(t => { Configure(t, docs); });
+            return services.AddSwaggerGen(t => { Configure<TCustomModelDocumentFilter>(t, docs); });
         }
 
-        public static IServiceCollection AddBootstrapSwaggerGen<TApiVisibleAttribute, TApiVisibleRealm>(
+        public static IServiceCollection AddBootstrapSwaggerGen<TApiVisibleAttribute, TApiVisibleRealm,
+            TCustomModelDocumentFilter>(
             this IServiceCollection services,
             IEnumerable<KeyValuePair<string, OpenApiInfo>> docs) where TApiVisibleRealm : Enum
             where TApiVisibleAttribute : Attribute, IApiVisibilityAttribute<TApiVisibleRealm>
+            where TCustomModelDocumentFilter : SwaggerCustomModelDocumentFilter
         {
             return services.AddSwaggerGen(t =>
             {
-                Configure(t, docs);
+                Configure<TCustomModelDocumentFilter>(t, docs);
 
                 t.DocInclusionPredicate((docName, apiDesc) =>
                 {

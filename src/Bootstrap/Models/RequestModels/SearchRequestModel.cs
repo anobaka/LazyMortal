@@ -3,7 +3,10 @@ using Newtonsoft.Json;
 
 namespace Bootstrap.Models.RequestModels
 {
-    public class SearchRequestModel
+	/// <summary>
+	/// todo: change class to record.
+	/// </summary>
+	public class SearchRequestModel
     {
         /// <summary>
         /// 从1开始
