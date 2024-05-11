@@ -28,7 +28,7 @@
     <PackageReference Include="MailKit" Version="4.0.0" />
     <PackageReference Include="NPOI" Version="2.6.0" />
     <PackageReference Include="Quartz" Version="3.6.2" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.0.1" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4" />
     <PackageReference Include="StackExchange.Redis" Version="2.6.104" />
     <PackageReference Include="System.CodeDom" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />

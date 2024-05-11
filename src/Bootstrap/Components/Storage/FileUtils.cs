@@ -219,7 +219,7 @@ namespace Bootstrap.Components.Storage
                         break;
                     }
 
-                    await destination.WriteAsync(buffer, ct);
+                    await destination.WriteAsync(buffer, 0, readBytesLength, ct);
                     copiedBytesLength += readBytesLength;
                     var newPercentage = (int) ((decimal) copiedBytesLength / totalLength * 100);
                     if (newPercentage != percentage)
