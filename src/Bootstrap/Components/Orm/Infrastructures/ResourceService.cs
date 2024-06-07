@@ -20,10 +20,9 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// 
         /// </summary>
         /// <param name="key"></param>
-        /// <param name="asNoTracking"></param>
         /// <returns></returns>
-        public virtual async Task<TResource> GetByKey(TKey key, bool asNoTracking = false) =>
-            await BaseService.GetByKey<TResource>(key, asNoTracking);
+        public virtual async Task<TResource> GetByKey(TKey key) =>
+            await BaseService.GetByKey<TResource>(key);
 
         /// <summary>
         /// 

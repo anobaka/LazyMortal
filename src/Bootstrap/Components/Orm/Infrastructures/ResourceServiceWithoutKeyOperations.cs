@@ -24,20 +24,18 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <param name="selector"></param>
         /// <param name="orderBy"></param>
         /// <param name="asc"></param>
-        /// <param name="asNoTracking"></param>
         /// <returns></returns>
         public virtual Task<TResource> GetFirst(Expression<Func<TResource, bool>> selector,
             Expression<Func<TResource, object>> orderBy = null,
-            bool asc = false, bool asNoTracking = false) => BaseService.GetFirst(selector, orderBy, asc, asNoTracking);
+            bool asc = false) => BaseService.GetFirst(selector, orderBy, asc);
 
         /// <summary>
         /// 获取全部默认资源
         /// </summary>
         /// <param name="selector">为空则获取全部</param>
-        /// <param name="asNoTracking"></param>
         /// <returns></returns>
-        public virtual Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null, bool asNoTracking = false) =>
-            BaseService.GetAll(selector, asNoTracking);
+        public virtual Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null) =>
+            BaseService.GetAll(selector);
 
         /// <summary>
         /// 搜索默认资源

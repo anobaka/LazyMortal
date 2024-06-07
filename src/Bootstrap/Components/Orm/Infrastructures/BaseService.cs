@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Bootstrap.Components.Miscellaneous.ResponseBuilders;
+using Bootstrap.Components.Orm.Extensions;
 using Bootstrap.Extensions;
 using Bootstrap.Models.Constants;
 using Bootstrap.Models.ResponseModels;
@@ -24,13 +25,12 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// </summary>
         /// <typeparam name="TResource"></typeparam>
         /// <param name="key"></param>
-        /// <param name="asNoTracking"></param>
         /// <returns></returns>
-        public virtual async Task<TResource> GetByKey<TResource>(object key, bool asNoTracking = false)
+        public virtual async Task<TResource> GetByKey<TResource>(object key)
             where TResource : class
         {
             var exp = ExpressionExtensions.BuildKeyEqualsExpression<TResource>(key);
-            return await GetFirst(exp, asNoTracking: asNoTracking);
+            return await GetFirst(exp);
         }
 
         /// <summary>
@@ -113,6 +113,9 @@ namespace Bootstrap.Components.Orm.Infrastructures
 
                 modify(r);
                 await ctx.SaveChangesAsync();
+
+                ctx.Detach(r);
+
                 return new SingletonResponse<TResource>(r);
             }
 
@@ -136,6 +139,9 @@ namespace Bootstrap.Components.Orm.Infrastructures
             }
 
             await ctx.SaveChangesAsync();
+
+            ctx.DetachAll(rs);
+
             return new ListResponse<TResource>(rs);
         }
 
@@ -150,10 +156,9 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <param name="selector"></param>
         /// <param name="orderBy"></param>
         /// <param name="asc"></param>
-        /// <param name="asNoTracking"></param>
         /// <returns></returns>
         public virtual async Task<TResource> GetFirst<TResource>(Expression<Func<TResource, bool>> selector,
-            Expression<Func<TResource, object>> orderBy = null, bool asc = false, bool asNoTracking = false)
+            Expression<Func<TResource, object>> orderBy = null, bool asc = false)
             where TResource : class
         {
             IQueryable<TResource> query = DbContext.Set<TResource>();
@@ -167,12 +172,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
                 query = asc ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
             }
 
-            if (asNoTracking)
-            {
-	            query = query.AsNoTracking();
-            }
-
-            var result = await query.FirstOrDefaultAsync();
+            var result = await query.AsNoTracking().FirstOrDefaultAsync();
             return result;
         }
 
@@ -181,9 +181,8 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// </summary>
         /// <typeparam name="TResource"></typeparam>
         /// <param name="selector">Null for getting all resources.</param>
-        /// <param name="asNoTracking"></param>
         /// <returns></returns>
-        public virtual async Task<List<TResource>> GetAll<TResource>(Expression<Func<TResource, bool>> selector, bool asNoTracking = false)
+        public virtual async Task<List<TResource>> GetAll<TResource>(Expression<Func<TResource, bool>> selector)
             where TResource : class
         {
             IQueryable<TResource> query = DbContext.Set<TResource>();
@@ -192,12 +191,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
                 query = query.Where(selector);
             }
 
-            if (asNoTracking)
-            {
-                query = query.AsNoTracking();
-            }
-
-            var result = await query.ToListAsync();
+            var result = await query.AsNoTracking().ToListAsync();
             return result;
         }
 
@@ -230,7 +224,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
             }
 
             var count = await query.CountAsync();
-            var data = await query.Skip(Math.Max(pageIndex - 1, 0) * pageSize).Take(pageSize).ToListAsync();
+            var data = await query.Skip(Math.Max(pageIndex - 1, 0) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
             var result = new SearchResponse<TResource>(data, count, pageIndex, pageSize);
             return result;
         }
@@ -260,8 +254,10 @@ namespace Bootstrap.Components.Orm.Infrastructures
         public virtual async Task<SingletonResponse<TResource>> Add<TResource>(TResource resource)
             where TResource : class
         {
-            DbContext.Add(resource);
-            await DbContext.SaveChangesAsync();
+            var ctx = DbContext;
+            ctx.Add(resource);
+            await ctx.SaveChangesAsync();
+            ctx.Detach(resource);
             return new SingletonResponse<TResource>(resource);
         }
 
@@ -278,6 +274,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
             var ctx = DbContext;
             await ctx.AddRangeAsync(data);
             await ctx.SaveChangesAsync();
+            ctx.DetachAll(data);
             return new ListResponse<TResource>(data);
         }
 
@@ -300,13 +297,15 @@ namespace Bootstrap.Components.Orm.Infrastructures
             var ctx = DbContext;
             ctx.Entry(resource).State = EntityState.Modified;
             await ctx.SaveChangesAsync();
+            ctx.Detach(resource);
             return BaseResponseBuilder.Ok;
         }
 
         public virtual async Task<BaseResponse> UpdateRange<TResource>(IEnumerable<TResource> resources)
             where TResource : class
         {
-            var rs = resources.ToList();
+            var array = resources as TResource[] ?? resources.ToArray();
+            var rs = array.ToList();
             var ks = FuncExtensions.BuildKeySelector<TResource>();
             var keys = rs.Select(r => ks(r)).ToList();
             var ctx = DbContext;
@@ -318,6 +317,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
             }
 
             await ctx.SaveChangesAsync();
+            ctx.DetachAll(array);
             return BaseResponseBuilder.Ok;
         }
 
@@ -335,6 +335,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
 
             modify(r);
             await ctx.SaveChangesAsync();
+            ctx.Detach(r);
             return new SingletonResponse<TResource>(r);
         }
 
@@ -357,6 +358,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
             }
 
             await ctx.SaveChangesAsync();
+            ctx.DetachAll(rs);
             return new ListResponse<TResource>(rs);
         }
 

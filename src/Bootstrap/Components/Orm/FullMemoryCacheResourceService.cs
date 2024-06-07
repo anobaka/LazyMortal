@@ -9,6 +9,7 @@ using Bootstrap.Components.Orm.Infrastructures;
 using Bootstrap.Extensions;
 using Bootstrap.Models.Constants;
 using Bootstrap.Models.ResponseModels;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NPOI.SS.Formula.Functions;
@@ -30,7 +31,7 @@ namespace Bootstrap.Components.Orm
                 // ignore the other concurrent requests
                 if (!_cacheVault.TryGetValue(key, out vault))
                 {
-                    var data = await ResourceService.GetAll(null, true);
+                    var data = await ResourceService.GetAll(null);
                     _cacheVault[key] = vault =
                         new ConcurrentDictionary<TKey, TResource>(
                             data.ToDictionary(FuncExtensions.BuildKeySelector<TResource, TKey>(), t => t));
@@ -54,10 +55,10 @@ namespace Bootstrap.Components.Orm
             _cacheVault.TryRemove(key, out _);
         }
 
-        public virtual async Task<TResource> GetByKey(TKey key, bool returnCopy = true)
+        public virtual async Task<TResource> GetByKey(TKey key, bool asNoTracking = true)
         {
             var data = (await GetCacheVault()).TryGetValue(key, out var v) ? v : null;
-            if (returnCopy)
+            if (asNoTracking)
             {
                 data = data.JsonCopy();
             }
@@ -65,12 +66,12 @@ namespace Bootstrap.Components.Orm
             return data;
         }
 
-        public virtual async Task<TResource[]> GetByKeys(IEnumerable<TKey> keys, bool returnCopy = true)
+        public virtual async Task<TResource[]> GetByKeys(IEnumerable<TKey> keys, bool asNoTracking = true)
         {
             var cache = await GetCacheVault();
             var data = keys.Select(k => cache.TryGetValue(k, out var v) ? v : null).Where(v => v != null)
                 .ToArray();
-            if (returnCopy)
+            if (asNoTracking)
             {
                 data = data.JsonCopy();
             }
@@ -79,7 +80,7 @@ namespace Bootstrap.Components.Orm
         }
 
         public virtual async Task<TResource> GetFirst(Expression<Func<TResource, bool>> selector,
-            Expression<Func<TResource, object>> orderBy = null, bool asc = false, bool returnCopy = true)
+            Expression<Func<TResource, object>> orderBy = null, bool asc = false, bool asNoTracking = true)
         {
             var list = (await GetCacheVault()).Values.Where(selector.Compile());
             if (orderBy != null)
@@ -89,7 +90,7 @@ namespace Bootstrap.Components.Orm
             }
 
             var data = list.FirstOrDefault();
-            if (returnCopy)
+            if (asNoTracking)
             {
                 data = data.JsonCopy();
             }
@@ -97,13 +98,13 @@ namespace Bootstrap.Components.Orm
             return data;
         }
 
-        public virtual async Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null, bool returnCopy = true)
+        public virtual async Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null, bool asNoTracking = true)
         {
             var data = (selector == null
                     ? (await GetCacheVault()).Values
                     : (await GetCacheVault()).Values.Where(selector.Compile()))
                 .ToList();
-            if (returnCopy)
+            if (asNoTracking)
             {
                 data = data.JsonCopy();
             }
@@ -115,6 +116,10 @@ namespace Bootstrap.Components.Orm
             ? (await GetCacheVault()).Values.Count
             : (await GetCacheVault()).Values.Count(selector);
 
+        public virtual async Task<bool> Any([CanBeNull] Func<TResource, bool> selector = null) => selector == null
+            ? (await GetCacheVault()).Values.Any()
+            : (await GetCacheVault()).Values.Any(selector);
+
         /// <summary>
         /// 
         /// </summary>
@@ -122,11 +127,11 @@ namespace Bootstrap.Components.Orm
         /// <param name="pageIndex"></param>
         /// <param name="pageSize"></param>
         /// <param name="orders">Key Selector - Asc</param>
-        /// <param name="returnCopy"></param>
+        /// <param name="asNoTracking"></param>
         /// <returns></returns>
         public virtual async Task<SearchResponse<TResource>> Search(Func<TResource, bool> selector,
             int pageIndex, int pageSize, (Func<TResource, object> SelectKey, bool Asc, IComparer<object>? comparer)[] orders,
-            bool returnCopy = true)
+            bool asNoTracking = true)
         {
             var cache = await GetCacheVault();
             var resources = cache.Values.ToList();
@@ -149,7 +154,7 @@ namespace Bootstrap.Components.Orm
 
             var count = resources.Count;
             var data = resources.Skip(Math.Max(pageIndex - 1, 0) * pageSize).Take(pageSize).ToList();
-            if (returnCopy)
+            if (asNoTracking)
             {
                 data = data.JsonCopy();
             }
@@ -159,10 +164,10 @@ namespace Bootstrap.Components.Orm
         }
 
         public virtual Task<SearchResponse<TResource>> Search(Func<TResource, bool> selector,
-            int pageIndex, int pageSize, Func<TResource, object> orderBy = null, bool asc = false, IComparer<object>? comparer = null, bool returnCopy = true)
+            int pageIndex, int pageSize, Func<TResource, object> orderBy = null, bool asc = false, IComparer<object>? comparer = null, bool asNoTracking = true)
         {
             var orders = orderBy == null ? null : new[] {(orderBy, asc, comparer)};
-            var r = Search(selector, pageIndex, pageSize, orders, returnCopy);
+            var r = Search(selector, pageIndex, pageSize, orders, asNoTracking);
             return r;
         }
 

@@ -2,29 +2,26 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using JetBrains.Annotations;
 
 namespace Bootstrap.Extensions
 {
     public static class ExpressionExtensions
     {
-        public static Expression<Func<T, bool>> And<T>(
-            this Expression<Func<T, bool>> first,
-            Expression<Func<T, bool>> second)
+        public static Expression<Func<T, bool>> And<T>([CanBeNull] this Expression<Func<T, bool>> first, Expression<Func<T, bool>> second)
         {
-            return first.AndAlso<T>(second, Expression.AndAlso);
+            return first != null ? first.Combine<T>(second, Expression.AndAlso) : second;
         }
 
-        public static Expression<Func<T, bool>> Or<T>(
-            this Expression<Func<T, bool>> first,
-            Expression<Func<T, bool>> second)
+        public static Expression<Func<T, bool>> Or<T>([CanBeNull] this Expression<Func<T, bool>> first, Expression<Func<T, bool>> second)
         {
-            return first.AndAlso<T>(second, Expression.OrElse);
+            return first == null ? second : first.Combine<T>(second, Expression.OrElse);
         }
 
-        private static Expression<Func<T, bool>> AndAlso<T>(
+        private static Expression<Func<T, bool>> Combine<T>(
             this Expression<Func<T, bool>> expr1,
             Expression<Func<T, bool>> expr2,
-            Func<Expression, Expression, BinaryExpression> func)
+            Func<Expression, Expression, BinaryExpression> combination)
         {
             var parameter = Expression.Parameter(typeof(T));
 
@@ -35,7 +32,7 @@ namespace Bootstrap.Extensions
             var right = rightVisitor.Visit(expr2.Body);
 
             return Expression.Lambda<Func<T, bool>>(
-                func(left, right), parameter);
+                combination(left, right), parameter);
         }
 
         private class ReplaceExpressionVisitor
