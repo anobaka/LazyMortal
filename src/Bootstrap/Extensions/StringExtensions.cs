@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
 using JetBrains.Annotations;
-using NPOI.HPSF;
 
 namespace Bootstrap.Extensions
 {
     public static class StringExtensions
     {
-        public static bool IsNullOrEmpty([CanBeNull] this string s) => string.IsNullOrEmpty(s);
-        public static bool IsNotEmpty([CanBeNull] this string s) => !s.IsNullOrEmpty();
+        public static bool IsNullOrEmpty([CanBeNull][NotNullWhen(false)] this string s) => string.IsNullOrEmpty(s);
+        public static bool IsNotEmpty([CanBeNull][NotNullWhen(true)] this string s) => !s.IsNullOrEmpty();
         public static string ToNullIfEmpty([CanBeNull] this string s) => s.IsNullOrEmpty() ? null : s;
 
         public static string TrimEnd(this string s, params string[] trimStrings)
@@ -137,7 +137,7 @@ namespace Bootstrap.Extensions
         /// <param name="value">The string to retrieve the substring from.</param>
         /// <param name="length">The number of characters to retrieve.</param>
         /// <returns>The substring.</returns>
-        public static string SubstringFromEnd([NotNull] this string value, int length)
+        public static string SubstringFromEnd([JetBrains.Annotations.NotNull] this string value, int length)
         {
             if (value == null)
             {
@@ -152,7 +152,7 @@ namespace Bootstrap.Extensions
             return length < value.Length ? value[^length..] : value;
         }
 
-        public static string[] FindTopLevelPaths([NotNull] this string[] paths)
+        public static string[] FindTopLevelPaths([JetBrains.Annotations.NotNull] this string[] paths)
         {
             if (paths == null)
             {
