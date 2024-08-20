@@ -1,14 +1,16 @@
-﻿namespace Bootstrap.Models.ResponseModels
+﻿using JetBrains.Annotations;
+
+namespace Bootstrap.Models.ResponseModels
 {
     public class SingletonResponse<T> : BaseResponse
     {
-        public T Data { get; set; }
+        [CanBeNull] public T Data { get; set; }
 
         public SingletonResponse()
         {
         }
 
-        public SingletonResponse(T data)
+        public SingletonResponse([CanBeNull] T data)
         {
             Data = data;
         }
