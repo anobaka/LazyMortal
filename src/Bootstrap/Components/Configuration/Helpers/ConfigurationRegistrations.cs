@@ -45,7 +45,17 @@ namespace Bootstrap.Components.Configuration.Helpers
                 refsAssemblies.Concat(
                     _additionalAssemblies.Where(a => refsAssemblies.All(b => b.FullName != a.FullName)));
 
-            var allOptionTypes = allAssemblies.SelectMany(a => a.GetTypes()).Where(a =>
+            var allOptionTypes = allAssemblies.SelectMany(a =>
+            {
+                try
+                {
+                    return a.GetTypes();
+                }
+                catch
+                {
+                    return [];
+                }
+            }).Where(a =>
                 a.IsPublic && !a.IsAbstract && a.IsClass &&
                 a.GetCustomAttribute<OptionsAttribute>() != null);
             var describers = allOptionTypes
