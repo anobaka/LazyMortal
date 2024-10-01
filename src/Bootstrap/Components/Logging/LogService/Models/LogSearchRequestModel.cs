@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Bootstrap.Components.Logging.LogService.Models
 {
-    public class LogSearchRequestModel : SearchRequestModel
+    public record LogSearchRequestModel : SearchRequestModel
     {
         public LogLevel? Level { get; set; }
         public DateTime? StartDt { get; set; }

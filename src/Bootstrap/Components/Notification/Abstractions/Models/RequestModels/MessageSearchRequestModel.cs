@@ -3,7 +3,7 @@ using Bootstrap.Models.RequestModels;
 
 namespace Bootstrap.Components.Notification.Abstractions.Models.RequestModels
 {
-    public class MessageSearchRequestModel : SearchRequestModel
+    public record MessageSearchRequestModel : SearchRequestModel
     {
         public string Receiver { get; set; }
         public NotificationType[] Types { get; set; }
