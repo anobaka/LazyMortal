@@ -32,6 +32,9 @@ namespace Bootstrap.Components.Doc.Swagger
 
             t.DescribeAllParametersInCamelCase();
 
+            t.SupportNonNullableReferenceTypes();
+            t.SchemaFilter<RequiredNotNullableSchemaFilter>();
+
             t.DocumentFilter<EnumSchemaFilter>();
             t.SchemaFilter<EnumSchemaFilter>();
             t.OperationFilter<EnumSchemaFilter>();
