@@ -7,15 +7,17 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Bootstrap.Extensions;
+using FluentAssertions;
 using MailKit;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.FileIO;
+using NPOI.SS.Formula.Functions;
 using FileSystem = Microsoft.VisualBasic.FileIO.FileSystem;
 using SearchOption = System.IO.SearchOption;
 
 namespace Bootstrap.Components.Storage
 {
-    public static class DirectoryUtils
+    public class DirectoryUtils
     {
         // public static Dictionary<string, int> CountExtensions(string directory, bool recursively)
         // {
@@ -54,7 +56,7 @@ namespace Bootstrap.Components.Storage
 
             var topLevelDirectories = source.GetDirectories();
             var sourceIsInSubDirectoryDestinations = false;
-            // Copy each sub directory using recursion.
+            // Copy each subdirectory recursively.
             foreach (var diSourceSubDir in topLevelDirectories)
             {
                 var nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
@@ -62,6 +64,7 @@ namespace Bootstrap.Components.Storage
                 {
                     sourceIsInSubDirectoryDestinations = true;
                 }
+
                 Merge(diSourceSubDir, nextTargetSubDir, overwrite);
             }
 
@@ -101,7 +104,7 @@ namespace Bootstrap.Components.Storage
 
         public static void CopyFilesRecursively(string sourcePath, string targetPath, bool overwrite)
         {
-            //Now Create all of the directories
+            //Now Create all the directories
             foreach (var dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
             {
                 Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
@@ -194,120 +197,116 @@ namespace Bootstrap.Components.Storage
             }
         }
 
-        public static async Task MergeAsync(Dictionary<string, string> sourcesAndDestinations, bool overwrite,
+        public static async Task MoveAsync1(string sourcePath, string destinationPath, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
-            var unitPercentage = (decimal) 100 / sourcesAndDestinations.Count;
-            var doneCount = 0;
-            var percentage = 0;
-            foreach (var (source, dest) in sourcesAndDestinations)
-            {
-                await MergeAsync(source, dest, overwrite, async fileProgress =>
-                {
-                    var newPercentage = (int) (unitPercentage * doneCount + unitPercentage * fileProgress / 100);
-                    if (newPercentage != percentage)
-                    {
-                        await onProgressChange(newPercentage);
-                        percentage = newPercentage;
-                    }
-                }, ct);
-                doneCount++;
-            }
+            await CopyAsync1(sourcePath, destinationPath, overwrite, onProgressChange, ct, true);
         }
 
-        public static async Task MoveAsync(string sourcePath, string destinationDirectory, bool overwrite,
+        public static async Task CopyAsync1(string sourcePath, string destinationPath, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
-            if (Directory.Exists(sourcePath))
-            {
-                var name = Path.GetFileName(sourcePath);
-                destinationDirectory = Path.Combine(destinationDirectory, name);
-            }
-
-            await MergeAsync(sourcePath, destinationDirectory, overwrite, onProgressChange, ct);
+            await CopyAsync1(sourcePath, destinationPath, overwrite, onProgressChange, ct, false);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sourcePath"></param>
-        /// <param name="destinationDirectory"></param>
-        /// <param name="overwrite"></param>
-        /// <param name="onProgressChange"></param>
-        /// <param name="ct"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public static async Task MergeAsync(string sourcePath, string destinationDirectory, bool overwrite,
-            Func<int, Task> onProgressChange, CancellationToken ct)
+        protected static async Task CopyAsync1(string sourcePath, string destinationPath, bool overwrite,
+            Func<int, Task> onProgressChange, CancellationToken ct, bool deleteAfter)
         {
-            var sourceIsDirectory = Directory.Exists(sourcePath);
-            if (!sourceIsDirectory && !File.Exists(sourcePath))
+            if (File.Exists(sourcePath) || File.Exists(destinationPath))
+            {
+                throw new Exception($"The {nameof(sourcePath)} or {nameof(destinationPath)} cannot be a file.");
+            }
+
+            var sourceDir = new DirectoryInfo(sourcePath!);
+            if (!sourceDir.Exists)
             {
                 throw new Exception($"{sourcePath} is not found");
             }
 
-            string[] files;
-            // {key} is removable if {value} is empty.
-            var fileEntriesDependencies = new Dictionary<string, HashSet<string>>();
-            if (sourceIsDirectory)
+            var destinationDir = new DirectoryInfo(destinationPath!);
+            if (sourceDir.FullName == destinationDir.FullName)
             {
-                // Now Create all of the directories
-                foreach (var dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
-                {
-                    Directory.CreateDirectory(dirPath.Replace(sourcePath, destinationDirectory));
-                    fileEntriesDependencies[dirPath] = Directory.GetFileSystemEntries(dirPath).ToHashSet();
-                }
-
-                //Copy all the files & Replaces any files with the same name
-                files = Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories);
-
-                Directory.CreateDirectory(sourcePath.Replace(sourcePath, destinationDirectory));
-                fileEntriesDependencies[sourcePath] = Directory.GetFileSystemEntries(sourcePath).ToHashSet();
-            }
-            else
-            {
-                files = new[] {sourcePath};
-                fileEntriesDependencies[Path.GetDirectoryName(sourcePath)!] = new HashSet<string> {sourcePath};
+                await onProgressChange(100);
+                return;
             }
 
-            // {key} belongs to {value}
-            var fileEntriesReversedDependencies = new Dictionary<string, string>();
-            foreach (var (key, value) in fileEntriesDependencies)
+            if (sourceDir.FullName.StartsWith(destinationDir.FullName))
             {
-                foreach (var v in value)
-                {
-                    fileEntriesReversedDependencies[v] = key;
-                }
+                throw new Exception($"{nameof(destinationPath)} can not be a sub path of {nameof(sourcePath)}");
             }
 
+            if (!destinationDir.Exists)
+            {
+                destinationDir.Create();
+            }
+
+            var totalLength = 0L;
+
+            // For large amount of files, this way is more efficient than using Directory.GetFileSystemEntries then detect files or directories.
+            var directories = Directory.GetDirectories(sourceDir.FullName, "*", SearchOption.AllDirectories).ToHashSet();
+            var files = Directory.GetFiles(sourceDir.FullName, "*", SearchOption.AllDirectories).ToHashSet();
+            var entries = files.Concat(directories).OrderBy(x => x, StringComparer.CurrentCultureIgnoreCase).ToList();
+
+            var dirDependencyMap = entries.Select(e => (Path: e, Directory: Path.GetDirectoryName(e)))
+                .GroupBy(d => d.Directory).ToDictionary(x => x.Key, x => x.Select(y => y.Path).ToHashSet());
+            var reversedDirDependencyMap = dirDependencyMap.SelectMany(x => x.Value.Select(a => (Dir: x.Key, Dep: a)))
+                .ToDictionary(d => d.Dep, d => d.Dir);
+
+            var fileLengthMap = new Dictionary<string, long>();
+            foreach (var f in files)
+            {
+                var fi = new FileInfo(f);
+                totalLength += fi.Length;
+                fileLengthMap[f] = fi.Length;
+            }
+
+            var doneLength = 0L;
             var percentage = 0;
-            var singleFilePercentage = files.Length == 0 ? 0 : 100 / (decimal) files.Length;
-            var existedFiles = new List<string>();
-            var missingFiles = new List<string>();
-            for (var i = 0; i < files.Length; i++)
-            {
-                var filePath = files[i];
-                var parent = fileEntriesReversedDependencies[filePath];
-                var neighbors = fileEntriesDependencies[parent];
-                if (!File.Exists(filePath))
-                {
-                    missingFiles.Add(filePath);
-                    neighbors.Remove(filePath);
-                }
 
-                var dest = sourceIsDirectory
-                    ? filePath.Replace(sourcePath, destinationDirectory)
-                    : Path.Combine(destinationDirectory, Path.GetFileName(filePath));
-                if (File.Exists(dest) && !overwrite)
+            var conflictFiles = new List<string>();
+            var missingFiles = new List<string>();
+
+            Directory.CreateDirectory(destinationPath!);
+
+            if (!entries.Any() && deleteAfter)
+            {
+                sourceDir.Delete();
+            }
+
+            foreach (var e in entries)
+            {
+                var targetPath = Path.Combine(destinationPath!, e.Replace(sourceDir.FullName, destinationDir.FullName));
+                var isFileOrEmptyDirectory = !dirDependencyMap.TryGetValue(e, out var tmpDependencies) || !tmpDependencies.Any();
+                var isDirectory = directories.Contains(e);
+                if (isDirectory)
                 {
-                    existedFiles.Add(filePath);
+                    Directory.CreateDirectory(targetPath);
+                    if (isFileOrEmptyDirectory && deleteAfter)
+                    {
+                        Directory.Delete(e);
+                    }
                 }
                 else
                 {
-                    await FileUtils.MoveAsync(filePath, dest, overwrite, async fileProgress =>
+                    var fileLength = fileLengthMap[e];
+                    var length = doneLength;
+
+                    if (!File.Exists(e))
                     {
-                        var newPercentage =
-                            (int) (singleFilePercentage * i + singleFilePercentage * fileProgress / 100);
+                        missingFiles.Add(e);
+                        continue;
+                    }
+
+                    if (!overwrite && File.Exists(targetPath))
+                    {
+                        conflictFiles.Add(targetPath);
+                        continue;
+                    }
+
+                    async Task ProgressChange(int fileProgress)
+                    {
+                        var newDoneLength = fileLength / 100m * fileProgress;
+                        var newPercentage = (int) ((newDoneLength + length) / totalLength);
                         if (newPercentage != percentage)
                         {
                             if (onProgressChange != null)
@@ -316,65 +315,51 @@ namespace Bootstrap.Components.Storage
                                 percentage = newPercentage;
                             }
                         }
-                    }, ct);
-                    neighbors.Remove(filePath);
-                }
-            }
+                    }
 
-            if (sourceIsDirectory)
-            {
-                foreach (var directory in fileEntriesDependencies.Select(t => t.Key).OrderByDescending(t => t.Length))
-                {
-                    // We've got all sub directories from Directory.GetDirectories,
-                    // so there is not need to worry about scenarios like sourcePath is /a, and the only sub-directory is /a/b/c/d/e
-                    if (Directory.Exists(directory) && Directory.GetFileSystemEntries(directory).Length == 0)
+                    if (deleteAfter)
                     {
-                        Directory.Delete(directory);
-                        if (directory != sourcePath)
+                        await FileUtils.MoveAsync(e, targetPath, overwrite, ProgressChange, ct);
+                    }
+                    else
+                    {
+                        await FileUtils.CopyAsync(e, targetPath, overwrite, ProgressChange, ct);
+                    }
+
+                    doneLength += fileLength;
+                }
+
+                if (deleteAfter && isFileOrEmptyDirectory)
+                {
+                    var current = e;
+                    while (current != sourceDir.FullName)
+                    {
+                        var parent = reversedDirDependencyMap[current];
+                        var dependencies = dirDependencyMap[parent];
+                        dependencies.Remove(current);
+                        if (!dependencies.Any())
                         {
-                            fileEntriesDependencies[fileEntriesReversedDependencies[directory]].Remove(directory);
+                            Directory.Delete(parent);
+                            dirDependencyMap.Remove(parent);
+                            current = parent;
+                        }
+                        else
+                        {
+                            break;
                         }
                     }
                 }
             }
 
-            if (existedFiles.Any() || missingFiles.Any())
+            if (missingFiles.Any() || conflictFiles.Any())
             {
-                const int maxShownFilesCount = 10;
-                var sb = new StringBuilder();
-                if (existedFiles.Any())
-                {
-                    sb.Append(@$"Failed to move {existedFiles.Count} files due to files exist.");
-                    foreach (var f in existedFiles.Take(maxShownFilesCount))
-                    {
-                        sb.Append(Environment.NewLine).Append(f);
-                    }
+                throw new DirectoryMovingException
+                    {MissingFiles = missingFiles.ToArray(), ConflictFiles = conflictFiles.ToArray()};
+            }
 
-                    if (existedFiles.Count > maxShownFilesCount)
-                    {
-                        sb.Append(Environment.NewLine).Append("...");
-                    }
-
-                    sb.Append(Environment.NewLine);
-                }
-
-                if (missingFiles.Any())
-                {
-                    sb.Append(@$"Failed to move {missingFiles.Count} files due to files are not found.");
-                    foreach (var f in missingFiles.Take(maxShownFilesCount))
-                    {
-                        sb.Append(Environment.NewLine).Append(f);
-                    }
-
-                    if (missingFiles.Count > maxShownFilesCount)
-                    {
-                        sb.Append(Environment.NewLine).Append("...");
-                    }
-
-                    sb.Append(Environment.NewLine);
-                }
-
-                throw new Exception(sb.ToString());
+            if (deleteAfter)
+            {
+                dirDependencyMap.Should().BeNullOrEmpty();
             }
         }
     }

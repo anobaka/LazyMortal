@@ -179,32 +179,49 @@ namespace Bootstrap.Components.Storage
         public static async Task MoveAsync(string sourcePath, string destinationPath, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
+            if (Directory.Exists(sourcePath) || Directory.Exists(destinationPath))
+            {
+                throw new Exception($"The {nameof(sourcePath)} or {nameof(destinationPath)} cannot be a directory.");
+            }
+
             if (Path.GetPathRoot(sourcePath) == Path.GetPathRoot(destinationPath))
             {
-                File.Move(sourcePath, destinationPath, overwrite);
+                Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
+                File.Move(sourcePath!, destinationPath!, overwrite);
                 await onProgressChange(100);
             }
             else
             {
                 await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, ct);
-                File.Delete(sourcePath);
+                File.Delete(sourcePath!);
             }
         }
 
         public static async Task CopyAsync(string sourcePath, string destinationPath, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(destinationPath));
-            await using Stream destination = File.OpenWrite(destinationPath);
+            if (Directory.Exists(sourcePath) || Directory.Exists(destinationPath))
+            {
+                throw new Exception($"The {nameof(sourcePath)} or {nameof(destinationPath)} cannot be a directory.");
+            }
+
+            if (sourcePath == destinationPath)
+            {
+                await onProgressChange(100);
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
+            await using Stream destination = File.OpenWrite(destinationPath!);
             if (destination.Length > 0)
             {
                 if (!overwrite)
                 {
-                    throw new Exception($"{destinationPath} exists and {nameof(overwrite)} is set to false");
+                    throw new Exception($"{destinationPath} exists and {nameof(overwrite)} is set to false.");
                 }
             }
 
-            await using Stream source = File.OpenRead(sourcePath);
+            await using Stream source = File.OpenRead(sourcePath!);
             var buffer = new byte[1024 * 1024];
             var totalLength = source.Length;
             var copiedBytesLength = 0L;
@@ -228,6 +245,8 @@ namespace Bootstrap.Components.Storage
                         percentage = newPercentage;
                     }
                 }
+
+                destination.SetLength(source.Length);
             }
             catch (Exception)
             {
