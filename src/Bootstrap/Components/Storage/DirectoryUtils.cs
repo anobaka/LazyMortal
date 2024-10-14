@@ -197,19 +197,19 @@ namespace Bootstrap.Components.Storage
             }
         }
 
-        public static async Task MoveAsync1(string sourcePath, string destinationPath, bool overwrite,
+        public static async Task MoveAsync(string sourcePath, string destinationPath, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
-            await CopyAsync1(sourcePath, destinationPath, overwrite, onProgressChange, ct, true);
+            await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, ct, true);
         }
 
-        public static async Task CopyAsync1(string sourcePath, string destinationPath, bool overwrite,
+        public static async Task CopyAsync(string sourcePath, string destinationPath, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct)
         {
-            await CopyAsync1(sourcePath, destinationPath, overwrite, onProgressChange, ct, false);
+            await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, ct, false);
         }
 
-        protected static async Task CopyAsync1(string sourcePath, string destinationPath, bool overwrite,
+        protected static async Task CopyAsync(string sourcePath, string destinationPath, bool overwrite,
             Func<int, Task> onProgressChange, CancellationToken ct, bool deleteAfter)
         {
             if (File.Exists(sourcePath) || File.Exists(destinationPath))
@@ -306,7 +306,7 @@ namespace Bootstrap.Components.Storage
                     async Task ProgressChange(int fileProgress)
                     {
                         var newDoneLength = fileLength / 100m * fileProgress;
-                        var newPercentage = (int) ((newDoneLength + length) / totalLength);
+                        var newPercentage = (int) ((newDoneLength + length) * 100 / totalLength);
                         if (newPercentage != percentage)
                         {
                             if (onProgressChange != null)

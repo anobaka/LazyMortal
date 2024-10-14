@@ -149,7 +149,7 @@ public class FileSystemTests
         }
 
         var func = async () =>
-            await DirectoryUtils.MoveAsync1(sourcePath, targetPath, true, async p => { }, new CancellationToken());
+            await DirectoryUtils.MoveAsync(sourcePath, targetPath, true, async p => { }, new CancellationToken());
         await func.Should().ThrowAsync<Exception>();
     }
 
@@ -183,12 +183,12 @@ public class FileSystemTests
         {
             if (isCopy)
             {
-                await DirectoryUtils.CopyAsync1(sourceDir, targetDir, overwrite, async p => { percentages.Add(p); },
+                await DirectoryUtils.CopyAsync(sourceDir, targetDir, overwrite, async p => { percentages.Add(p); },
                     new CancellationToken());
             }
             else
             {
-                await DirectoryUtils.MoveAsync1(sourceDir, targetDir, overwrite, async p => { percentages.Add(p); },
+                await DirectoryUtils.MoveAsync(sourceDir, targetDir, overwrite, async p => { percentages.Add(p); },
                     new CancellationToken());
             }
         }
