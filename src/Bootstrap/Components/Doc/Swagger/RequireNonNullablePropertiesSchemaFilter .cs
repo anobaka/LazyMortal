@@ -25,6 +25,17 @@ class RequiredNotNullableSchemaFilter : ISchemaFilter
         {
             schema.Required.Add(property.Key);
         }
+
+        // Use undefined instead of nullable.
+        var nullableProperties = schema.Properties
+            .Where(x => x.Value.Nullable)
+            .Select(x => x.Key)
+            .ToList();
+
+        foreach (var nullableProp in nullableProperties)
+        {
+            schema.Properties[nullableProp].Nullable = false;
+        }
     }
 
     /// <summary>
