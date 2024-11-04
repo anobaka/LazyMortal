@@ -230,7 +230,7 @@ namespace Bootstrap.Components.Storage
                 return;
             }
 
-            if (sourceDir.FullName.StartsWith(destinationDir.FullName))
+            if (destinationDir.FullName.StartsWith(sourceDir.FullName))
             {
                 throw new Exception($"{nameof(destinationPath)} can not be a sub path of {nameof(sourcePath)}");
             }
