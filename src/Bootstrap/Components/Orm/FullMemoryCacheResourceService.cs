@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Bootstrap.Components.Orm.Extensions;
 using Bootstrap.Components.Orm.Infrastructures;
 using Bootstrap.Extensions;
 using Bootstrap.Models.Constants;
@@ -35,6 +36,7 @@ namespace Bootstrap.Components.Orm
                     _cacheVault[key] = vault =
                         new ConcurrentDictionary<TKey, TResource>(
                             data.ToDictionary(FuncExtensions.BuildKeySelector<TResource, TKey>(), t => t));
+                    ResourceService.DbContext.DetachAll(data);
                 }
 
                 @lock.Release();
@@ -79,7 +81,8 @@ namespace Bootstrap.Components.Orm
             return data;
         }
 
-        public virtual async Task<TResource> GetFirst(Expression<Func<TResource, bool>> selector,
+        [ItemCanBeNull]
+        public virtual async Task<TResource> GetFirstOrDefault(Expression<Func<TResource, bool>> selector,
             Expression<Func<TResource, object>> orderBy = null, bool asc = false, bool asNoTracking = true)
         {
             var list = (await GetCacheVault()).Values.Where(selector.Compile());
@@ -92,7 +95,7 @@ namespace Bootstrap.Components.Orm
             var data = list.FirstOrDefault();
             if (asNoTracking)
             {
-                data = data.JsonCopy();
+                data = data?.JsonCopy();
             }
 
             return data;
