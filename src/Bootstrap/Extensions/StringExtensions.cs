@@ -5,13 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 
 namespace Bootstrap.Extensions
 {
     public static class StringExtensions
     {
-        public static bool IsNullOrEmpty([CanBeNull][NotNullWhen(false)] this string s) => string.IsNullOrEmpty(s);
-        public static bool IsNotEmpty([CanBeNull][NotNullWhen(true)] this string s) => !s.IsNullOrEmpty();
+        public static bool IsNullOrEmpty([CanBeNull] [NotNullWhen(false)] this string s) => string.IsNullOrEmpty(s);
+        public static bool IsNotEmpty([CanBeNull] [NotNullWhen(true)] this string s) => !s.IsNullOrEmpty();
         public static string ToNullIfEmpty([CanBeNull] this string s) => s.IsNullOrEmpty() ? null : s;
 
         public static string TrimEnd(this string s, params string[] trimStrings)
@@ -186,6 +187,42 @@ namespace Bootstrap.Extensions
             }
 
             return sb.ToString();
+        }
+
+        [CanBeNull]
+        public static T JsonDeserializeOrDefault<T>([CanBeNull] this string json)
+        {
+            if (!json.IsNullOrEmpty())
+            {
+                try
+                {
+                    return JsonConvert.DeserializeObject<T>(json!);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+            }
+
+            return default;
+        }
+
+        [CanBeNull]
+        public static object JsonDeserializeOrDefault([CanBeNull] this string json, Type type)
+        {
+            if (!json.IsNullOrEmpty())
+            {
+                try
+                {
+                    return JsonConvert.DeserializeObject(json!, type);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+            }
+
+            return default;
         }
     }
 }
