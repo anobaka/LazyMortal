@@ -10,7 +10,7 @@ namespace Bootstrap.Models.ResponseModels
         {
         }
 
-        public SingletonResponse([CanBeNull] T data)
+        public SingletonResponse([CanBeNull] T? data)
         {
             Data = data;
         }
