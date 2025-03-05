@@ -2,7 +2,7 @@
 
 namespace Bootstrap.Components.Configuration.Abstractions
 {
-    public interface IBOptions<TOptions>: IOptions<TOptions> where TOptions : class
+    public interface IBOptions<out TOptions>: IOptions<TOptions> where TOptions : class
     {
 
     }

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using JetBrains.Annotations;
+using Newtonsoft.Json;
 
 namespace Bootstrap.Extensions
 {
@@ -17,7 +18,7 @@ namespace Bootstrap.Extensions
 
         public static bool IsNull(this object t) => t == null;
 
-        public static string ToJson(this object obj)
+        public static string ToJson([CanBeNull] this object obj)
         {
             if (obj == null) return null;
             return JsonConvert.SerializeObject(obj);
