@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Bootstrap.Components.Tasks;
 using Bootstrap.Extensions;
 using FluentAssertions;
 using MailKit;
@@ -198,19 +199,19 @@ namespace Bootstrap.Components.Storage
         }
 
         public static async Task MoveAsync(string sourcePath, string destinationPath, bool overwrite,
-            Func<int, Task> onProgressChange, CancellationToken ct)
+            Func<int, Task> onProgressChange, PauseToken pt, CancellationToken ct)
         {
-            await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, ct, true);
+            await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, pt, ct, true);
         }
 
         public static async Task CopyAsync(string sourcePath, string destinationPath, bool overwrite,
-            Func<int, Task> onProgressChange, CancellationToken ct)
+            Func<int, Task> onProgressChange, PauseToken pt, CancellationToken ct)
         {
-            await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, ct, false);
+            await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, pt, ct, false);
         }
 
         protected static async Task CopyAsync(string sourcePath, string destinationPath, bool overwrite,
-            Func<int, Task> onProgressChange, CancellationToken ct, bool deleteAfter)
+            Func<int, Task> onProgressChange, PauseToken pt, CancellationToken ct, bool deleteAfter)
         {
             if (File.Exists(sourcePath) || File.Exists(destinationPath))
             {
@@ -319,11 +320,11 @@ namespace Bootstrap.Components.Storage
 
                     if (deleteAfter)
                     {
-                        await FileUtils.MoveAsync(e, targetPath, overwrite, ProgressChange, ct);
+                        await FileUtils.MoveAsync(e, targetPath, overwrite, ProgressChange, pt, ct);
                     }
                     else
                     {
-                        await FileUtils.CopyAsync(e, targetPath, overwrite, ProgressChange, ct);
+                        await FileUtils.CopyAsync(e, targetPath, overwrite, ProgressChange, pt, ct);
                     }
 
                     doneLength += fileLength;

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Bootstrap.Components.Tasks;
 using Bootstrap.Extensions;
 using Microsoft.Extensions.Primitives;
 using Microsoft.VisualBasic;
@@ -177,7 +178,7 @@ namespace Bootstrap.Components.Storage
 
 
         public static async Task MoveAsync(string sourcePath, string destinationPath, bool overwrite,
-            Func<int, Task> onProgressChange, CancellationToken ct)
+            Func<int, Task> onProgressChange, PauseToken pt, CancellationToken ct)
         {
             if (Directory.Exists(sourcePath) || Directory.Exists(destinationPath))
             {
@@ -192,13 +193,13 @@ namespace Bootstrap.Components.Storage
             }
             else
             {
-                await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, ct);
+                await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, pt, ct);
                 File.Delete(sourcePath!);
             }
         }
 
         public static async Task CopyAsync(string sourcePath, string destinationPath, bool overwrite,
-            Func<int, Task> onProgressChange, CancellationToken ct)
+            Func<int, Task> onProgressChange, PauseToken pt, CancellationToken ct)
         {
             if (Directory.Exists(sourcePath) || Directory.Exists(destinationPath))
             {
@@ -230,6 +231,7 @@ namespace Bootstrap.Components.Storage
             {
                 while (true)
                 {
+                    await pt.WaitWhilePausedAsync();
                     var readBytesLength = await source.ReadAsync(buffer, 0, buffer.Length, ct);
                     if (readBytesLength == 0)
                     {
