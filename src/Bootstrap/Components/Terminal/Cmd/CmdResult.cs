@@ -4,11 +4,14 @@ namespace Bootstrap.Components.Terminal.Cmd
 {
     public class CmdResult
     {
-        public CmdResult(int exitCode, [CanBeNull] string output, [CanBeNull] string error)
+        public string Command { get; }
+
+        public CmdResult(string command, int exitCode, [CanBeNull] string output, [CanBeNull] string error)
         {
             ExitCode = exitCode;
             Output = output;
             Error = error;
+            Command = command;
         }
 
         public int ExitCode { get; }
