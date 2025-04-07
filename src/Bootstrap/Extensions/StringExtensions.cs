@@ -90,7 +90,7 @@ namespace Bootstrap.Extensions
                         }
 
                         // Remove other bad chars
-                        return a.RemoveInvalidFileNameChars(invalidCharReplacement);
+                        return a.Trim().RemoveInvalidFileNameChars(invalidCharReplacement);
                     }));
 
 
