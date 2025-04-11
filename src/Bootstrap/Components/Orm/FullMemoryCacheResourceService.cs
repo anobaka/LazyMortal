@@ -29,17 +29,22 @@ namespace Bootstrap.Components.Orm
             if (!_cacheVault.TryGetValue(key, out var vault))
             {
                 var @lock = await _cacheVault.RequestLock(key);
-                // ignore the other concurrent requests
-                if (!_cacheVault.TryGetValue(key, out vault))
+                try
                 {
-                    var data = await ResourceService.GetAll(null);
-                    _cacheVault[key] = vault =
-                        new ConcurrentDictionary<TKey, TResource>(
-                            data.ToDictionary(FuncExtensions.BuildKeySelector<TResource, TKey>(), t => t));
-                    ResourceService.DbContext.DetachAll(data);
+                    // ignore the other concurrent requests
+                    if (!_cacheVault.TryGetValue(key, out vault))
+                    {
+                        var data = await ResourceService.GetAll(null);
+                        _cacheVault[key] = vault =
+                            new ConcurrentDictionary<TKey, TResource>(
+                                data.ToDictionary(FuncExtensions.BuildKeySelector<TResource, TKey>(), t => t));
+                        ResourceService.DbContext.DetachAll(data);
+                    }
                 }
-
-                @lock.Release();
+                finally
+                {
+                    @lock.Release();
+                }
             }
 
             return vault as ConcurrentDictionary<TKey, TResource>;
