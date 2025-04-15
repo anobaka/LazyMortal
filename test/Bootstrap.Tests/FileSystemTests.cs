@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Bootstrap.Components.Storage;
+using Bootstrap.Components.Tasks;
 using FluentAssertions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NPOI.SS.Formula.Functions;
@@ -86,12 +87,12 @@ public class FileSystemTests
         {
             if (isCopy)
             {
-                await FileUtils.CopyAsync(path, toPath, overwrite, async p => { percentages.Add(p); },
+                await FileUtils.CopyAsync(path, toPath, overwrite, async p => { percentages.Add(p); }, new PauseToken(),
                     new CancellationToken());
             }
             else
             {
-                await FileUtils.MoveAsync(path, toPath, overwrite, async p => { percentages.Add(p); },
+                await FileUtils.MoveAsync(path, toPath, overwrite, async p => { percentages.Add(p); }, new PauseToken(),
                     new CancellationToken());
             }
         }
@@ -149,7 +150,7 @@ public class FileSystemTests
         }
 
         var func = async () =>
-            await DirectoryUtils.MoveAsync(sourcePath, targetPath, true, async p => { }, new CancellationToken());
+            await DirectoryUtils.MoveAsync(sourcePath, targetPath, true, async p => { }, new PauseToken(), new CancellationToken());
         await func.Should().ThrowAsync<Exception>();
     }
 
@@ -183,12 +184,12 @@ public class FileSystemTests
         {
             if (isCopy)
             {
-                await DirectoryUtils.CopyAsync(sourceDir, targetDir, overwrite, async p => { percentages.Add(p); },
+                await DirectoryUtils.CopyAsync(sourceDir, targetDir, overwrite, async p => { percentages.Add(p); }, new PauseToken(),
                     new CancellationToken());
             }
             else
             {
-                await DirectoryUtils.MoveAsync(sourceDir, targetDir, overwrite, async p => { percentages.Add(p); },
+                await DirectoryUtils.MoveAsync(sourceDir, targetDir, overwrite, async p => { percentages.Add(p); }, new PauseToken(),
                     new CancellationToken());
             }
         }
