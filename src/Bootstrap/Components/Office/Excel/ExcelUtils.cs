@@ -30,8 +30,11 @@ namespace Bootstrap.Components.Office.Excel
 
                 var r = sheet.GetRow(cell.Top);
                 var c = r.GetCell(cell.Left);
-                sheet.AddMergedRegion(new CellRangeAddress(cell.Top, cell.Bottom, cell.Left, cell.Right));
-
+                if (cell.HashMultipleCells)
+                {
+                    sheet.AddMergedRegion(new CellRangeAddress(cell.Top, cell.Bottom, cell.Left, cell.Right));
+                }
+                
                 c.CellStyle = wb.CreateCellStyle();
 
                 if (cell.Bold)

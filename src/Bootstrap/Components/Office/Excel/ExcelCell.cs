@@ -11,5 +11,6 @@ namespace Bootstrap.Components.Office.Excel
         public string Content { get; set; }
         public bool Bold { get; set; }
         public HorizontalAlignment? HorizontalAlignment { get; set; }
+        public bool HashMultipleCells => Right > Left || Bottom > Top;
     }
 }
