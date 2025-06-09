@@ -11,6 +11,7 @@ namespace Bootstrap.Components.Miscellaneous.ResponseBuilders
         public static ListResponse<T> SystemError = Build(ResponseCode.SystemError);
         public static ListResponse<T> Unauthorized = Build(ResponseCode.Unauthorized);
         public static ListResponse<T> NotFound = Build(ResponseCode.NotFound);
+        public static ListResponse<T> NotModified = Build(ResponseCode.NotModified);
         public static ListResponse<T> Conflict = Build(ResponseCode.Conflict);
         public static ListResponse<T> Unauthenticated = Build(ResponseCode.Unauthenticated);
         public static ListResponse<T> Timeout = Build(ResponseCode.Timeout);
