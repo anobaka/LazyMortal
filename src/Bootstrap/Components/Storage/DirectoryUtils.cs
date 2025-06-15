@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Bootstrap.Components.Tasks;
+using Bootstrap.Components.Tasks.Progressor.Abstractions;
 using Bootstrap.Extensions;
 using FluentAssertions;
 using MailKit;
