@@ -262,12 +262,12 @@ namespace Bootstrap.Components.Storage
                 totalCount += newScannedCount;
                 if (totalCount > estimateTotalCount * 0.8)
                 {
-                    estimateTotalCount += 1;
+                    estimateTotalCount += newScannedCount;
                 }
                 else
                 {
-                    estimateTotalCount =
-                        Math.Max(totalCount, (int) (alpha * totalCount + (1 - alpha) * estimateTotalCount));
+                    // estimateTotalCount =
+                    //     Math.Max(totalCount, (int) (alpha * totalCount + (1 - alpha) * estimateTotalCount));
                 }
 
                 var np = totalCount * 100 / estimateTotalCount;
