@@ -10,6 +10,7 @@ using Bootstrap.Components.Tasks;
 using Bootstrap.Components.Tasks.Progressor.Abstractions;
 using Bootstrap.Extensions;
 using FluentAssertions;
+using JetBrains.Annotations;
 using MailKit;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.FileIO;
@@ -197,6 +198,124 @@ namespace Bootstrap.Components.Storage
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 0.4x slower than <see cref="Directory.EnumerateFileSystemEntries(string)"/>
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="onProgress"></param>
+        /// <returns></returns>
+        public static IEnumerable<(string Path, bool IsFile)> EnumerateFileSystemEntries(string path,
+            [CanBeNull] Action<int> onProgress)
+        {
+            var estimateTotalCount = GetEstimateFileSystemEntriesCount(path);
+            const float alpha = 0.2f;
+            const int maxProgress = 99;
+            const int maxProgressStep = 5;
+            var directories = new Queue<string>();
+            var eo = new EnumerationOptions
+            {
+                IgnoreInaccessible = true,
+                // RecurseSubdirectories = true,
+                ReturnSpecialDirectories = false
+            };
+            directories.Enqueue(path);
+            var totalCount = 0;
+            var progress = 0;
+
+            while (directories.Count > 0)
+            {
+                var currentDir = directories.Dequeue();
+                yield return (currentDir, false);
+
+                SetStatistics(1);
+
+                var files = new List<string>();
+                try
+                {
+                    foreach (var subDir in Directory.EnumerateDirectories(currentDir, "*", eo))
+                    {
+                        directories.Enqueue(subDir);
+                    }
+
+                    files.AddRange(Directory.EnumerateFiles(currentDir, "*", eo));
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine(ex.BuildFullInformationText());
+                }
+
+                SetStatistics(files.Count);
+
+                foreach (var file in files)
+                {
+                    yield return (file, true);
+                }
+            }
+
+            onProgress?.Invoke(100);
+            yield break;
+
+            void SetStatistics(int newScannedCount)
+            {
+                totalCount += newScannedCount;
+                if (totalCount > estimateTotalCount * 0.8)
+                {
+                    estimateTotalCount += 1;
+                }
+                else
+                {
+                    estimateTotalCount =
+                        Math.Max(totalCount, (int) (alpha * totalCount + (1 - alpha) * estimateTotalCount));
+                }
+
+                var np = totalCount * 100 / estimateTotalCount;
+                if (np != progress)
+                {
+                    np = Math.Min(maxProgress, Math.Min(progress + maxProgressStep, np));
+                    progress = np;
+                    onProgress?.Invoke(progress);
+                }
+            }
+        }
+
+        public static int GetEstimateFileSystemEntriesCount(string path)
+        {
+            var files = Directory.EnumerateFiles(path);
+            var filesCount = 0;
+            try
+            {
+                foreach (var unused in files)
+                {
+                    filesCount++;
+                }
+            }
+            catch (Exception e)
+            {
+                // ignored
+            }
+
+            var dirs = Directory.EnumerateDirectories(path);
+            var dirsCount = 0;
+            var fseCountInDir = -1;
+            try
+            {
+                foreach (var d in dirs)
+                {
+                    dirsCount++;
+                    if (fseCountInDir < 0)
+                    {
+                        fseCountInDir = GetEstimateFileSystemEntriesCount(d);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                // ignored
+            }
+
+            return filesCount + dirsCount * fseCountInDir;
         }
 
         public static async Task MoveAsync(string sourcePath, string destinationPath, bool overwrite,
