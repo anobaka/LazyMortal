@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Bootstrap.Extensions
 {
@@ -10,12 +11,19 @@ namespace Bootstrap.Extensions
             return SpecificEnumUtils<T>.Values.Contains(e);
         }
 
+        [CanBeNull]
         public static TAttribute GetAttribute<TAttribute>(this Enum value)
             where TAttribute : Attribute
         {
+            return value.GetAttributes<TAttribute>().FirstOrDefault();
+        }
+
+        public static TAttribute[] GetAttributes<TAttribute>(this Enum value)
+            where TAttribute : Attribute
+        {
             var enumType = value.GetType();
-            var name = Enum.GetName(enumType, value);
-            return enumType.GetField(name).GetCustomAttributes(false).OfType<TAttribute>().SingleOrDefault();
+            var name = Enum.GetName(enumType, value)!;
+            return enumType.GetField(name)!.GetCustomAttributes(false).OfType<TAttribute>().ToArray();
         }
 
         public static string GetDisplayName<T>(this T @enum) where T : Enum
