@@ -231,7 +231,7 @@ namespace Bootstrap.Components.Storage
             {
                 while (true)
                 {
-                    await pt.WaitWhilePausedAsync();
+                    await pt.WaitWhilePausedAsync(ct);
                     var readBytesLength = await source.ReadAsync(buffer, 0, buffer.Length, ct);
                     if (readBytesLength == 0)
                     {

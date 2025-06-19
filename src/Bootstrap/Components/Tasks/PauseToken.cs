@@ -13,8 +13,8 @@ public readonly struct PauseToken
         _source = source;
     }
 
-    public Task WaitWhilePausedAsync()
+    public Task WaitWhilePausedAsync(CancellationToken ct)
     {
-        return _source?.WaitWhilePausedAsync() ?? Task.CompletedTask;
+        return _source?.WaitWhilePausedAsync(ct) ?? Task.CompletedTask;
     }
 }

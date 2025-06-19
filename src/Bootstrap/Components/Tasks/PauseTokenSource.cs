@@ -5,7 +5,7 @@ using System;
 
 namespace Bootstrap.Components.Tasks;
 
-public class PauseTokenSource(CancellationToken ct)
+public class PauseTokenSource
 {
     private volatile TaskCompletionSource<bool>? _pauseTask;
 
@@ -14,8 +14,8 @@ public class PauseTokenSource(CancellationToken ct)
 
     public PauseToken Token => new PauseToken(this);
 
-    public event Func<Task>? OnWaitPauseStart;
-    public event Func<Task>? OnWaitPauseEnd;
+    public event Func<CancellationToken, Task>? OnPause;
+    public event Func<CancellationToken, Task>? OnResume;
 
     public void Pause()
     {
@@ -32,27 +32,22 @@ public class PauseTokenSource(CancellationToken ct)
         _pauseTask = null;
     }
 
-    internal async Task WaitWhilePausedAsync()
+    internal async Task WaitWhilePausedAsync(CancellationToken ct)
     {
         if (IsPauseRequested)
         {
-            if (OnWaitPauseStart != null)
+            if (OnPause != null)
             {
-                await OnWaitPauseStart();
+                await OnPause(ct);
             }
 
-            var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            var cancelTask = Task.Delay(Timeout.Infinite, cts.Token);
-            var completedTask = await Task.WhenAny(cancelTask, _pauseTask.Task);
-            await cts.CancelAsync();
-            if (completedTask == cancelTask)
-            {
-                throw new OperationCanceledException(ct);
-            }
+            var cancelTask = Task.Delay(Timeout.Infinite, ct);
+            await Task.WhenAny(cancelTask, _pauseTask.Task);
+            ct.ThrowIfCancellationRequested();
 
-            if (OnWaitPauseEnd != null)
+            if (OnResume != null)
             {
-                await OnWaitPauseEnd();
+                await OnResume(ct);
             }
         }
     }
