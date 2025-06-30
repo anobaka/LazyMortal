@@ -147,7 +147,7 @@ namespace Bootstrap.Extensions
             return type.GetSubclassDefinitionOfRawGeneric(generic) != null;
         }
 
-        public static Type GetSubclassDefinitionOfRawGeneric(this Type type, Type generic)
+        public static Type? GetSubclassDefinitionOfRawGeneric(this Type type, Type generic)
         {
             while (type != null && type != typeof(object))
             {
@@ -163,7 +163,7 @@ namespace Bootstrap.Extensions
             return null;
         }
 
-        public static Type GetSubclassTypeOfGenericDefinition(this Type type, Type generic)
+        public static Type? GetSubclassTypeOfGenericDefinition(this Type type, Type generic)
         {
             while (type != null && type != typeof(object))
             {

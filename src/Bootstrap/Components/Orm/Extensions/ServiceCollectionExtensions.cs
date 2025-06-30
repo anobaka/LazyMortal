@@ -13,11 +13,11 @@ namespace Bootstrap.Components.Orm.Extensions
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddBootstrapServices<TDbContext>(this IServiceCollection services,
-            Action<DbContextOptionsBuilder> configure = null) where TDbContext : DbContext =>
+            Action<DbContextOptionsBuilder>? configure = null) where TDbContext : DbContext =>
             AddBootstrapServices<TDbContext, TDbContext>(services, configure);
 
         public static IServiceCollection AddBootstrapServices<TDbContext, TDbContextImplementation>(
-            this IServiceCollection services, Action<DbContextOptionsBuilder> configure = null)
+            this IServiceCollection services, Action<DbContextOptionsBuilder>? configure = null)
             where TDbContext : DbContext where TDbContextImplementation : TDbContext
         {
             services.TryAddScoped<BaseService<TDbContext>>();
@@ -36,7 +36,7 @@ namespace Bootstrap.Components.Orm.Extensions
         /// <param name="configure"></param>
         /// <returns></returns>
         public static IServiceCollection AddServiceBootstrapServices<TDbContext>(
-            this IServiceCollection services, Type serviceType, Action<DbContextOptionsBuilder> configure = null)
+            this IServiceCollection services, Type serviceType, Action<DbContextOptionsBuilder>? configure = null)
             where TDbContext : DbContext
         {
             return services.AddServiceBootstrapServices<TDbContext, TDbContext>(serviceType, configure);
@@ -52,7 +52,7 @@ namespace Bootstrap.Components.Orm.Extensions
         /// <param name="configure"></param>
         /// <returns></returns>
         public static IServiceCollection AddServiceBootstrapServices<TDbContext, TDbContextImplementation>(
-            this IServiceCollection services, Type serviceType, Action<DbContextOptionsBuilder> configure = null)
+            this IServiceCollection services, Type serviceType, Action<DbContextOptionsBuilder>? configure = null)
             where TDbContextImplementation : TDbContext where TDbContext : DbContext
         {
             services.TryAddScoped(serviceType);

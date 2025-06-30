@@ -1,5 +1,8 @@
-﻿namespace Bootstrap.Components.Notification.Implementations.LeanCloud.ResponseModels
+﻿using System;
+
+namespace Bootstrap.Components.Notification.Implementations.LeanCloud.ResponseModels
 {
+    [Obsolete]
     public class LeanCloudResponseModel
     {
         public int Code { get; set; }

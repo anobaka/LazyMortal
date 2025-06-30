@@ -1,12 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MimeKit;
 
 namespace Bootstrap.Components.Notification.Abstractions.Infrastructures.Email
 {
+
     /// <summary>
     /// todo: Use more abstracter things than MimeKit.
     /// </summary>
+    [Obsolete]
     public interface IEmailSender
     {
         string DefaultSender { get; }

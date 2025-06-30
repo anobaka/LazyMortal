@@ -5,7 +5,7 @@ namespace Bootstrap.Components.Configuration;
 
 public class MemoryOptionsManager<TOptions> : AbstractOptionsManager<TOptions> where TOptions : class, new()
 {
-    private TOptions _options;
+    private TOptions _options = new();
     public override TOptions Value => _options;
 
     public override void Save(TOptions options)

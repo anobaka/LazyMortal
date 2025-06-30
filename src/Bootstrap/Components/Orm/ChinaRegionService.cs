@@ -8,9 +8,7 @@ using Newtonsoft.Json;
 
 namespace Bootstrap.Components.Orm
 {
-    /// <summary>
-    /// todo: redesign
-    /// </summary>
+    [Obsolete]
     public class
         ChinaRegionService<TDbContext, TRegion, TKey> : ActiveMultilevelResourceService<TDbContext, TRegion, TKey>
         where TDbContext : DbContext

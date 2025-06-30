@@ -13,8 +13,8 @@ namespace Bootstrap.Components.Logging.LogService.Models
         public LogLevel? Level { get; set; }
         public DateTime? StartDt { get; set; }
         public DateTime? EndDt { get; set; }
-        public string Logger { get; set; }
-        public string Event { get; set; }
-        public string Message { get; set; }
+        public string? Logger { get; set; }
+        public string? Event { get; set; }
+        public string? Message { get; set; }
     }
 }

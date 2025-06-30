@@ -89,7 +89,7 @@ namespace Bootstrap.Components.Miscellaneous
                     var authentication = await context.AuthenticateAsync();
                     // may be null
                     var principal = authentication.Principal;
-                    var isAuthenticated = principal?.Identity.IsAuthenticated == true;
+                    var isAuthenticated = principal?.Identity?.IsAuthenticated == true;
                     sw.Stop();
                     var lines = new List<string>
                     {
@@ -103,7 +103,7 @@ namespace Bootstrap.Components.Miscellaneous
                         $"body: {reqString}",
                         BuildDelimiter("session"),
                         $"authenticated: {isAuthenticated}",
-                        $"name: {principal?.Identity.Name}",
+                        $"name: {principal?.Identity?.Name}",
                         $"claims: {(principal != null ? $"{{{string.Join(", ", principal.Claims.Select(t => $"{t.Type}: {t.Value}"))}}}" : null)}",
                         BuildDelimiter("response"),
                         $"status: {context.Response.StatusCode}",

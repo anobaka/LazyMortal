@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Bootstrap.Components.Notification.Abstractions.Infrastructures;
 using Bootstrap.Components.Notification.Abstractions.Models.Constants;
 using Bootstrap.Components.Notification.Abstractions.Models.Entities;
@@ -7,6 +8,7 @@ using Bootstrap.Models.ResponseModels;
 
 namespace Bootstrap.Components.Notification.Implementations.WeChat
 {
+    [Obsolete]
     public class WeChatMessageSender : INotifier, IWeChatMessageSender
     {
         public async Task<BaseResponse> Send(WeChatTemplateMessageContent message)

@@ -48,7 +48,7 @@ namespace Bootstrap.Extensions
             while (!csvParser.EndOfData)
             {
                 // Read current line fields, pointer moves to the next line.
-                var fields = csvParser.ReadFields();
+                var fields = csvParser.ReadFields()!;
                 lines.Add(fields);
             }
 

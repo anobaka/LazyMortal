@@ -2,6 +2,7 @@
 
 namespace Bootstrap.Components.Configuration.SystemProperty.Attributes
 {
+    [Obsolete]
     [AttributeUsage(AttributeTargets.Field)]
     public class SystemPropertyKeyAttribute : Attribute
     {

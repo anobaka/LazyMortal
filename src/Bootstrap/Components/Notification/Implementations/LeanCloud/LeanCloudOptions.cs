@@ -1,5 +1,8 @@
-﻿namespace Bootstrap.Components.Notification.Implementations.LeanCloud
+﻿using System;
+
+namespace Bootstrap.Components.Notification.Implementations.LeanCloud
 {
+    [Obsolete]
     public class LeanCloudOptions
     {
         public string LcId { get; set; }

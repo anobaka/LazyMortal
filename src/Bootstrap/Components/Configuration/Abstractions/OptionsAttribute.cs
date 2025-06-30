@@ -8,8 +8,8 @@ namespace Bootstrap.Components.Configuration.Abstractions
     [AttributeUsage(AttributeTargets.Class)]
     public class OptionsAttribute : Attribute
     {
-        public string FileKey { get; set; }
-        public string OptionsKey { get; set; }
+        public string? FileKey { get; set; }
+        public string? OptionsKey { get; set; }
         /// <summary>
         /// 
         /// </summary>
@@ -19,7 +19,7 @@ namespace Bootstrap.Components.Configuration.Abstractions
         /// /// <param name="fileKey">
         /// The configuration file will be saved as {key}.{ext}. If it's not set, it will be word-separated, lowercased and '-'-joined <see cref="OptionsKey"/>
         /// </param>
-        public OptionsAttribute(string optionsKey = null, string fileKey = null)
+        public OptionsAttribute(string? optionsKey = null, string? fileKey = null)
         {
             OptionsKey = optionsKey;
             FileKey = fileKey;

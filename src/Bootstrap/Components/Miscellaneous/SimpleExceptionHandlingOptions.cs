@@ -10,6 +10,6 @@ namespace Bootstrap.Components.Miscellaneous
         /// Default value is true.
         /// </summary>
         public bool NoCache { get; set; } = true;
-        public Func<HttpResponse, Exception, Task> ModifyResponse { get; set; }
+        public Func<HttpResponse, Exception, Task>? ModifyResponse { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using MimeKit;
 
 namespace Bootstrap.Components.Notification.Abstractions.Infrastructures.Email
 {
+    [Obsolete]
     public interface IEmailNotifier : INotifier
     {
         string DefaultSender { get; }

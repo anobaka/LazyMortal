@@ -12,7 +12,7 @@ namespace Bootstrap.Extensions
             session.Set(key, Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(obj)));
         }
 
-        public static T Get<T>(this ISession session, string key)
+        public static T? Get<T>(this ISession session, string key)
         {
             var bytes = session.Get(key);
             if (bytes?.Any() == true)

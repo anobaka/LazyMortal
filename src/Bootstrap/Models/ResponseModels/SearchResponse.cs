@@ -23,7 +23,7 @@ namespace Bootstrap.Models.ResponseModels
         {
         }
 
-        public SearchResponse(int code, string message) : base(code, message)
+        public SearchResponse(int code, string? message) : base(code, message)
         {
         }
     }

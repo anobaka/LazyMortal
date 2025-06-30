@@ -6,7 +6,7 @@ namespace Bootstrap.Components.Terminal.Cmd
     {
         public string Command { get; }
 
-        public CmdResult(string command, int exitCode, [CanBeNull] string output, [CanBeNull] string error)
+        public CmdResult(string command, int exitCode, string? output, string? error)
         {
             ExitCode = exitCode;
             Output = output;
@@ -15,7 +15,7 @@ namespace Bootstrap.Components.Terminal.Cmd
         }
 
         public int ExitCode { get; }
-        [CanBeNull] public string Output { get; }
-        [CanBeNull] public string Error { get; set; }
+        public string? Output { get; }
+        public string? Error { get; set; }
     }
 }

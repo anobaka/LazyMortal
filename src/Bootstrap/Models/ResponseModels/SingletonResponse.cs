@@ -4,13 +4,13 @@ namespace Bootstrap.Models.ResponseModels
 {
     public class SingletonResponse<T> : BaseResponse
     {
-        [CanBeNull] public T Data { get; set; }
+        public T? Data { get; set; }
 
         public SingletonResponse()
         {
         }
 
-        public SingletonResponse([CanBeNull] T? data)
+        public SingletonResponse(T? data)
         {
             Data = data;
         }
@@ -19,7 +19,7 @@ namespace Bootstrap.Models.ResponseModels
         {
         }
 
-        public SingletonResponse(int code, string message) : base(code, message)
+        public SingletonResponse(int code, string? message) : base(code, message)
         {
         }
     }

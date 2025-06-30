@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -12,6 +13,7 @@ using Newtonsoft.Json;
 
 namespace Bootstrap.Components.Notification.Implementations.LeanCloud
 {
+    [Obsolete]
     public class LeanCloudSmsService
     {
         private readonly IOptions<LeanCloudOptions> _options;

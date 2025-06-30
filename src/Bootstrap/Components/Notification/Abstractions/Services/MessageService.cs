@@ -10,6 +10,7 @@ using Bootstrap.Models.ResponseModels;
 
 namespace Bootstrap.Components.Notification.Abstractions.Services
 {
+    [Obsolete]
     public class MessageService: ResourceService<NotificationDbContext, Message, int>
     {
         private IEnumerable<INotifier> Notifiers => GetRequiredService<IEnumerable<INotifier>>();

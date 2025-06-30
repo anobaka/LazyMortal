@@ -7,9 +7,9 @@ namespace Bootstrap.Components.Configuration.Abstractions
     /// </summary>
     public class OptionsDescriber
     {
-        public string FilePath { get; set; }
-        public string FileKey { get; set; }
-        public string OptionsKey { get; set; }
-        public Type OptionsType { get; set; }
+        public string FilePath { get; set; } = null!;
+        public string FileKey { get; set; } = null!;
+        public string OptionsKey { get; set; } = null!;
+        public Type OptionsType { get; set; } = null!;
     }
 }

@@ -32,7 +32,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <returns>Resolved service from current request scope. Or from global scope if it doesn't exist.</returns>
         protected virtual T GetRequiredService<T>() => ServiceProvider.GetRequiredService<T>();
 
-        protected virtual T GetService<T>() => ServiceProvider.GetService<T>();
+        protected virtual T? GetService<T>() => ServiceProvider.GetService<T>();
 
         /// <summary>
         /// 
@@ -42,7 +42,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
         protected virtual T GetRequiredService<T>(Type implementationType) where T : class
         {
             var instance = ServiceProvider.GetRequiredService(implementationType);
-            return instance as T;
+            return (instance as T)!;
         }
 
         #endregion

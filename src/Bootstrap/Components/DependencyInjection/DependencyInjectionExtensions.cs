@@ -19,7 +19,7 @@ namespace Bootstrap.Components.DependencyInjection
                 if (service.ServiceType != typeof(TServiceType))
                 {
                     services.Add(new ServiceDescriptor(SpecificTypeUtils<TServiceType>.Type,
-                        t => t.GetRequiredService(service.ImplementationType ?? service.ServiceType) as TServiceType,
+                        t => (t.GetRequiredService(service.ImplementationType ?? service.ServiceType) as TServiceType)!,
                         service.Lifetime));
                 }
             }

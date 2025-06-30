@@ -7,7 +7,7 @@ namespace Bootstrap.Extensions
     {
         public static Type Type = typeof(T);
 
-        private static PropertyInfo[] _propertyInfos;
+        private static PropertyInfo[]? _propertyInfos;
 
         public static PropertyInfo[] Properties => _propertyInfos ??= Type.GetProperties();
         public static TypeInfo TypeInfo => Type.GetCachedTypeInfo();

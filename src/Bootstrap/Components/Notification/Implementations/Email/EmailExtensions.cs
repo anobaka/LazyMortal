@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 
 namespace Bootstrap.Components.Notification.Implementations.Email
 {
+    [Obsolete]
     public static class EmailExtensions
     {
         public static string ToBase64String(this MimeMessage message)

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DotNext.Threading;
-using JetBrains.Annotations;
 
 namespace Bootstrap.Components.Tasks;
 
-public class BProgressor([CanBeNull] Func<int, Task> onChange) : IAsyncDisposable
+public class BProgressor(Func<int, Task>? onChange) : IAsyncDisposable
 {
     private Atomic<float> _progress;
     private Atomic<int> _lastReported;

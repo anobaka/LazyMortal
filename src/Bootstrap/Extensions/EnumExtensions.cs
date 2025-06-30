@@ -11,8 +11,7 @@ namespace Bootstrap.Extensions
             return SpecificEnumUtils<T>.Values.Contains(e);
         }
 
-        [CanBeNull]
-        public static TAttribute GetAttribute<TAttribute>(this Enum value)
+        public static TAttribute? GetAttribute<TAttribute>(this Enum value)
             where TAttribute : Attribute
         {
             return value.GetAttributes<TAttribute>().FirstOrDefault();

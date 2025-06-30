@@ -15,10 +15,10 @@ namespace Bootstrap.Components.Miscellaneous.ResponseBuilders
         public static SingletonResponse<T> Unauthenticated = Build(ResponseCode.Unauthenticated);
         public static SingletonResponse<T> Timeout = Build(ResponseCode.Timeout);
 
-        public static SingletonResponse<T> Build(ResponseCode code, string message = null) =>
+        public static SingletonResponse<T> Build(ResponseCode code, string? message = null) =>
             new((int) code, message ?? code.GetDisplayName());
 
-        public static SingletonResponse<T> BuildBadRequest(string message) =>
+        public static SingletonResponse<T> BuildBadRequest(string? message) =>
             Build(ResponseCode.InvalidPayloadOrOperation, message);
     }
 }

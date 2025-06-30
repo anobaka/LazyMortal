@@ -2,7 +2,7 @@
 {
     public class AdbOptions
     {
-        public string ExecutablePath { get; set; }
-        public string TempFilePath { get; set; }
+        public string? ExecutablePath { get; set; }
+        public string? TempFilePath { get; set; }
     }
 }

@@ -1,5 +1,8 @@
-﻿namespace Bootstrap.Components.Notification.Abstractions.Models.Constants
+﻿using System;
+
+namespace Bootstrap.Components.Notification.Abstractions.Models.Constants
 {
+    [Obsolete]
     public enum MessageStatus
     {
         ToBeSent = 0,

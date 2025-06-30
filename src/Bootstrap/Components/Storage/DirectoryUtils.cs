@@ -3,18 +3,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Bootstrap.Components.Tasks;
-using Bootstrap.Components.Tasks.Progressor.Abstractions;
 using Bootstrap.Extensions;
 using FluentAssertions;
 using JetBrains.Annotations;
-using MailKit;
-using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.FileIO;
-using NPOI.SS.Formula.Functions;
 using FileSystem = Microsoft.VisualBasic.FileIO.FileSystem;
 using SearchOption = System.IO.SearchOption;
 
@@ -207,10 +202,9 @@ namespace Bootstrap.Components.Storage
         /// <param name="onProgress"></param>
         /// <returns></returns>
         public static IEnumerable<(string Path, bool IsFile)> EnumerateFileSystemEntries(string path,
-            [CanBeNull] Action<int> onProgress)
+            Action<int>? onProgress)
         {
             var estimateTotalCount = GetEstimateFileSystemEntriesCount(path);
-            const float alpha = 0.2f;
             const int maxProgress = 99;
             const int maxProgressStep = 5;
             var directories = new Queue<string>();
@@ -291,7 +285,7 @@ namespace Bootstrap.Components.Storage
                     filesCount++;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // ignored
             }
@@ -310,7 +304,7 @@ namespace Bootstrap.Components.Storage
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // ignored
             }
@@ -319,35 +313,39 @@ namespace Bootstrap.Components.Storage
         }
 
         public static async Task MoveAsync(string sourcePath, string destinationPath, bool overwrite,
-            Func<int, Task> onProgressChange, PauseToken pt, CancellationToken ct)
+            Func<int, Task>? onProgressChange, PauseToken pt, CancellationToken ct)
         {
             await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, pt, ct, true);
         }
 
         public static async Task CopyAsync(string sourcePath, string destinationPath, bool overwrite,
-            Func<int, Task> onProgressChange, PauseToken pt, CancellationToken ct)
+            Func<int, Task>? onProgressChange, PauseToken pt, CancellationToken ct)
         {
             await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, pt, ct, false);
         }
 
         protected static async Task CopyAsync(string sourcePath, string destinationPath, bool overwrite,
-            Func<int, Task> onProgressChange, PauseToken pt, CancellationToken ct, bool deleteAfter)
+            Func<int, Task>? onProgressChange, PauseToken pt, CancellationToken ct, bool deleteAfter)
         {
             if (File.Exists(sourcePath) || File.Exists(destinationPath))
             {
                 throw new Exception($"The {nameof(sourcePath)} or {nameof(destinationPath)} cannot be a file.");
             }
 
-            var sourceDir = new DirectoryInfo(sourcePath!);
+            var sourceDir = new DirectoryInfo(sourcePath);
             if (!sourceDir.Exists)
             {
                 throw new Exception($"{sourcePath} is not found");
             }
 
-            var destinationDir = new DirectoryInfo(destinationPath!);
+            var destinationDir = new DirectoryInfo(destinationPath);
             if (sourceDir.FullName == destinationDir.FullName)
             {
-                await onProgressChange(100);
+                if (onProgressChange != null)
+                {
+                    await onProgressChange(100);
+                }
+
                 return;
             }
 
@@ -369,7 +367,7 @@ namespace Bootstrap.Components.Storage
             var entries = files.Concat(directories).OrderBy(x => x, StringComparer.CurrentCultureIgnoreCase).ToList();
 
             var dirDependencyMap = entries.Select(e => (Path: e, Directory: Path.GetDirectoryName(e)))
-                .GroupBy(d => d.Directory).ToDictionary(x => x.Key, x => x.Select(y => y.Path).ToHashSet());
+                .GroupBy(d => d.Directory).ToDictionary(x => x.Key!, x => x.Select(y => y.Path).ToHashSet());
             var reversedDirDependencyMap = dirDependencyMap.SelectMany(x => x.Value.Select(a => (Dir: x.Key, Dep: a)))
                 .ToDictionary(d => d.Dep, d => d.Dir);
 
@@ -387,7 +385,7 @@ namespace Bootstrap.Components.Storage
             var conflictFiles = new List<string>();
             var missingFiles = new List<string>();
 
-            Directory.CreateDirectory(destinationPath!);
+            Directory.CreateDirectory(destinationPath);
 
             if (!entries.Any() && deleteAfter)
             {
@@ -396,7 +394,7 @@ namespace Bootstrap.Components.Storage
 
             foreach (var e in entries)
             {
-                var targetPath = Path.Combine(destinationPath!, e.Replace(sourceDir.FullName, destinationDir.FullName));
+                var targetPath = Path.Combine(destinationPath, e.Replace(sourceDir.FullName, destinationDir.FullName));
                 var isFileOrEmptyDirectory = !dirDependencyMap.TryGetValue(e, out var tmpDependencies) || !tmpDependencies.Any();
                 var isDirectory = directories.Contains(e);
                 if (isDirectory)

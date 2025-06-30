@@ -7,7 +7,7 @@ public static class DbContextExtensions
 {
     public static void Detach<TResource>(this DbContext ctx, TResource resource)
     {
-        ctx.Entry(resource).State = EntityState.Detached;
+        ctx.Entry(resource!).State = EntityState.Detached;
     }
 
     public static void DetachAll<TResource>(this DbContext ctx, IEnumerable<TResource> resources)

@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Bootstrap.Components.Notification.Abstractions.Extensions
 {
+    [Obsolete]
     public static class NotificationServiceCollectionExtensions
     {
         public static IServiceCollection AddBootstrapNotificationService<TDbContextImplementation>(

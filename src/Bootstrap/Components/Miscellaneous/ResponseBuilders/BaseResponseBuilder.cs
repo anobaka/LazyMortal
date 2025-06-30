@@ -17,10 +17,10 @@ namespace Bootstrap.Components.Miscellaneous.ResponseBuilders
         public static BaseResponse Timeout = Build(ResponseCode.Timeout);
         public static BaseResponse NotModified = Build(ResponseCode.NotModified);
 
-        public static BaseResponse Build(ResponseCode code, string message = null) =>
+        public static BaseResponse Build(ResponseCode code, string? message = null) =>
             new BaseResponse((int) code, message ?? code.GetDisplayName());
 
-        public static BaseResponse BuildBadRequest(string message) => Build(ResponseCode.InvalidPayloadOrOperation, message);
-        public static BaseResponse BuildUnauthorized(string message) => Build(ResponseCode.Unauthorized, message);
+        public static BaseResponse BuildBadRequest(string? message) => Build(ResponseCode.InvalidPayloadOrOperation, message);
+        public static BaseResponse BuildUnauthorized(string? message) => Build(ResponseCode.Unauthorized, message);
     }
 }

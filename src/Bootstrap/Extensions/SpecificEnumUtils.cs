@@ -10,7 +10,7 @@ namespace Bootstrap.Extensions
         public static readonly IReadOnlySet<TEnum> Values = Enum.GetValues(SpecificTypeUtils<TEnum>.Type).Cast<TEnum>()
             .ToHashSet();
 
-        private static Dictionary<TEnum, string> _displayNames;
+        private static Dictionary<TEnum, string>? _displayNames;
 
         public static Dictionary<TEnum, string> DisplayNames =>
             _displayNames ??=
@@ -24,7 +24,7 @@ namespace Bootstrap.Extensions
                 return true;
             }
 
-            e = default;
+            e = default!;
             return false;
         }
     }

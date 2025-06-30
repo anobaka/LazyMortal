@@ -11,9 +11,9 @@ namespace Bootstrap.Extensions
 {
     public static class StringExtensions
     {
-        public static bool IsNullOrEmpty([CanBeNull] [NotNullWhen(false)] this string s) => string.IsNullOrEmpty(s);
-        public static bool IsNotEmpty([CanBeNull] [NotNullWhen(true)] this string s) => !s.IsNullOrEmpty();
-        public static string ToNullIfEmpty([CanBeNull] this string s) => s.IsNullOrEmpty() ? null : s;
+        public static bool IsNullOrEmpty([NotNullWhen(false)] this string? s) => string.IsNullOrEmpty(s);
+        public static bool IsNotEmpty([NotNullWhen(true)] this string? s) => !s.IsNullOrEmpty();
+        public static string? ToNullIfEmpty(this string? s) => s.IsNullOrEmpty() ? null : s;
 
         public static string TrimEnd(this string s, params string[] trimStrings)
         {
@@ -53,7 +53,7 @@ namespace Bootstrap.Extensions
 
         public static string Format(this string s, params object[] args) => string.Format(s, args);
 
-        public static string RemoveInvalidFileNameChars(this string filename, string invalidCharReplacement = "_")
+        public static string? RemoveInvalidFileNameChars(this string filename, string invalidCharReplacement = "_")
         {
             if (filename.IsNullOrEmpty())
             {
@@ -66,7 +66,7 @@ namespace Bootstrap.Extensions
             return filename;
         }
 
-        public static string RemoveInvalidFilePathChars(this string fullname, string invalidCharReplacement = "_")
+        public static string? RemoveInvalidFilePathChars(this string fullname, string invalidCharReplacement = "_")
         {
             if (fullname.IsNullOrEmpty())
             {
@@ -116,7 +116,7 @@ namespace Bootstrap.Extensions
         /// results in satisfying .EndsWith(ending).
         /// </summary>
         /// <example>"hel".WithEnding("llo") returns "hello", which is the result of "hel" + "lo".</example>
-        public static string MakeEndWith([CanBeNull] this string str, string ending)
+        public static string MakeEndWith(this string? str, string ending)
         {
             if (str == null)
                 return ending;
@@ -138,7 +138,7 @@ namespace Bootstrap.Extensions
         /// <param name="value">The string to retrieve the substring from.</param>
         /// <param name="length">The number of characters to retrieve.</param>
         /// <returns>The substring.</returns>
-        public static string SubstringFromEnd([JetBrains.Annotations.NotNull] this string value, int length)
+        public static string SubstringFromEnd(this string value, int length)
         {
             if (value == null)
             {
@@ -153,7 +153,7 @@ namespace Bootstrap.Extensions
             return length < value.Length ? value[^length..] : value;
         }
 
-        public static string[] FindTopLevelPaths([JetBrains.Annotations.NotNull] this string[] paths)
+        public static string[] FindTopLevelPaths(this string[] paths)
         {
             if (paths == null)
             {
@@ -189,8 +189,7 @@ namespace Bootstrap.Extensions
             return sb.ToString();
         }
 
-        [CanBeNull]
-        public static T JsonDeserializeOrDefault<T>([CanBeNull] this string json)
+        public static T? JsonDeserializeOrDefault<T>(this string? json)
         {
             if (!json.IsNullOrEmpty())
             {
@@ -207,8 +206,7 @@ namespace Bootstrap.Extensions
             return default;
         }
 
-        [CanBeNull]
-        public static object JsonDeserializeOrDefault([CanBeNull] this string json, Type type)
+        public static object? JsonDeserializeOrDefault(this string? json, Type type)
         {
             if (!json.IsNullOrEmpty())
             {

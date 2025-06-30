@@ -28,11 +28,11 @@ namespace Bootstrap.Models
         /// </summary>
         public TimeSpan RunTime => ExitTime - StartTime;
 
-        public string Error { get; init; }
+        public string? Error { get; init; }
     }
 
     public class CommandResult<T> : CommandResult
     {
-        public T Output { get; set; }
+        public T? Output { get; set; }
     }
 }

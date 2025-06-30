@@ -1,11 +1,12 @@
-﻿using Microsoft.Extensions.Localization;
+﻿using JetBrains.Annotations;
+using Microsoft.Extensions.Localization;
 
 namespace Bootstrap.Models.ResponseModels
 {
     public class BaseResponse
     {
         public int Code { get; set; }
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
         public BaseResponse()
         {
@@ -16,7 +17,7 @@ namespace Bootstrap.Models.ResponseModels
             Code = code;
         }
 
-        public BaseResponse(int code, string message)
+        public BaseResponse(int code, string? message)
         {
             Code = code;
             Message = message;

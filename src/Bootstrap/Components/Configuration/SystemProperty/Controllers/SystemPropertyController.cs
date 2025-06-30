@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Bootstrap.Components.Configuration.SystemProperty.Models.Dtos;
 using Bootstrap.Components.Configuration.SystemProperty.Models.RequestModels;
 using Bootstrap.Components.Configuration.SystemProperty.Services;
@@ -9,6 +10,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace Bootstrap.Components.Configuration.SystemProperty.Controllers
 {
+    [Obsolete]
     [Route("~/system-property")]
     public abstract class SystemPropertyController : Controller
     {

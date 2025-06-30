@@ -49,9 +49,9 @@ namespace Bootstrap.Components.Logging.LogService.Services
                 l => (!model.Level.HasValue || model.Level.Value == l.Level)
                      && (!model.StartDt.HasValue || model.StartDt <= l.DateTime)
                      && (!model.EndDt.HasValue || model.EndDt >= l.DateTime)
-                     && (string.IsNullOrEmpty(model.Logger) || l.Logger.Contains(model.Logger))
-                     && (string.IsNullOrEmpty(model.Event) || l.Logger.Contains(model.Event))
-                     && (string.IsNullOrEmpty(model.Message) || l.Logger.Contains(model.Message));
+                     && (string.IsNullOrEmpty(model.Logger) || l.Logger != null && l.Logger.Contains(model.Logger))
+                     && (string.IsNullOrEmpty(model.Event) || l.Event != null && l.Event.Contains(model.Event))
+                     && (string.IsNullOrEmpty(model.Message) || l.Message != null && l.Message.Contains(model.Message));
             var data = await DbContext.Logs.OrderByDescending(a => a.DateTime).Where(exp).Skip(model.SkipCount)
                 .Take(model.PageSize).ToListAsync();
             var count = await DbContext.Logs.CountAsync(exp);

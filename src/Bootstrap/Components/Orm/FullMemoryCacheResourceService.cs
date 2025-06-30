@@ -13,12 +13,11 @@ using Bootstrap.Models.ResponseModels;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using NPOI.SS.Formula.Functions;
 
 namespace Bootstrap.Components.Orm
 {
     public class FullMemoryCacheResourceService<TDbContext, TResource, TKey> : ServiceBase<TDbContext>
-        where TDbContext : DbContext where TResource : class
+        where TDbContext : DbContext where TResource : class where TKey : notnull
     {
         protected ResourceService<TDbContext, TResource, TKey> ResourceService;
         private readonly GlobalCacheVault _cacheVault;
@@ -47,7 +46,7 @@ namespace Bootstrap.Components.Orm
                 }
             }
 
-            return vault as ConcurrentDictionary<TKey, TResource>;
+            return (vault as ConcurrentDictionary<TKey, TResource>)!;
         }
 
         public FullMemoryCacheResourceService(IServiceProvider serviceProvider) : base(serviceProvider)
@@ -62,9 +61,9 @@ namespace Bootstrap.Components.Orm
             _cacheVault.TryRemove(key, out _);
         }
 
-        public virtual async Task<TResource> GetByKey(TKey key, bool asNoTracking = true)
+        public virtual async Task<TResource?> GetByKey(TKey key, bool asNoTracking = true)
         {
-            var data = (await GetCacheVault()).TryGetValue(key, out var v) ? v : null;
+            var data = (await GetCacheVault()).GetValueOrDefault(key);
             if (asNoTracking)
             {
                 data = data.JsonCopy();
@@ -76,7 +75,7 @@ namespace Bootstrap.Components.Orm
         public virtual async Task<TResource[]> GetByKeys(IEnumerable<TKey> keys, bool asNoTracking = true)
         {
             var cache = await GetCacheVault();
-            var data = keys.Select(k => cache.TryGetValue(k, out var v) ? v : null).Where(v => v != null)
+            var data = keys.Select(k => cache.GetValueOrDefault(k)).OfType<TResource>()
                 .ToArray();
             if (asNoTracking)
             {
@@ -86,11 +85,11 @@ namespace Bootstrap.Components.Orm
             return data;
         }
 
-        [ItemCanBeNull]
-        public virtual async Task<TResource> GetFirstOrDefault(Expression<Func<TResource, bool>> selector,
-            Expression<Func<TResource, object>> orderBy = null, bool asc = false, bool asNoTracking = true)
+        public virtual async Task<TResource?> GetFirstOrDefault(Expression<Func<TResource, bool>>? selector,
+            Expression<Func<TResource, object>>? orderBy = null, bool asc = false, bool asNoTracking = true)
         {
-            var list = (await GetCacheVault()).Values.Where(selector.Compile());
+            var vault = (await GetCacheVault());
+            var list = selector == null ? vault.Values : vault.Values.Where(selector.Compile());
             if (orderBy != null)
             {
                 var ob = orderBy.Compile();
@@ -106,7 +105,7 @@ namespace Bootstrap.Components.Orm
             return data;
         }
 
-        public virtual async Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null, bool asNoTracking = true)
+        public virtual async Task<List<TResource>> GetAll(Expression<Func<TResource, bool>>? selector = null, bool asNoTracking = true)
         {
             var data = (selector == null
                     ? (await GetCacheVault()).Values
@@ -120,11 +119,11 @@ namespace Bootstrap.Components.Orm
             return data;
         }
 
-        public virtual async Task<int> Count(Func<TResource, bool> selector = null) => selector == null
+        public virtual async Task<int> Count(Func<TResource, bool>? selector = null) => selector == null
             ? (await GetCacheVault()).Values.Count
             : (await GetCacheVault()).Values.Count(selector);
 
-        public virtual async Task<bool> Any([CanBeNull] Func<TResource, bool> selector = null) => selector == null
+        public virtual async Task<bool> Any(Func<TResource, bool>? selector = null) => selector == null
             ? (await GetCacheVault()).Values.Any()
             : (await GetCacheVault()).Values.Any(selector);
 
@@ -137,8 +136,8 @@ namespace Bootstrap.Components.Orm
         /// <param name="orders">Key Selector - Asc</param>
         /// <param name="asNoTracking"></param>
         /// <returns></returns>
-        public virtual async Task<SearchResponse<TResource>> Search(Func<TResource, bool> selector,
-            int pageIndex, int pageSize, (Func<TResource, object> SelectKey, bool Asc, IComparer<object>? comparer)[] orders,
+        public virtual async Task<SearchResponse<TResource>> Search(Func<TResource, bool>? selector,
+            int pageIndex, int pageSize, (Func<TResource, object> SelectKey, bool Asc, IComparer<object>? comparer)[]? orders,
             bool asNoTracking = true)
         {
             var cache = await GetCacheVault();
@@ -171,8 +170,8 @@ namespace Bootstrap.Components.Orm
             return result;
         }
 
-        public virtual Task<SearchResponse<TResource>> Search(Func<TResource, bool> selector,
-            int pageIndex, int pageSize, Func<TResource, object> orderBy = null, bool asc = false, IComparer<object>? comparer = null, bool asNoTracking = true)
+        public virtual Task<SearchResponse<TResource>> Search(Func<TResource, bool>? selector,
+            int pageIndex, int pageSize, Func<TResource, object>? orderBy = null, bool asc = false, IComparer<object>? comparer = null, bool asNoTracking = true)
         {
             var orders = orderBy == null ? null : new[] {(orderBy, asc, comparer)};
             var r = Search(selector, pageIndex, pageSize, orders, asNoTracking);
@@ -263,7 +262,7 @@ namespace Bootstrap.Components.Orm
             return rsp;
         }
 
-        public virtual async Task<SingletonResponse<TResource>> UpdateByKey(TKey key, Action<TResource> modify)
+        public virtual async Task<SingletonResponse<TResource?>> UpdateByKey(TKey key, Action<TResource> modify)
         {
             var rsp = await ResourceService.UpdateByKey(key, modify);
             if (rsp.Data != null)

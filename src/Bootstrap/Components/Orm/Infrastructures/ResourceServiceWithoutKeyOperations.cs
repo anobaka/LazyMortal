@@ -25,8 +25,8 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <param name="orderBy"></param>
         /// <param name="asc"></param>
         /// <returns></returns>
-        public virtual Task<TResource> GetFirst(Expression<Func<TResource, bool>> selector,
-            Expression<Func<TResource, object>> orderBy = null,
+        public virtual Task<TResource?> GetFirst(Expression<Func<TResource, bool>> selector,
+            Expression<Func<TResource, object>>? orderBy = null,
             bool asc = false) => BaseService.GetFirst(selector, orderBy, asc);
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// </summary>
         /// <param name="selector">为空则获取全部</param>
         /// <returns></returns>
-        public virtual Task<List<TResource>> GetAll(Expression<Func<TResource, bool>> selector = null) =>
+        public virtual Task<List<TResource>> GetAll(Expression<Func<TResource, bool>>? selector = null) =>
             BaseService.GetAll(selector);
 
         /// <summary>
@@ -48,9 +48,9 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <param name="include"></param>
         /// <returns></returns>
         public virtual Task<SearchResponse<TResource>> Search(
-            Expression<Func<TResource, bool>> selector, int pageIndex, int pageSize,
-            Expression<Func<TResource, object>> orderBy = null, bool asc = false,
-            Expression<Func<TResource, object>> include = null) =>
+            Expression<Func<TResource, bool>>? selector, int pageIndex, int pageSize,
+            Expression<Func<TResource, object>>? orderBy = null, bool asc = false,
+            Expression<Func<TResource, object>>? include = null) =>
             BaseService.Search(selector, pageIndex, pageSize, orderBy, asc, include);
 
         public virtual Task<BaseResponse> Remove(TResource resource) => BaseService.Remove(resource);

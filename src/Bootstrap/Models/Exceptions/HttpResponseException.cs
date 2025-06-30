@@ -14,7 +14,7 @@ namespace Bootstrap.Models.Exceptions
             StatusCode = statusCode;
         }
 
-        public HttpResponseException(HttpStatusCode statusCode, string message) : base(message)
+        public HttpResponseException(HttpStatusCode statusCode, string? message) : base(message)
         {
             StatusCode = statusCode;
         }
@@ -25,13 +25,13 @@ namespace Bootstrap.Models.Exceptions
             ErrorCode = errorCode;
         }
 
-        public HttpResponseException(HttpStatusCode statusCode, int errorCode, string message) : base(message)
+        public HttpResponseException(HttpStatusCode statusCode, int errorCode, string? message) : base(message)
         {
             StatusCode = statusCode;
             ErrorCode = errorCode;
         }
 
-        public HttpResponseException(HttpStatusCode statusCode, int errorCode, string message, Exception inner) : base(
+        public HttpResponseException(HttpStatusCode statusCode, int errorCode, string? message, Exception? inner) : base(
             message,
             inner)
         {

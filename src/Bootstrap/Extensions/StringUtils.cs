@@ -14,12 +14,12 @@ namespace Bootstrap.Extensions
             return Random.Next(Convert.ToInt32(Math.Pow(10, length))).ToString($"D{length}");
         }
 
-        public static string GenerateOrderNo(string prefix = null)
+        public static string GenerateOrderNo(string? prefix = null)
         {
-            return GenerateOrderNoList(1, prefix).FirstOrDefault();
+            return GenerateOrderNoList(1, prefix).First();
         }
 
-        public static string[] GenerateOrderNoList(int count, string prefix = null)
+        public static string[] GenerateOrderNoList(int count, string? prefix = null)
         {
             prefix = $"{prefix}{DateTime.Now:yyyyMMddHHmmssfff}";
             var suffixInt = GetRandomNumber(6);
@@ -138,7 +138,7 @@ namespace Bootstrap.Extensions
                 for (var j = 0; j < table.Count; j++)
                 {
                     var r = table[j];
-                    string p = null;
+                    string? p = null;
                     if (r.Count > i)
                     {
                         p = r[i];

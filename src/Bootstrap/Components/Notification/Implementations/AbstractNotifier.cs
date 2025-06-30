@@ -11,6 +11,7 @@ using Bootstrap.Models.ResponseModels;
 
 namespace Bootstrap.Components.Notification.Implementations
 {
+    [Obsolete]
     public abstract class AbstractNotifier<TMessageData> : INotifier where TMessageData : class
     {
         private readonly MessageService _messageService;

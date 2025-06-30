@@ -3,6 +3,7 @@ using Bootstrap.Components.Notification.Abstractions.Models.Constants;
 
 namespace Bootstrap.Components.Notification.Abstractions.Models.RequestModels
 {
+    [Obsolete]
     public class CommonMessageSendRequestModel
     {
         public string Receiver { get; set; }

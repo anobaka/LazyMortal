@@ -8,8 +8,8 @@ namespace Bootstrap.Components.Storage;
 
 public class DirectoryMovingException : Exception
 {
-    [CanBeNull] public string[] MissingFiles { get; init; } = null;
-    [CanBeNull] public string[] ConflictFiles { get; init; } = null;
+    public string[]? MissingFiles { get; init; } = null;
+    public string[]? ConflictFiles { get; init; } = null;
 
     public override string Message
     {

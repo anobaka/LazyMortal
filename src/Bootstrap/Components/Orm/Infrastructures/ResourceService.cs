@@ -21,8 +21,8 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public virtual async Task<TResource> GetByKey(TKey key) =>
-            await BaseService.GetByKey<TResource>(key);
+        public virtual async Task<TResource?> GetByKey(TKey key) =>
+            await BaseService.GetByKey<TResource>(key!);
 
         /// <summary>
         /// 
@@ -32,7 +32,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
         public virtual async Task<List<TResource>> GetByKeys(IEnumerable<TKey> keys) =>
             await BaseService.GetByKeys<TResource>(keys.Cast<object>());
 
-        public virtual Task<SingletonResponse<TResource>> UpdateByKey(TKey key, Action<TResource> modify) =>
+        public virtual Task<SingletonResponse<TResource?>> UpdateByKey(TKey key, Action<TResource> modify) =>
             BaseService.UpdateByKey(key, modify);
 
         public virtual Task<ListResponse<TResource>> UpdateByKeys(IReadOnlyCollection<TKey> keys,
@@ -43,7 +43,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public virtual Task<BaseResponse> RemoveByKey(TKey key) => BaseService.RemoveByKey<TResource>(key);
+        public virtual Task<BaseResponse> RemoveByKey(TKey key) => BaseService.RemoveByKey<TResource>(key!);
 
         /// <summary>
         /// 删除

@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Bootstrap.Components.Configuration.SystemProperty.Extensions
 {
+    [Obsolete]
     public static class SystemPropertyServiceCollectionExtensions
     {
         /// <summary>

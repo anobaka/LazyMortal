@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Bootstrap.Models.ResponseModels
 {
@@ -17,7 +18,7 @@ namespace Bootstrap.Models.ResponseModels
         {
         }
 
-        public ListResponse(int code, string message) : base(code, message)
+        public ListResponse(int code, string? message) : base(code, message)
         {
         }
     }

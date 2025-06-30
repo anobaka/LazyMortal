@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Bootstrap.Components.Configuration.SystemProperty.Extensions
 {
+    [Obsolete]
     public static class SystemPropertyExtensions
     {
         public static SystemPropertyDto ToDto(this Models.Entities.SystemProperty sp, SystemPropertyKeyAttribute properties = null,

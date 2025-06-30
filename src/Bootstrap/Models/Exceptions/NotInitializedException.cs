@@ -6,7 +6,7 @@ namespace Bootstrap.Models.Exceptions
     {
         public string Type { get; }
 
-        public NotInitializedException(string type, string message = null) : base($"[{type}] not initialized. {message}".Trim())
+        public NotInitializedException(string type, string? message = null) : base($"[{type}] not initialized. {message}".Trim())
         {
             Type = type;
         }

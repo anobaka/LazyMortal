@@ -33,7 +33,7 @@ namespace Bootstrap.Components.Office.Excel
             }
         }
 
-        public List<ExcelCell> Cells { get; set; }
+        public List<ExcelCell> Cells { get; set; } = [];
 
     }
 }

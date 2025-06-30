@@ -12,15 +12,15 @@ namespace Bootstrap.Components.Orm
 {
     public class
         MultilevelResourceService<TDbContext, TMultilevelResource, TKey> : ResourceService<TDbContext,
-            TMultilevelResource,
-            TKey>
+        TMultilevelResource,
+        TKey>
         where TDbContext : DbContext where TMultilevelResource : MultilevelResource<TMultilevelResource>
     {
         public MultilevelResourceService(IServiceProvider serviceProvider) : base(serviceProvider)
         {
         }
 
-        public virtual async Task<List<TMultilevelResource>> GetPath(TKey id)
+        public virtual async Task<List<TMultilevelResource>?> GetPath(TKey id)
         {
             var resource = await GetByKey(id);
             return resource == null ? null : DbContext.Set<TMultilevelResource>().GetPath(resource);
@@ -36,14 +36,11 @@ namespace Bootstrap.Components.Orm
 
         private void _populateTree(IReadOnlyCollection<TMultilevelResource> parents, List<TMultilevelResource> allData)
         {
-            if (parents != null && allData != null)
+            foreach (var p in parents)
             {
-                foreach (var p in parents)
-                {
-                    p.Children = allData.FindAll(t => t.ParentId == p.Id);
-                    p.Children.ForEach(t => t.Parent = p);
-                    _populateTree(p.Children, allData);
-                }
+                p.Children = allData.FindAll(t => t.ParentId == p.Id);
+                p.Children.ForEach(t => t.Parent = p);
+                _populateTree(p.Children, allData);
             }
         }
 
@@ -65,7 +62,8 @@ namespace Bootstrap.Components.Orm
             return rsp;
         }
 
-        public override async Task<ListResponse<TMultilevelResource>> AddRange(IEnumerable<TMultilevelResource> resources)
+        public override async Task<ListResponse<TMultilevelResource>> AddRange(
+            IEnumerable<TMultilevelResource> resources)
         {
             var rsp = await base.AddRange(resources);
             await BuildTree();
@@ -96,9 +94,14 @@ namespace Bootstrap.Components.Orm
             return rsp;
         }
 
-        public virtual async Task<List<TMultilevelResource>> GetProgenies(TKey key, bool tile)
+        public virtual async Task<List<TMultilevelResource>?> GetProgenies(TKey key, bool tile)
         {
             var descent = await GetByKey(key);
+            if (descent == null)
+            {
+                return null;
+            }
+
             var progenies = await GetAll(t => t.Left > descent.Left && t.Right < descent.Right);
             var result = tile ? progenies : progenies.Connect();
             return result;

@@ -5,6 +5,7 @@ using Bootstrap.Components.Tasks.Progressor.Abstractions.Models;
 
 namespace Bootstrap.Components.Tasks.Progressor.Abstractions
 {
+    [Obsolete]
     public interface IProgressor
     {
         string Key { get; }

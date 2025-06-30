@@ -6,7 +6,7 @@ namespace Bootstrap.Extensions
 {
     public static class ExceptionExtensions
     {
-        private static IEnumerable<string> _getExceptionInformationRecursively(Exception e, int level = 0)
+        private static IEnumerable<string> _getExceptionInformationRecursively(Exception? e, int level = 0)
         {
             if (e != null)
             {
@@ -23,7 +23,7 @@ namespace Bootstrap.Extensions
                 return info;
             }
 
-            return default;
+            return [];
         }
 
         public static string BuildFullInformationText(this Exception e)

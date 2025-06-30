@@ -13,6 +13,7 @@ using MimeKit;
 
 namespace Bootstrap.Components.Notification.Implementations.Email
 {
+    [Obsolete]
     public class EmailSender : AbstractNotifier<MimeMessage>, IEmailNotifier, IEmailSender
     {
         private readonly IOptions<EmailOptions> _options;

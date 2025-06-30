@@ -17,7 +17,7 @@ namespace Bootstrap.Components.Storage
     public class FileUtils
     {
         public static async Task Save(string fullname, Stream stream, FileMode mode = FileMode.Create,
-            Encoding encoding = null)
+            Encoding? encoding = null)
         {
 
             if (string.IsNullOrEmpty(fullname))
@@ -37,7 +37,7 @@ namespace Bootstrap.Components.Storage
         }
 
         public static async Task Save(string fullname, byte[] data, FileMode mode = FileMode.Create,
-            Encoding encoding = null)
+            Encoding? encoding = null)
         {
             if (string.IsNullOrEmpty(fullname))
             {
@@ -56,7 +56,7 @@ namespace Bootstrap.Components.Storage
         }
 
         public static async Task Save(string fullname, string content, FileMode mode = FileMode.Create,
-            Encoding encoding = null)
+            Encoding? encoding = null)
         {
             if (string.IsNullOrEmpty(fullname))
             {
@@ -97,7 +97,7 @@ namespace Bootstrap.Components.Storage
             await source.CopyToAsync(destination);
         }
 
-        public static string GetFullname(string filename)
+        public static string? GetFullname(string filename)
         {
             if (File.Exists(filename))
                 return Path.GetFullPath(filename);
@@ -188,13 +188,13 @@ namespace Bootstrap.Components.Storage
             if (Path.GetPathRoot(sourcePath) == Path.GetPathRoot(destinationPath))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
-                File.Move(sourcePath!, destinationPath!, overwrite);
+                File.Move(sourcePath, destinationPath, overwrite);
                 await onProgressChange(100);
             }
             else
             {
                 await CopyAsync(sourcePath, destinationPath, overwrite, onProgressChange, pt, ct);
-                File.Delete(sourcePath!);
+                File.Delete(sourcePath);
             }
         }
 
@@ -213,7 +213,7 @@ namespace Bootstrap.Components.Storage
             }
 
             Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
-            await using Stream destination = File.OpenWrite(destinationPath!);
+            await using Stream destination = File.OpenWrite(destinationPath);
             if (destination.Length > 0)
             {
                 if (!overwrite)
@@ -222,7 +222,7 @@ namespace Bootstrap.Components.Storage
                 }
             }
 
-            await using Stream source = File.OpenRead(sourcePath!);
+            await using Stream source = File.OpenRead(sourcePath);
             var buffer = new byte[1024 * 1024];
             var totalLength = source.Length;
             var copiedBytesLength = 0L;

@@ -9,9 +9,9 @@ namespace Bootstrap.Models
     {
         [Key] public virtual int Id { get; set; }
 
-        [NotMapped] public virtual List<TResource> Children { get; set; }
+        [NotMapped] public virtual List<TResource>? Children { get; set; }
 
-        [NotMapped] public virtual TResource Parent { get; set; }
+        [NotMapped] public virtual TResource? Parent { get; set; }
         public virtual int? ParentId { get; set; }
         public virtual int Left { get; set; }
         public virtual int Right { get; set; }

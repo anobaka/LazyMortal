@@ -1,5 +1,8 @@
-﻿namespace Bootstrap.Models
+﻿using System;
+
+namespace Bootstrap.Models
 {
+    [Obsolete]
     public class StandardAddress
     {
         public string Country { get; set; }

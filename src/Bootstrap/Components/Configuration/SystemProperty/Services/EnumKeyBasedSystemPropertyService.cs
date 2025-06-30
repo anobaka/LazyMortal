@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Extensions;
 
 namespace Bootstrap.Components.Configuration.SystemProperty.Services
 {
+    [Obsolete]
     public abstract class EnumKeyBasedSystemPropertyService<TKey> : SystemPropertyService where TKey : Enum
     {
         protected readonly Dictionary<TKey, string> KeysMap = new();

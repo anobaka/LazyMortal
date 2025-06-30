@@ -20,7 +20,7 @@ namespace Bootstrap.Components.Configuration
         {
             get
             {
-                TOptions options = null;
+                TOptions? options = null;
                 if (File.Exists(FilePath))
                 {
                     var json = File.ReadAllText(FilePath, Encoding.UTF8);

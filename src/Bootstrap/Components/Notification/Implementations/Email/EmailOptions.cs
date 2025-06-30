@@ -1,5 +1,8 @@
-﻿namespace Bootstrap.Components.Notification.Implementations.Email
+﻿using System;
+
+namespace Bootstrap.Components.Notification.Implementations.Email
 {
+    [Obsolete]
     public class EmailOptions
     {
         public string Host { get; set; }

@@ -15,10 +15,10 @@ namespace Bootstrap.Components.Miscellaneous.ResponseBuilders
         public static SearchResponse<T> Unauthenticated = Build(ResponseCode.Unauthenticated);
         public static SearchResponse<T> Timeout = Build(ResponseCode.Timeout);
 
-        public static SearchResponse<T> Build(ResponseCode code, string message = null) =>
+        public static SearchResponse<T> Build(ResponseCode code, string? message = null) =>
             new SearchResponse<T>((int) code, message ?? code.GetDisplayName());
 
-        public static SearchResponse<T> BuildBadRequest(string message) =>
+        public static SearchResponse<T> BuildBadRequest(string? message) =>
             Build(ResponseCode.InvalidPayloadOrOperation, message);
     }
 }

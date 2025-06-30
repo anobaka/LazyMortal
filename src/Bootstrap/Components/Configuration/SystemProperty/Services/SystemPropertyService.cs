@@ -13,6 +13,7 @@ using Bootstrap.Models.ResponseModels;
 
 namespace Bootstrap.Components.Configuration.SystemProperty.Services
 {
+    [Obsolete]
     public class SystemPropertyService : ResourceService<SystemPropertyDbContext, Models.Entities.SystemProperty, string>
     {
         protected readonly Dictionary<string, SystemPropertyKeyAttribute> PropertiesCache = new();

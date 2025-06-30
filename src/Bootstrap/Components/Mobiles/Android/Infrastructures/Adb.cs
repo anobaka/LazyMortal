@@ -17,7 +17,7 @@ namespace Bootstrap.Components.Mobiles.Android.Infrastructures
 
         #region Adb
 
-        public async Task<List<AdbDevice>> Devices(string arguments = null)
+        public async Task<List<AdbDevice>> Devices(string? arguments = null)
         {
             var cmd = $"devices {arguments}";
             var output = await Execute(cmd);

@@ -3,6 +3,7 @@
 namespace Bootstrap.Components.Notification.Abstractions.Models.Constants
 {
     [Flags]
+    [Obsolete]
     public enum NotificationType
     {
         Os = 1,

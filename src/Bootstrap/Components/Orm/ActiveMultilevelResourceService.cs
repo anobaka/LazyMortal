@@ -13,15 +13,13 @@ using Microsoft.EntityFrameworkCore;
 namespace Bootstrap.Components.Orm
 {
     public class
-        ActiveMultilevelResourceService<TDbContext, TActiveMultilevelResource, TKey> : ResourceService<TDbContext,
-            TActiveMultilevelResource, TKey>
-        where TDbContext : DbContext where TActiveMultilevelResource : ActiveMultilevelResource<TActiveMultilevelResource>
+        ActiveMultilevelResourceService<TDbContext, TActiveMultilevelResource, TKey>(IServiceProvider serviceProvider)
+        : ResourceService<TDbContext,
+            TActiveMultilevelResource, TKey>(serviceProvider)
+        where TDbContext : DbContext
+        where TActiveMultilevelResource : ActiveMultilevelResource<TActiveMultilevelResource>
     {
-        public ActiveMultilevelResourceService(IServiceProvider serviceProvider) : base(serviceProvider)
-        {
-        }
-
-        public async Task<List<TActiveMultilevelResource>> GetPath(TKey id)
+        public async Task<List<TActiveMultilevelResource>?> GetPath(TKey id)
         {
             var resource = await GetByKey(id);
             if (resource == null)
@@ -34,11 +32,6 @@ namespace Bootstrap.Components.Orm
 
         public List<TActiveMultilevelResource> GetPath(IEnumerable<TActiveMultilevelResource> allResources, TActiveMultilevelResource child)
         {
-            if (child == null)
-            {
-                return null;
-            }
-
             var path = allResources.Where(t => t.Left < child.Left && t.Right > child.Right).ToList();
             path.Add(child);
             return path.OrderBy(t => t.Left).ToList();
@@ -52,16 +45,14 @@ namespace Bootstrap.Components.Orm
             return root;
         }
 
-        protected void PopulateTree(IReadOnlyCollection<TActiveMultilevelResource> parents, List<TActiveMultilevelResource> allData)
+        protected void PopulateTree(IReadOnlyCollection<TActiveMultilevelResource> parents,
+            List<TActiveMultilevelResource> allData)
         {
-            if (parents != null && allData != null)
+            foreach (var p in parents)
             {
-                foreach (var p in parents)
-                {
-                    p.Children = allData.FindAll(t => t.ParentId == p.Id);
-                    p.Children.ForEach(t => t.Parent = p);
-                    PopulateTree(p.Children, allData);
-                }
+                p.Children = allData.FindAll(t => t.ParentId == p.Id);
+                p.Children.ForEach(t => t.Parent = p);
+                PopulateTree(p.Children, allData);
             }
         }
 
@@ -96,6 +87,11 @@ namespace Bootstrap.Components.Orm
         public override async Task<BaseResponse> RemoveByKey(TKey key)
         {
             var resource = await GetByKey(key);
+            if (resource == null)
+            {
+                return BaseResponseBuilder.NotFound;
+            }
+
             resource.Active = false;
             await DbContext.SaveChangesAsync();
             await BuildTree();

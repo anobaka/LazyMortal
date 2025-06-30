@@ -8,12 +8,12 @@ namespace Bootstrap.Extensions
 {
     public static class ExpressionExtensions
     {
-        public static Expression<Func<T, bool>> And<T>([CanBeNull] this Expression<Func<T, bool>> first, Expression<Func<T, bool>> second)
+        public static Expression<Func<T, bool>> And<T>(this Expression<Func<T, bool>>? first, Expression<Func<T, bool>> second)
         {
             return first != null ? first.Combine<T>(second, Expression.AndAlso) : second;
         }
 
-        public static Expression<Func<T, bool>> Or<T>([CanBeNull] this Expression<Func<T, bool>> first, Expression<Func<T, bool>> second)
+        public static Expression<Func<T, bool>> Or<T>(this Expression<Func<T, bool>>? first, Expression<Func<T, bool>> second)
         {
             return first == null ? second : first.Combine<T>(second, Expression.OrElse);
         }
@@ -26,10 +26,10 @@ namespace Bootstrap.Extensions
             var parameter = Expression.Parameter(typeof(T));
 
             var leftVisitor = new ReplaceExpressionVisitor(expr1.Parameters[0], parameter);
-            var left = leftVisitor.Visit(expr1.Body);
+            var left = leftVisitor.Visit(expr1.Body)!;
 
             var rightVisitor = new ReplaceExpressionVisitor(expr2.Parameters[0], parameter);
-            var right = rightVisitor.Visit(expr2.Body);
+            var right = rightVisitor.Visit(expr2.Body)!;
 
             return Expression.Lambda<Func<T, bool>>(
                 combination(left, right), parameter);
@@ -47,7 +47,7 @@ namespace Bootstrap.Extensions
                 _newValue = newValue;
             }
 
-            public override Expression Visit(Expression node)
+            public override Expression? Visit(Expression? node)
             {
                 if (node == _oldValue)
                     return _newValue;
@@ -87,8 +87,8 @@ namespace Bootstrap.Extensions
         /// <param name="v"></param>
         /// <param name="buildBody">key type, key, instance value(s), body</param>
         /// <returns></returns>
-        private static Expression<Func<TResource, TOut>> BuildKeyExpression<TResource, TOut>(object v,
-            Func<Type, Expression, Expression, Expression> buildBody)
+        private static Expression<Func<TResource, TOut>> BuildKeyExpression<TResource, TOut>(object? v,
+            Func<Type, Expression, Expression?, Expression> buildBody)
         {
             var type = SpecificTypeUtils<TResource>.Type;
             var keyProperty = type.GetKeyProperty();

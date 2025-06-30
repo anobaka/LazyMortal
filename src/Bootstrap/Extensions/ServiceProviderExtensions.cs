@@ -9,7 +9,7 @@ namespace Bootstrap.Extensions
     {
         public static T GetFirstRequiredService<T>(this IServiceProvider sp, Func<T, bool> where)
         {
-            return sp.GetRequiredService<IEnumerable<T>>().FirstOrDefault(where);
+            return sp.GetRequiredService<IEnumerable<T>>().FirstOrDefault(where)!;
         }
     }
 }

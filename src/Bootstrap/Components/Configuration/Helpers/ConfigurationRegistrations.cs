@@ -123,7 +123,7 @@ namespace Bootstrap.Components.Configuration.Helpers
                         optionsDescriber.OptionsKey,
                         monitor,
                         logger
-                    );
+                    )!;
                     return instance;
                 }
                 catch

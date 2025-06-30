@@ -8,7 +8,7 @@ namespace Bootstrap.Extensions
     public static class SearchRequestModelExtensions
     {
         public static SearchResponse<T> BuildResponse<T>(this SearchRequestModel model, IEnumerable<T> data, int count,
-            int code = 0, string message = null)
+            int code = 0, string? message = null)
         {
             return new SearchResponse<T>
             {

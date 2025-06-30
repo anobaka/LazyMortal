@@ -26,7 +26,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <typeparam name="TResource"></typeparam>
         /// <param name="key"></param>
         /// <returns></returns>
-        public virtual async Task<TResource> GetByKey<TResource>(object key)
+        public virtual async Task<TResource?> GetByKey<TResource>(object key)
             where TResource : class
         {
             var exp = ExpressionExtensions.BuildKeyEqualsExpression<TResource>(key);
@@ -52,7 +52,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
         public virtual async Task<BaseResponse> Remove<TResource>(TResource resource)
         {
             var ctx = DbContext;
-            ctx.Entry(resource).State = EntityState.Deleted;
+            ctx.Entry(resource!).State = EntityState.Deleted;
             await ctx.SaveChangesAsync();
             return BaseResponseBuilder.Ok;
         }
@@ -63,7 +63,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
             var ctx = DbContext;
             foreach (var r in resources)
             {
-                ctx.Entry(r).State = EntityState.Deleted;
+                ctx.Entry(r!).State = EntityState.Deleted;
             }
 
             await ctx.SaveChangesAsync();
@@ -157,8 +157,8 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <param name="orderBy"></param>
         /// <param name="asc"></param>
         /// <returns></returns>
-        public virtual async Task<TResource> GetFirst<TResource>(Expression<Func<TResource, bool>> selector,
-            Expression<Func<TResource, object>> orderBy = null, bool asc = false)
+        public virtual async Task<TResource?> GetFirst<TResource>(Expression<Func<TResource, bool>>? selector,
+            Expression<Func<TResource, object>>? orderBy = null, bool asc = false)
             where TResource : class
         {
             IQueryable<TResource> query = DbContext.Set<TResource>();
@@ -182,7 +182,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <typeparam name="TResource"></typeparam>
         /// <param name="selector">Null for getting all resources.</param>
         /// <returns></returns>
-        public virtual async Task<List<TResource>> GetAll<TResource>(Expression<Func<TResource, bool>> selector)
+        public virtual async Task<List<TResource>> GetAll<TResource>(Expression<Func<TResource, bool>>? selector)
             where TResource : class
         {
             IQueryable<TResource> query = DbContext.Set<TResource>();
@@ -207,9 +207,9 @@ namespace Bootstrap.Components.Orm.Infrastructures
         /// <param name="include"></param>
         /// <returns></returns>
         public virtual async Task<SearchResponse<TResource>> Search<TResource>(
-            Expression<Func<TResource, bool>> selector, int pageIndex, int pageSize,
-            Expression<Func<TResource, object>> orderBy = null, bool asc = false,
-            Expression<Func<TResource, object>> include = null)
+            Expression<Func<TResource, bool>>? selector, int pageIndex, int pageSize,
+            Expression<Func<TResource, object>>? orderBy = null, bool asc = false,
+            Expression<Func<TResource, object>>? include = null)
             where TResource : class
         {
             IQueryable<TResource> query = DbContext.Set<TResource>();
@@ -278,7 +278,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
             return new ListResponse<TResource>(data);
         }
 
-        public virtual async Task<int> Count<TResource>(Expression<Func<TResource, bool>> selector)
+        public virtual async Task<int> Count<TResource>(Expression<Func<TResource, bool>>? selector)
             where TResource : class
         {
             return selector == null
@@ -295,7 +295,7 @@ namespace Bootstrap.Components.Orm.Infrastructures
         public virtual async Task<BaseResponse> Update<TResource>(TResource resource)
         {
             var ctx = DbContext;
-            ctx.Entry(resource).State = EntityState.Modified;
+            ctx.Entry(resource!).State = EntityState.Modified;
             await ctx.SaveChangesAsync();
             ctx.Detach(resource);
             return BaseResponseBuilder.Ok;
@@ -328,6 +328,11 @@ namespace Bootstrap.Components.Orm.Infrastructures
         {
             var ctx = DbContext;
             var r = (await GetAll(selector)).FirstOrDefault();
+            if (r == null)
+            {
+                return SingletonResponseBuilder<TResource>.NotFound;
+            }
+
             if (ctx.Entry(r).State == EntityState.Detached)
             {
                 ctx.Attach(r);

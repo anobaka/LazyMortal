@@ -5,6 +5,7 @@ using Bootstrap.Components.Notification.Abstractions.Models.Constants;
 
 namespace Bootstrap.Components.Notification.Abstractions.Models.Entities
 {
+    [Obsolete]
     public record Message
     {
         public int Id { get; set; }

@@ -19,7 +19,7 @@ namespace Bootstrap.Components.Doc.Swagger
         /// <param name="t"></param>
         /// <param name="docs"></param>
         private static void Configure<TCustomModelDocumentFilter>(this SwaggerGenOptions t,
-            IEnumerable<KeyValuePair<string, OpenApiInfo>> docs)
+            IEnumerable<KeyValuePair<string, OpenApiInfo>>? docs)
             where TCustomModelDocumentFilter : SwaggerCustomModelDocumentFilter
         {
             if (docs != null)
@@ -76,12 +76,12 @@ namespace Bootstrap.Components.Doc.Swagger
 
                     var apiVisibility = methodInfo.GetCustomAttribute<TApiVisibleAttribute>(true);
 
-                    if (apiVisibility == null || apiVisibility.Realms?.Any() != true)
+                    if (apiVisibility == null || apiVisibility.Realms.Any() != true)
                     {
                         return true;
                     }
 
-                    if (apiVisibility.Realms?.Any(r => Convert.ToInt32(r) == 0) == true)
+                    if (apiVisibility.Realms.Any(r => Convert.ToInt32(r) == 0) == true)
                     {
                         return false;
                     }
@@ -99,7 +99,7 @@ namespace Bootstrap.Components.Doc.Swagger
                             {
                                 if (enumDocs.TryGetValue(sr, out var d))
                                 {
-                                    docNames.Add(d);
+                                    docNames.Add(d!);
                                 }
                             }
                         }

@@ -12,7 +12,7 @@ namespace Bootstrap.Components.Configuration.Abstractions
         public abstract Task SaveAsync(TOptions options);
         public async Task SaveAsync(Action<TOptions> modify)
         {
-            var options = JsonConvert.DeserializeObject<TOptions>(JsonConvert.SerializeObject(Value));
+            var options = JsonConvert.DeserializeObject<TOptions>(JsonConvert.SerializeObject(Value))!;
             modify(options);
             await SaveAsync(options);
         }
