@@ -20,13 +20,13 @@ namespace Bootstrap.Extensions
             return port;
         }
 
-        public static int GetFreeTcpPortAfter(int after)
+        public static int GetFreeTcpPortFrom(int startPort)
         {
             var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
             var tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
 
             var usingPorts = tcpConnInfoArray.Select(s => s.LocalEndPoint.Port).ToHashSet();
-            for (var i = after + 1; i < 65536; i++)
+            for (var i = startPort; i < 65536; i++)
             {
                 if (!usingPorts.Contains(i))
                 {
