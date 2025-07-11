@@ -276,10 +276,10 @@ namespace Bootstrap.Components.Storage
 
         public static int GetEstimateFileSystemEntriesCount(string path)
         {
-            var files = Directory.EnumerateFiles(path);
             var filesCount = 0;
             try
             {
+                var files = Directory.EnumerateFiles(path);
                 foreach (var unused in files)
                 {
                     filesCount++;
@@ -290,11 +290,11 @@ namespace Bootstrap.Components.Storage
                 // ignored
             }
 
-            var dirs = Directory.EnumerateDirectories(path);
             var dirsCount = 0;
             var fseCountInDir = -1;
             try
             {
+                var dirs = Directory.EnumerateDirectories(path);
                 foreach (var d in dirs)
                 {
                     dirsCount++;
