@@ -137,6 +137,8 @@ namespace Bootstrap.Components.Configuration.Helpers
             var optionsManagerServiceType = typeof(IBOptionsManager<>).MakeGenericType(optionsDescriber.OptionsType);
             var optionsServiceType = typeof(IBOptions<>).MakeGenericType(optionsDescriber.OptionsType);
             services.AddSingleton(optionsManagerServiceType, sp => sp.GetRequiredService(optionsManagerType));
+            services.AddSingleton(SpecificTypeUtils<IBOptionsManagerInternal>.Type,
+                sp => sp.GetRequiredService(optionsManagerType));
             services.AddSingleton(optionsServiceType, sp => sp.GetRequiredService(optionsManagerType));
 
             return services;

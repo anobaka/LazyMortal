@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Bootstrap.Components.Configuration.Abstractions
 {
-    public interface IBOptionsManager<TOptions> : IBOptions<TOptions> where TOptions : class
+    public interface IBOptionsManager<TOptions> : IBOptionsManagerInternal, IBOptions<TOptions> where TOptions : class
     {
         void Save(TOptions options);
         Task SaveAsync(TOptions options);
