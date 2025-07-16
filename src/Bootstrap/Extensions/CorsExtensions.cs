@@ -9,15 +9,8 @@ namespace Bootstrap.Extensions
     {
         private static readonly string[] Origins = new[]
         {
-            // ice design 1
-            "http://localhost:4444",
-            // ice design 2
-            "http://localhost:4445",
-            // umi 1
-            "http://localhost:8000",
-            // umi 2
-            "http://localhost:8001",
-            "http://localhost:1970",
+            // next.js
+            "http://localhost:3000"
         };
 
         public static CorsPolicyBuilder WithDevOrigins(this CorsPolicyBuilder builder) =>
