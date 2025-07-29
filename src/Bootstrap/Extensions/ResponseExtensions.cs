@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Bootstrap.Components.Miscellaneous.ResponseBuilders;
+using Bootstrap.Models.Constants;
 using Bootstrap.Models.ResponseModels;
 using Microsoft.Extensions.Localization;
 
@@ -16,6 +17,11 @@ namespace Bootstrap.Extensions
         {
             response.Message = localizer[response.Message, args];
             return response;
+        }
+
+        public static bool IsSuccess(this BaseResponse response)
+        {
+            return response.Code == (int)ResponseCode.Success;
         }
     }
 }
