@@ -15,6 +15,7 @@ public readonly struct PauseToken
 
     public Task WaitWhilePausedAsync(CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         return _source?.WaitWhilePausedAsync(ct) ?? Task.CompletedTask;
     }
 }
