@@ -32,6 +32,8 @@ public class PauseTokenSource
         _pauseTask = null;
     }
 
+    private int _pauseTaskId = -1;
+
     internal async Task WaitWhilePausedAsync(CancellationToken ct)
     {
         if (IsPauseRequested)
@@ -44,8 +46,11 @@ public class PauseTokenSource
             var cancelTask = Task.Delay(Timeout.Infinite, ct);
             await Task.WhenAny(cancelTask, _pauseTask.Task);
             ct.ThrowIfCancellationRequested();
+            
+            var currentId = _pauseTask.Task.Id;
+            var originalId = Interlocked.CompareExchange(ref _pauseTaskId, currentId, _pauseTaskId);
 
-            if (OnResume != null)
+            if (originalId != currentId && OnResume != null)
             {
                 await OnResume(ct);
             }
