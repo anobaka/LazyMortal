@@ -66,7 +66,7 @@ namespace Bootstrap.Components.Orm
             var data = (await GetCacheVault()).GetValueOrDefault(key);
             if (asNoTracking)
             {
-                data = data.JsonCopy();
+                data = data.FastClone();
             }
 
             return data;
@@ -79,7 +79,7 @@ namespace Bootstrap.Components.Orm
                 .ToArray();
             if (asNoTracking)
             {
-                data = data.JsonCopy();
+                data = data.FastClone()!;
             }
 
             return data;
@@ -99,7 +99,7 @@ namespace Bootstrap.Components.Orm
             var data = list.FirstOrDefault();
             if (asNoTracking)
             {
-                data = data?.JsonCopy();
+                data = data?.FastClone();
             }
 
             return data;
@@ -113,7 +113,7 @@ namespace Bootstrap.Components.Orm
                 .ToList();
             if (asNoTracking)
             {
-                data = data.JsonCopy();
+                data = data.FastClone()!;
             }
 
             return data;
@@ -163,7 +163,7 @@ namespace Bootstrap.Components.Orm
             var data = resources.Skip(Math.Max(pageIndex - 1, 0) * pageSize).Take(pageSize).ToList();
             if (asNoTracking)
             {
-                data = data.JsonCopy();
+                data = data.FastClone()!;
             }
 
             var result = new SearchResponse<TResource>(data, count, pageIndex, pageSize);
@@ -243,7 +243,7 @@ namespace Bootstrap.Components.Orm
                 (await GetCacheVault())[d.GetKeyPropertyValue<TKey>()] = d;
             }
 
-            rsp.Data = rsp.Data.JsonCopy();
+            rsp.Data = rsp.Data.FastClone();
             return rsp;
         }
 
@@ -258,7 +258,7 @@ namespace Bootstrap.Components.Orm
                 }
             }
 
-            rsp.Data = rsp.Data.JsonCopy();
+            rsp.Data = rsp.Data.FastClone();
             return rsp;
         }
 
@@ -270,7 +270,7 @@ namespace Bootstrap.Components.Orm
                 (await GetCacheVault())[rsp.Data.GetKeyPropertyValue<TKey>()] = rsp.Data;
             }
 
-            rsp.Data = rsp.Data.JsonCopy();
+            rsp.Data = rsp.Data.FastClone();
             return rsp;
         }
 
@@ -311,7 +311,7 @@ namespace Bootstrap.Components.Orm
                 }
             }
 
-            rsp.Data = rsp.Data.JsonCopy();
+            rsp.Data = rsp.Data.FastClone();
             return rsp;
         }
 
@@ -324,7 +324,7 @@ namespace Bootstrap.Components.Orm
                 (await GetCacheVault())[rsp.Data.GetKeyPropertyValue<TKey>()] = rsp.Data;
             }
 
-            rsp.Data = rsp.Data.JsonCopy();
+            rsp.Data = rsp.Data.FastClone();
             return rsp;
         }
 
@@ -340,7 +340,7 @@ namespace Bootstrap.Components.Orm
                 }
             }
 
-            rsp.Data = rsp.Data.JsonCopy();
+            rsp.Data = rsp.Data.FastClone();
             return rsp;
         }
     }

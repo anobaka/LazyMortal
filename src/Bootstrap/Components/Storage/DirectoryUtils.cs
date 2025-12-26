@@ -165,7 +165,38 @@ namespace Bootstrap.Components.Storage
             {
                 if (sendToRecycleBin)
                 {
-                    FileSystem.DeleteDirectory(fullname, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                    if (OperatingSystem.IsWindows())
+                    {
+                        FileSystem.DeleteDirectory(fullname, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                    }
+                    else if (OperatingSystem.IsMacOS())
+                    {
+                        // Use osascript to move directory to Trash on macOS
+                        var escapedPath = fullname.Replace("\\", "\\\\").Replace("\"", "\\\"");
+                        var process = new System.Diagnostics.Process
+                        {
+                            StartInfo = new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = "osascript",
+                                Arguments = $"-e \"tell application \\\"Finder\\\" to delete POSIX file \\\"{escapedPath}\\\"\"",
+                                RedirectStandardOutput = true,
+                                RedirectStandardError = true,
+                                UseShellExecute = false,
+                                CreateNoWindow = true
+                            }
+                        };
+                        process.Start();
+                        process.WaitForExit();
+                        if (process.ExitCode != 0)
+                        {
+                            throw new Exception($"Failed to move directory to Trash: {process.StandardError.ReadToEnd()}");
+                        }
+                    }
+                    else
+                    {
+                        // On Linux and other platforms, fall back to permanent delete
+                        Directory.Delete(fullname, true);
+                    }
                 }
                 else
                 {

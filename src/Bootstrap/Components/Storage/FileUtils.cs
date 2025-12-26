@@ -133,12 +133,13 @@ namespace Bootstrap.Components.Storage
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="fullname"></param>
         /// <param name="ignoreError"></param>
         /// <param name="sendToRecycleBin">
         /// True for using <see cref="Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(string, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin)"/> and false for <see cref="File.Delete"/>
+        /// On non-Windows platforms, sendToRecycleBin uses platform-specific methods.
         /// </param>
         public static void Delete(string fullname, bool ignoreError, bool sendToRecycleBin)
         {
@@ -146,7 +147,38 @@ namespace Bootstrap.Components.Storage
             {
                 if (sendToRecycleBin)
                 {
-                    FileSystem.DeleteFile(fullname, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                    if (OperatingSystem.IsWindows())
+                    {
+                        FileSystem.DeleteFile(fullname, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                    }
+                    else if (OperatingSystem.IsMacOS())
+                    {
+                        // Use osascript to move file to Trash on macOS
+                        var escapedPath = fullname.Replace("\\", "\\\\").Replace("\"", "\\\"");
+                        var process = new System.Diagnostics.Process
+                        {
+                            StartInfo = new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = "osascript",
+                                Arguments = $"-e \"tell application \\\"Finder\\\" to delete POSIX file \\\"{escapedPath}\\\"\"",
+                                RedirectStandardOutput = true,
+                                RedirectStandardError = true,
+                                UseShellExecute = false,
+                                CreateNoWindow = true
+                            }
+                        };
+                        process.Start();
+                        process.WaitForExit();
+                        if (process.ExitCode != 0)
+                        {
+                            throw new Exception($"Failed to move file to Trash: {process.StandardError.ReadToEnd()}");
+                        }
+                    }
+                    else
+                    {
+                        // On Linux and other platforms, fall back to permanent delete
+                        File.Delete(fullname);
+                    }
                 }
                 else
                 {
