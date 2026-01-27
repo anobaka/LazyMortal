@@ -24,8 +24,11 @@ namespace Bootstrap.Extensions
         {
             var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
             var tcpConnInfoArray = ipGlobalProperties.GetActiveTcpConnections();
+            var tcpListeners = ipGlobalProperties.GetActiveTcpListeners();
 
-            var usingPorts = tcpConnInfoArray.Select(s => s.LocalEndPoint.Port).ToHashSet();
+            var usingPorts = tcpConnInfoArray.Select(s => s.LocalEndPoint.Port)
+                .Concat(tcpListeners.Select(l => l.Port))
+                .ToHashSet();
             for (var i = startPort; i < 65536; i++)
             {
                 if (!usingPorts.Contains(i))
