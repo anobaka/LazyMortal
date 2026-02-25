@@ -75,6 +75,14 @@ namespace Bootstrap.Components.Logging.LogService.Services
             await DbContext.SaveChangesAsync();
         }
 
+        public virtual async Task DeleteBefore(DateTime dateTime)
+        {
+            using var scope = CreateNewScope();
+            var logs = await DbContext.Logs.Where(l => l.DateTime < dateTime).ToListAsync();
+            DbContext.Logs.RemoveRange(logs);
+            await DbContext.SaveChangesAsync();
+        }
+
         public virtual async Task Truncate()
         {
             using var scope = CreateNewScope();
