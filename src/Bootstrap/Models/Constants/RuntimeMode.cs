@@ -4,5 +4,6 @@ public enum RuntimeMode
 {
     Dev = 0,
     WinForms = 1,
-    Docker = 2
+    Docker = 2,
+    MacOS = 3
 }
