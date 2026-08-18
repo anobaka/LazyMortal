@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Bootstrap.Components.Tasks;
@@ -343,6 +344,35 @@ namespace Bootstrap.Components.Storage
             return filesCount + dirsCount * fseCountInDir;
         }
 
+        /// <summary>
+        /// Windows and macOS file systems are case-insensitive by default; Linux ones are not.
+        /// Comparing paths case-sensitively on Windows would let a directory be copied onto itself
+        /// under a differently-cased spelling.
+        /// </summary>
+        private static readonly StringComparison PathComparison =
+            RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+                ? StringComparison.Ordinal
+                : StringComparison.OrdinalIgnoreCase;
+
+        private static string NormalizePathForComparison(string path) =>
+            Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        /// <summary>
+        /// Whether <paramref name="path"/> is <paramref name="parentPath"/> itself, or sits inside it.
+        ///
+        /// A plain <c>StartsWith</c> over the two full paths is not enough: it also matches a sibling
+        /// whose name merely begins with the parent's, so copying <c>D:\A\Book</c> into
+        /// <c>D:\A\Book2</c> (target <c>D:\A\Book2\Book</c>) was rejected as if it were nested.
+        /// Requiring a separator right after the parent fixes that.
+        /// </summary>
+        public static bool IsSameOrUnder(string parentPath, string path)
+        {
+            var parent = NormalizePathForComparison(parentPath);
+            var child = NormalizePathForComparison(path);
+            return string.Equals(parent, child, PathComparison) ||
+                   child.StartsWith(parent + Path.DirectorySeparatorChar, PathComparison);
+        }
+
         public static async Task MoveAsync(string sourcePath, string destinationPath, bool overwrite,
             Func<int, Task>? onProgressChange, PauseToken pt, CancellationToken ct)
         {
@@ -370,7 +400,8 @@ namespace Bootstrap.Components.Storage
             }
 
             var destinationDir = new DirectoryInfo(destinationPath);
-            if (sourceDir.FullName == destinationDir.FullName)
+            if (string.Equals(NormalizePathForComparison(sourceDir.FullName),
+                    NormalizePathForComparison(destinationDir.FullName), PathComparison))
             {
                 if (onProgressChange != null)
                 {
@@ -380,7 +411,7 @@ namespace Bootstrap.Components.Storage
                 return;
             }
 
-            if (destinationDir.FullName.StartsWith(sourceDir.FullName))
+            if (IsSameOrUnder(sourceDir.FullName, destinationDir.FullName))
             {
                 throw new Exception($"{nameof(destinationPath)} can not be a sub path of {nameof(sourcePath)}");
             }
