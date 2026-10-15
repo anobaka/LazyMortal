@@ -63,6 +63,9 @@ namespace Bootstrap.Components.Orm
 
         public virtual async Task<TResource?> GetByKey(TKey key, bool asNoTracking = true)
         {
+            if (PersistedReadScope.IsActive)
+                return await DbContext.Set<TResource>().AsNoTracking()
+                    .FirstOrDefaultAsync(ExpressionExtensions.BuildKeyEqualsExpression<TResource>(key));
             var data = (await GetCacheVault()).GetValueOrDefault(key);
             if (asNoTracking)
             {
@@ -74,6 +77,10 @@ namespace Bootstrap.Components.Orm
 
         public virtual async Task<TResource[]> GetByKeys(IEnumerable<TKey> keys, bool asNoTracking = true)
         {
+            if (PersistedReadScope.IsActive)
+                return await DbContext.Set<TResource>().AsNoTracking()
+                    .Where(ExpressionExtensions.BuildKeyContainsExpression<TResource>(keys.Cast<object>()))
+                    .ToArrayAsync();
             var cache = await GetCacheVault();
             var data = keys.Select(k => cache.GetValueOrDefault(k)).OfType<TResource>()
                 .ToArray();
@@ -88,6 +95,13 @@ namespace Bootstrap.Components.Orm
         public virtual async Task<TResource?> GetFirstOrDefault(Expression<Func<TResource, bool>>? selector,
             Expression<Func<TResource, object>>? orderBy = null, bool asc = false, bool asNoTracking = true)
         {
+            if (PersistedReadScope.IsActive)
+            {
+                var query = DbContext.Set<TResource>().AsNoTracking();
+                if (selector != null) query = query.Where(selector);
+                if (orderBy != null) query = asc ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
+                return await query.FirstOrDefaultAsync();
+            }
             var vault = (await GetCacheVault());
             var list = selector == null ? vault.Values : vault.Values.Where(selector.Compile());
             if (orderBy != null)
@@ -107,6 +121,12 @@ namespace Bootstrap.Components.Orm
 
         public virtual async Task<List<TResource>> GetAll(Expression<Func<TResource, bool>>? selector = null, bool asNoTracking = true)
         {
+            if (PersistedReadScope.IsActive)
+            {
+                var query = DbContext.Set<TResource>().AsNoTracking();
+                if (selector != null) query = query.Where(selector);
+                return await query.ToListAsync();
+            }
             var data = (selector == null
                     ? (await GetCacheVault()).Values
                     : (await GetCacheVault()).Values.Where(selector.Compile()))
@@ -119,13 +139,21 @@ namespace Bootstrap.Components.Orm
             return data;
         }
 
-        public virtual async Task<int> Count(Func<TResource, bool>? selector = null) => selector == null
-            ? (await GetCacheVault()).Values.Count
-            : (await GetCacheVault()).Values.Count(selector);
+        public virtual async Task<int> Count(Func<TResource, bool>? selector = null)
+        {
+            if (!PersistedReadScope.IsActive)
+                return selector == null ? (await GetCacheVault()).Count : (await GetCacheVault()).Values.Count(selector);
+            if (selector != null) throw new InvalidOperationException("Persisted reads require expression predicates.");
+            return await DbContext.Set<TResource>().AsNoTracking().CountAsync();
+        }
 
-        public virtual async Task<bool> Any(Func<TResource, bool>? selector = null) => selector == null
-            ? (await GetCacheVault()).Values.Any()
-            : (await GetCacheVault()).Values.Any(selector);
+        public virtual async Task<bool> Any(Func<TResource, bool>? selector = null)
+        {
+            if (!PersistedReadScope.IsActive)
+                return selector == null ? (await GetCacheVault()).Any() : (await GetCacheVault()).Values.Any(selector);
+            if (selector != null) throw new InvalidOperationException("Persisted reads require expression predicates.");
+            return await DbContext.Set<TResource>().AsNoTracking().AnyAsync();
+        }
 
         /// <summary>
         /// 
@@ -140,6 +168,8 @@ namespace Bootstrap.Components.Orm
             int pageIndex, int pageSize, (Func<TResource, object> SelectKey, bool Asc, IComparer<object>? comparer)[]? orders,
             bool asNoTracking = true)
         {
+            if (PersistedReadScope.IsActive)
+                throw new InvalidOperationException("Persisted reads require database expression predicates, not cached search delegates.");
             var cache = await GetCacheVault();
             var resources = cache.Values.ToList();
             if (selector != null)
